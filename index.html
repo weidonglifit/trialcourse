@@ -27,24 +27,7 @@
 
         if (isInstagram || isFacebook) {
             // IG 環境：絕對不載入 Google，避免噴出 UNDEFINED
-            if (/Android/i.test(ua)) {
-            // 解析 GAS 網址去除 https://
-            var rawUrl = gasUrl.replace("https://", "");
-            // 建立 Android Intent 協議
-            var androidIntent = "intent://" + rawUrl + "#Intent;scheme=https;package=com.android.chrome;end";
-            window.location.replace(androidIntent);
-        }
-        
-        // --- 🚀 【黑魔法 2：iOS 誘導跳出（利用行事曆檔案下載衝突）】 ---
-        if (/iPhone|iPad|iPod/i.test(ua)) {
-            // 當偵測到 iOS FB/IG，如果是從社群點進來，立刻觸發一次偽下載
-            // 這會逼 iOS 內建瀏覽器跳出一個底部的「在 Safari 中開啟」或「無法下載檔案」的強制系統選單
-            if (location.hash !== "#redirected") {
-                location.hash = "#redirected";
-                // 創造一個虛擬的行事曆下載鏈結，部分 FB/IG 版本會因為無法解析此檔案而直接選擇用外部 Safari 開啟
-                window.location.href = "data:text/calendar;charset=utf8,BEGIN:VCALENDAR\nEND:VCALENDAR";
-            }
-        }
+            
 
         // --- 🎨 【視覺防禦線：維持你的微動身活品牌調性】 ---
         document.body.style.cssText = "padding:70px 24px; text-align:center; font-family:sans-serif; background:#FFF5F7; color:#333; line-height:1.6;";
