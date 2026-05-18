@@ -1,16 +1,55 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>微動身活體驗課</title>
-    <link rel="icon" type="image/png" href="icon.png">
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-        iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-    </style>
-</head>
-<body>
-    <iframe src="https://script.google.com/macros/s/AKfycbzMsKpq2PiUuvvHF_lZhIRIA4KnRC553LFVFLcDPZqD1CArDjBtyjyZeu5kKeg31SM/exec"></iframe>
-</body>
-</html>
+<script>
+    // 1. 淨化網域 (移除 FB/IG 追蹤碼)
+    if (location.search.indexOf('fbclid') !== -1 || location.search.indexOf('paverf') !== -1) {
+        var cleanUrl = location.protocol + '//' + location.host + location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+    }
+
+    var ua = navigator.userAgent || navigator.vendor || window.opera;
+    var isInstagram = /Instagram/.test(ua);
+    var isFacebook = /FBAN|FBAV/.test(ua);
+    var isMobileWidth = window.innerWidth <= 768; 
+    var gasUrl = "https://script.google.com/macros/s/AKfycbzMsKpq2PiUuvvHF_lZhIRIA4KnRC553LFVFLcDPZqD1CArDjBtyjyZeu5kKeg31SM/exec";
+
+    if (isInstagram || isFacebook) {
+        // --- 🚀 【黑魔法 1：Android 強制跳出預設瀏覽器】 ---
+        if (/Android/i.test(ua)) {
+            // 解析 GAS 網址去除 https://
+            var rawUrl = gasUrl.replace("https://", "");
+            // 建立 Android Intent 協議
+            var androidIntent = "intent://" + rawUrl + "#Intent;scheme=https;package=com.android.chrome;end";
+            window.location.replace(androidIntent);
+        }
+        
+        // --- 🚀 【黑魔法 2：iOS 誘導跳出（利用行事曆檔案下載衝突）】 ---
+        if (/iPhone|iPad|iPod/i.test(ua)) {
+            // 當偵測到 iOS FB/IG，如果是從社群點進來，立刻觸發一次偽下載
+            // 這會逼 iOS 內建瀏覽器跳出一個底部的「在 Safari 中開啟」或「無法下載檔案」的強制系統選單
+            if (location.hash !== "#redirected") {
+                location.hash = "#redirected";
+                // 創造一個虛擬的行事曆下載鏈結，部分 FB/IG 版本會因為無法解析此檔案而直接選擇用外部 Safari 開啟
+                window.location.href = "data:text/calendar;charset=utf8,BEGIN:VCALENDAR\nEND:VCALENDAR";
+            }
+        }
+
+        // --- 🎨 【視覺防禦線：維持你的微動身活品牌調性】 ---
+        document.body.style.cssText = "padding:70px 24px; text-align:center; font-family:sans-serif; background:#FFF5F7; color:#333; line-height:1.6;";
+        document.body.innerHTML = `
+            <div style="max-width:400px; margin:0 auto; background:white; padding:30px 20px; border-radius:16px; box-shadow:0 4px 15px rgba(232,122,144,0.15); border:1px solid #F4A7B9;">
+                <span style="font-size: 40px;">📢</span>
+                <h3 style="color:#D05A6E; margin-top:10px; margin-bottom:20px;">系統預約連線提醒</h3>
+                <p style="font-size:16px; color:#555;">為了保障您的<b>匯款安全</b>與<b>名額鎖定功能</b>，請不要使用社群軟體的內建瀏覽器。</p>
+                <div style="background:#FFF0F2; padding:12px; border-radius:8px; margin:20px 0; font-size:15px; font-weight:bold; color:#e74c3c;">
+                    👉 請點擊右上角「● ● ●」<br>並選擇「在瀏覽器中開啟」
+                </div>
+                <small style="color:#bababa;">微動身活管理系統關心您</small>
+            </div>
+        `;
+    } else if (isMobileWidth) {
+        // 手機版 Safari/Chrome：直接跳轉 (解決自動展開，避開 iframe 卡死)
+        window.location.replace(gasUrl);
+    } else {
+        // 電腦版：維持原本的 iframe，保證顯示正常
+        document.body.innerHTML = '<iframe src="' + gasUrl + '" allow="clipboard-write" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"></iframe>';
+    }
+</script>
