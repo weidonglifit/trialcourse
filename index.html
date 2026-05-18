@@ -1,19 +1,33 @@
-<script>
-    // 1. 淨化網域 (移除 FB/IG 追蹤碼)
-    if (location.search.indexOf('fbclid') !== -1 || location.search.indexOf('paverf') !== -1) {
-        var cleanUrl = location.protocol + '//' + location.host + location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-    }
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微動身活</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+   <script>
+        // 1. 淨化網域 (移除 FB/IG 追蹤碼)
+        if (location.search.indexOf('fbclid') !== -1 || location.search.indexOf('paverf') !== -1) {
+            var cleanUrl = location.protocol + '//' + location.host + location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
 
-    var ua = navigator.userAgent || navigator.vendor || window.opera;
-    var isInstagram = /Instagram/.test(ua);
-    var isFacebook = /FBAN|FBAV/.test(ua);
-    var isMobileWidth = window.innerWidth <= 768; 
-    var gasUrl = "https://script.google.com/macros/s/AKfycbzMsKpq2PiUuvvHF_lZhIRIA4KnRC553LFVFLcDPZqD1CArDjBtyjyZeu5kKeg31SM/exec";
+        var ua = navigator.userAgent || navigator.vendor || window.opera;
+        var isInstagram = /Instagram/.test(ua);
+       var isFacebook = /FBAN|FBAV/.test(ua);
+        // 偵測螢幕寬度，通常手機小於 768px
+        var isMobileWidth = window.innerWidth <= 768; 
+        var gasUrl = "https://script.google.com/macros/s/AKfycbzMsKpq2PiUuvvHF_lZhIRIA4KnRC553LFVFLcDPZqD1CArDjBtyjyZeu5kKeg31SM/exec";
 
-    if (isInstagram || isFacebook) {
-        // --- 🚀 【黑魔法 1：Android 強制跳出預設瀏覽器】 ---
-        if (/Android/i.test(ua)) {
+        if (isInstagram || isFacebook) {
+            // IG 環境：絕對不載入 Google，避免噴出 UNDEFINED
+            if (/Android/i.test(ua)) {
             // 解析 GAS 網址去除 https://
             var rawUrl = gasUrl.replace("https://", "");
             // 建立 Android Intent 協議
@@ -45,11 +59,13 @@
                 <small style="color:#bababa;">微動身活管理系統關心您</small>
             </div>
         `;
-    } else if (isMobileWidth) {
-        // 手機版 Safari/Chrome：直接跳轉 (解決自動展開，避開 iframe 卡死)
-        window.location.replace(gasUrl);
-    } else {
-        // 電腦版：維持原本的 iframe，保證顯示正常
-        document.body.innerHTML = '<iframe src="' + gasUrl + '" allow="clipboard-write" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"></iframe>';
-    }
-</script>
+        } else if (isMobileWidth) {
+            // 手機版 Safari/Chrome：直接跳轉 (解決自動展開，避開 iframe 卡死)
+            window.location.replace(gasUrl);
+        } else {
+            // 電腦版：維持原本的 iframe，保證顯示正常
+            document.body.innerHTML = '<iframe src="' + gasUrl + '" allow="clipboard-write" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"></iframe>';
+        }
+    </script>
+</body>
+</html>
