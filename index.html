@@ -42,9 +42,6 @@
                 <small style="color:#bababa;">微動身活管理系統關心您</small>
             </div>
         `;
-        } else if (isMobileWidth) {
-            // 手機版 Safari/Chrome：直接跳轉 (解決自動展開，避開 iframe 卡死)
-            window.location.replace(gasUrl);
         } else {
             // 電腦版：維持原本的 iframe，保證顯示正常
             document.body.innerHTML = '<iframe src="' + gasUrl + '" allow="clipboard-write" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"></iframe>';
