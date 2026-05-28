@@ -1,51 +1,33 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>微動身活</title>
-    <link rel="icon" type="image/png" href="icon.png">
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-        iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-    </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f5f5f5; }
+    #reader { width: 100%; max-width: 400px; margin: auto; background: white; padding: 10px; border-radius: 8px; }
+    #result { margin-top: 20px; font-size: 20px; font-weight: bold; color: #28a745; word-break: break-all; }
+  </style>
 </head>
 <body>
-   <script>
-        // 1. 淨化網域 (移除 FB/IG 追蹤碼)
-        if (location.search.indexOf('fbclid') !== -1 || location.search.indexOf('paverf') !== -1) {
-            var cleanUrl = location.protocol + '//' + location.host + location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-        }
 
-        var ua = navigator.userAgent || navigator.vendor || window.opera;
-        var isInstagram = /Instagram/.test(ua);
-       var isFacebook = /FBAN|FBAV/.test(ua);
-        // 偵測螢幕寬度，通常手機小於 768px
-        var isMobileWidth = window.innerWidth <= 768; 
-        var gasUrl = "https://script.google.com/macros/s/AKfycbxDBlXRiLMABJvYKgkDDM4sDfosgcvh18tQyIzbKM915CD1KjkImgYOA5Lvs5rPvT65/exec";
+  <h2>📷 專用相機掃描器</h2>
+  <div id="reader"></div>
+  <div id="result">準備就緒</div>
 
-        if (isInstagram || isFacebook) {
-            // IG 環境：絕對不載入 Google，避免噴出 UNDEFINED
-            
+  <script>
+    function onScanSuccess(decodedText, decodedResult) {
+      document.getElementById('result').innerHTML = "掃描成功！內容：<br>" + decodedText;
+      
+      // 【重頭戲】把掃描結果傳回給你的 Google 試算表網頁
+      // 請把下面的網址，替換成你部署好的 Google 網頁應用程式網址
+      var gasUrl = "https://script.google.com/macros/s/AKfycbxDBlXRiLMABJvYKgkDDM4sDfosgcvh18tQyIzbKM915CD1KjkImgYOA5Lvs5rPvT65/exec"; 
+      
+      // 這裡可以選擇自動跳轉回 GAS 網頁，或者單純顯示在螢幕上
+    }
 
-        // --- 🎨 【視覺防禦線：維持你的微動身活品牌調性】 ---
-        document.body.style.cssText = "padding:70px 24px; text-align:center; font-family:sans-serif; background:#FFF5F7; color:#333; line-height:1.6;";
-        document.body.innerHTML = `
-            <div style="max-width:400px; margin:0 auto; background:white; padding:30px 20px; border-radius:16px; box-shadow:0 4px 15px rgba(232,122,144,0.15); border:1px solid #F4A7B9;">
-                <span style="font-size: 40px;">📢</span>
-                <h3 style="color:#D05A6E; margin-top:10px; margin-bottom:20px;">預約系統連線提醒</h3>
-                <p style="font-size:16px; color:#555;">請不要使用社群軟體的內建瀏覽器。</p>
-                <div style="background:#FFF0F2; padding:12px; border-radius:8px; margin:20px 0; font-size:15px; font-weight:bold; color:#e74c3c;">
-                    👉 請點擊右上角「● ● ●」<br>並選擇「在瀏覽器中開啟」
-                </div>
-                <small style="color:#bababa;">微動身活管理系統關心您</small>
-            </div>
-        `;
-        } else {
-            // 電腦版：維持原本的 iframe，保證顯示正常
-            document.body.innerHTML = '<iframe src="' + gasUrl + '" allow="clipboard-write" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"></iframe>';
-        }
-    </script>
+    var html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+    html5QrcodeScanner.render(onScanSuccess);
+  </script>
 </body>
 </html>
