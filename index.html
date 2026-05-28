@@ -2546,7 +2546,8 @@ window.addEventListener('load', function() {
   const startTime = performance.now(); 
   console.log("開始載入資料...");
   
-  callGasAPI("getAppInitData", {}, function(initData) {
+  callGasApi("getAppInitData")
+  .then(function(initData) {
     
     // 1. 將後端抓回的資料直接塞入全域變數中，供各功能隨時撈取
     globalSettings = initData.settings;
@@ -2600,8 +2601,6 @@ window.addEventListener('load', function() {
     } else if (newsBoardEl) {
       newsBoardEl.parentNode.style.display = 'none';
     }
-
-
 
     // 4. 配置折扣與早鳥日期參數
     globalDiscountRate = globalSettings.discount;
@@ -2732,6 +2731,10 @@ window.addEventListener('load', function() {
     const durationSeconds = ((endTime - startTime) / 1000).toFixed(3);
     
     console.log(`🎉 載入並渲染成功！總共花費了 ${durationSeconds} 秒。`);
+  })
+  .catch(function(error) {
+    console.error("❌ 系統初始化失敗:", error);
+    // 可視需求在這裡加入讓使用者知道載入失敗的 UI 提示
   }); // 🔄 改為只呼叫這一個整合大禮包函式
 });
 
@@ -3177,16 +3180,16 @@ function executeBatchSubmit(list, baseData, btn, output) {
   output.innerText = "正在處理報名資料，請稍候...";
 
   // 修改：直接呼叫一個專門處理「多人」的後端函數
-  callGasAPI("processBatchForm", { 
-    baseData: baseData, 
-    participantList: list, 
-    emergencyInfo: baseData.emergencyInfo || "" // 預防萬一，補上結構所需的緊急聯絡人欄位（若無則帶空字串）
-}, function(res) {
+  callGasApi("processBatchForm", [baseData, list])
+    .then(function(res) {
       // 成功後直接執行原本的結尾邏輯
       finalizeBatch(list.length, list.length, btn, output);
-    }, function(err){
+    })
+    .catch(function(err) {
       output.style.color = "red";
-      output.innerText = "❌ 提交失敗：" + err.message;
+      // 注意：catch 抓到的 err 如果是字串，直接印出即可；若是 Error 物件則印出 err.message
+      const errorMsg = err.message || err;
+      output.innerText = "❌ 提交失敗：" + errorMsg;
       btn.disabled = false;
       btn.innerText = "提交報名";
     }); // 此函數需在後端 (GS檔) 增加
@@ -3301,16 +3304,17 @@ function executeSingleSubmit(baseData, emergencyInfo, btn, output) {
   ];
 
   // 2. 改為呼叫後端的 processBatchForm 進入同一個 LOCK 排隊
-  callGasAPI("processBatchForm", { 
-    baseData: baseData, 
-    participantList: singleParticipantList, 
-    emergencyInfo: emergencyInfo || "" 
-}, function(res) {
+  // 將原本的三個參數，用陣列 [ ] 包起來一起傳給後端
+callGasApi("processBatchForm", [baseData, singleParticipantList, emergencyInfo])
+    .then(function() {
       // 成功後一樣執行 finalizeBatch，傳入 1 代表完成 1 人報名
       finalizeBatch(1, 1, btn, output); 
-    }, function(err){
+    })
+    .catch(function(err) {
       output.style.color = "red";
-      output.innerText = "❌ 提交失敗：" + err.message;
+      // 防呆：確保不論 err 是字串還是 Error 物件都能正確印出錯誤訊息
+      const errorMsg = err.message || err;
+      output.innerText = "❌ 提交失敗：" + errorMsg;
       btn.disabled = false;
       btn.innerText = "提交報名";
     }); // 這裡改呼叫 Batch 函式
@@ -3342,18 +3346,37 @@ function toggleAccordion(header) {
     btn.innerText = "提交中...";
     output.innerText = "";
 
-    callGasAPI("processForm", { formData: formElement }, function(res) {
+    // 1. 🌟 必須先手動將 HTML 的 Form 轉換為 JavaScript Object
+const formData = new FormData(formElement);
+const formObj = {};
+formData.forEach((value, key) => { 
+    // 確保如果表單有多選框 (checkbox，例如相同的 name)，會被轉成陣列
+    if (formObj[key]) {
+        if (!Array.isArray(formObj[key])) {
+            formObj[key] = [formObj[key]];
+        }
+        formObj[key].push(value);
+    } else {
+        formObj[key] = value; 
+    }
+});
+
+// 2. 呼叫後端 API
+// 對應後端的 processForm(formData, emergencyInfo)，第二個參數如果沒有就傳空字串
+callGasApi("processForm", [formObj, ""])
+  .then(function(res) {
       output.style.color = "green";
       output.innerHTML = "✅ " + res;
 
       const paymentInfoHtml = document.getElementById('paymentInfo').innerHTML;
-    const injectionPoint = document.getElementById('modalInjectionPoint');
-    injectionPoint.innerHTML = `<div style="display:block !important; border:none; background:none; margin:0;">${paymentInfoHtml}</div>`;
-    document.getElementById('paymentModalOverlay').classList.add('active');
+      const injectionPoint = document.getElementById('modalInjectionPoint');
+      injectionPoint.innerHTML = `<div style="display:block !important; border:none; background:none; margin:0;">${paymentInfoHtml}</div>`;
+      document.getElementById('paymentModalOverlay').classList.add('active');
 
       // 1. 重設表單基礎欄位（姓名、電話、LINE ID、Email、末5碼）
       formElement.reset();
       document.getElementById('agreementCheckbox').checked = false;
+      
       // 2. 清空「選擇的課程」顯示區塊，恢復到初始狀態
       const selectedList = document.getElementById('selected-list');
       if (selectedList) {
@@ -3376,12 +3399,14 @@ function toggleAccordion(header) {
       // 選擇性：3秒後清空成功訊息
       setTimeout(() => { output.innerText = ""; }, 3000);
 
-    }, function(err){
+  })
+  .catch(function(err) {
       output.style.color = "red";
-      output.innerText = "❌ 提交失敗：" + err.message;
+      const errorMsg = err.message || err;
+      output.innerText = "❌ 提交失敗：" + errorMsg;
       btn.disabled = false;
       btn.innerText = "提交報名";
-    });
+  });
   }
 
 /**
@@ -3404,7 +3429,8 @@ document.getElementById('queryBtn').addEventListener('click', function() {
     btn.innerHTML = '<div class="loader"></div>';
     resultDiv.innerText = "";
 
-    callGasAPI("queryRegistration", { phone: phone }, function(res) {
+    callGasApi("queryRegistration", [phone])
+    .then(function(res) {
         if (res === "查無紀錄。") {
             resultDiv.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">${res}</div>`;
         } else if (res.error) {
@@ -3540,9 +3566,15 @@ document.getElementById('queryBtn').addEventListener('click', function() {
             const matchedCourses = allCourseData.filter(c => {
                 return userFullCourseNames.some(uName => c.name.includes(uName));
             });
-
         }
 
+        btn.disabled = false;
+        btn.innerText = "立即查詢";
+    })
+    .catch(function(err) {
+        // 增加防呆：處理網路錯誤或伺服器錯誤，避免按鈕永久卡住
+        const errorMsg = err.message || err;
+        resultDiv.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">❌ 查詢失敗：${errorMsg}</div>`;
         btn.disabled = false;
         btn.innerText = "立即查詢";
     });
@@ -3863,7 +3895,8 @@ function fetchRoomStatus() {
 
 
 
-  callGasAPI("getRoomStatus", { roomName: room, dateString: dateString }, function(serverStatus) {
+  callGasApi("getRoomStatus", [room, dateString])
+  .then(function(serverStatus) {
     currentStatusData = localStatusGrid.map((item, idx) => {
       if (item.status === "課程") return item;
       return serverStatus[idx];
@@ -3902,6 +3935,16 @@ function fetchRoomStatus() {
     body.innerHTML = html;
     document.getElementById('statusTableSection').style.display = 'block';
     updateAvailableTimes();
+  })
+  .catch(function(err) {
+    // 增加例外處理，避免查詢失敗時畫面卡死或沒有提示
+    console.error("❌ 讀取教室狀態失敗:", err);
+    const msgDiv = document.getElementById('roomstatusmsg');
+    if (msgDiv) {
+        const errorMsg = err.message || err;
+        msgDiv.innerHTML = `<span style="color: red;">❌ 查詢失敗：${errorMsg}</span>`; 
+        msgDiv.style.display = "block";
+    }
   });
 }
 
@@ -4090,33 +4133,31 @@ const originalBtnText = "送出教室預約";
   btn.style.cursor = "not-allowed";
 
 
-        callGasAPI("submitRoomBooking", { data: data }, function(res) {
+        callGasApi("submitRoomBooking", [data])
+    .then(function(res) {
+        btn.innerText = originalBtnText;
+        btn.disabled = false;
+        btn.style.backgroundColor = "#E87A90"; 
+        btn.style.cursor = "pointer";
 
-btn.innerText = originalBtnText;
-    btn.disabled = false;
-    btn.style.backgroundColor = "#E87A90"; 
-    btn.style.cursor = "pointer";
+        output.style.color = "green";
+        output.innerHTML = "✅ " + res + "<br>資料已清空，可繼續下一次預約。";
+        output.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
+        const durationSelect = document.getElementById('durationSelect');
+        const selectedText = durationSelect.options[durationSelect.selectedIndex].text;
+        const priceMatch = selectedText.match(/\((\d+)元\)/);
+        const finalPrice = priceMatch ? priceMatch[1] : "0";
 
-          output.style.color = "green";
-          output.innerHTML = "✅ " + res + "<br>資料已清空，可繼續下一次預約。";
-          output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // 2. 注入共用的 paymentInfo
+        document.getElementById('displayFinalAmount').innerText = finalPrice;
+        const content = document.getElementById('paymentInfo').innerHTML;
+        document.getElementById('modalInjectionPoint').innerHTML = content;
+        
+        // 3. 彈出
+        document.getElementById('paymentModalOverlay').classList.add('active');
 
-    const durationSelect = document.getElementById('durationSelect');
-    const selectedText = durationSelect.options[durationSelect.selectedIndex].text;
-    const priceMatch = selectedText.match(/\((\d+)元\)/);
-    const finalPrice = priceMatch ? priceMatch[1] : "0";
-
-    // 2. 注入共用的 paymentInfo
-    document.getElementById('displayFinalAmount').innerText = finalPrice;
-    const content = document.getElementById('paymentInfo').innerHTML;
-    document.getElementById('modalInjectionPoint').innerHTML = content;
-    
-    // 3. 彈出
-    document.getElementById('paymentModalOverlay').classList.add('active');
-
-
-          setTimeout(function() {
+        setTimeout(function() {
             // 清空欄位
             nameInput.value = "";
             phoneInput.value = "";
@@ -4127,13 +4168,16 @@ btn.innerText = originalBtnText;
             fetchRoomStatus(); // 重新整理表格
             btn.disabled = false;
             output.innerText = "";
-          }, 3000);
-          
-        }, function(err){
-          output.style.color = "red";
-          output.innerText = "❌ 提交失敗：" + err.message;
-          btn.disabled = false;
-        });
+        }, 3000);
+        
+    })
+    .catch(function(err) {
+        output.style.color = "red";
+        // 加入 err.message || err 的防呆機制，確保字串或錯誤物件都能正確顯示
+        const errorMsg = err.message || err;
+        output.innerText = "❌ 提交失敗：" + errorMsg;
+        btn.disabled = false;
+    });
       }
 
 function closePaymentModal() {
@@ -4242,7 +4286,8 @@ function handleRoomQuery() {
   
   resultDiv.style.color = "#2c3e50";
 
-  callGasAPI("queryRoomReservation", { phone: phone }, function(res) {
+  callGasApi("queryRoomReservation", [phone])
+    .then(function(res) {
       // 2. 查詢完畢：恢復按鈕狀態 
       btn.innerText = "查詢預約";
       btn.disabled = false;
@@ -4287,11 +4332,14 @@ function handleRoomQuery() {
         resultDiv.style.color = "#2c3e50";
         resultDiv.innerHTML = "\n" + tableHtml;
       }
-    }, function(err){
+    })
+    .catch(function(err) {
       btn.innerText = "查詢我的預約";
       btn.disabled = false;
       btn.style.backgroundColor = "#E87A90";
       
+      // 可以將錯誤訊息印在 Console 方便除錯
+      console.error("查詢預約失敗:", err.message || err);
       resultDiv.innerText = "❌ 系統錯誤，請稍後再試。";
       resultDiv.style.color = "red";
     });
@@ -4718,11 +4766,8 @@ function loadSingleDates() {
   priceSpan.innerText = course.pricePerClass + extraFee;
 
   container.innerHTML = "讀取名額中...";
-  callGasAPI("getSingleDayRemaining", { 
-    courseName: course.name, 
-    fullDates: course.dates, 
-    totalRemaining: course.remaining 
-}, function(dateStatus) {
+  callGasApi("getSingleDayRemaining", [course.name, course.dates, course.remaining])
+  .then(function(dateStatus) {
     container.innerHTML = "";
 
     const sortedDates = Object.keys(dateStatus).sort(function(a, b) {
@@ -4795,6 +4840,11 @@ function loadSingleDates() {
       container.innerHTML = '<p style="color: #999; font-size: 0.9em;">☕ 此課程當前已無可報名的未來日期</p>';
     }
 
+  })
+  .catch(function(err) {
+    // 防呆處理：網路斷線或後端出錯時的提示
+    console.error("取得單堂日期失敗:", err);
+    container.innerHTML = '<p style="color: red; font-size: 0.9em;">❌ 取得日期失敗，請稍後再試</p>';
   });
 }
 
@@ -4850,7 +4900,8 @@ function executeSingleCourseSubmit(data, emergencyInfo, btn, output) {
   output.style.color = "#34495e";
   output.innerText = "正在處理單堂報名資料...";
 
-  callGasAPI("processSingleForm", { formData: data, emergencyInfo: emergencyInfo }, function(res) {
+  callGasApi("processSingleForm", [data, emergencyInfo])
+    .then(function(res) {
       if (btn) {
         btn.disabled = false;
         btn.innerText = "提交單堂報名";
@@ -4885,14 +4936,17 @@ function executeSingleCourseSubmit(data, emergencyInfo, btn, output) {
       document.getElementById('agreementCheckbox_S').checked = false;
       
       loadSingleDates(); // 刷新名額狀態
-    }, function(err){
+    })
+    .catch(function(err) {
       if (btn) {
         btn.disabled = false;
         btn.innerText = "提交單堂報名";
       }
       output.style.color = "red";
-      output.innerText = "❌ 提交失敗：" + err.message;
-    }); // 將聯絡人傳向後端
+      // 增加防呆：確保字串或錯誤物件都能正確顯示
+      const errorMsg = err.message || err;
+      output.innerText = "❌ 提交失敗：" + errorMsg;
+    });
 }
 
 function openSubTab(evt, tabName) {
@@ -5820,8 +5874,8 @@ window.addEventListener('DOMContentLoaded', function() {
   fetchTomorrowWeather();
 });
 
-
 function sendAIMessage() {
+  console.log(`進AI呼叫 ${performance.now()/1000} 秒。`);
   var inputEl = document.getElementById('ai-input');
   var msgContainer = document.getElementById('ai-messages');
   var userText = inputEl.value.trim();
@@ -5865,75 +5919,101 @@ function sendAIMessage() {
       console.log("🎯 偵測到關鍵字，準備呼叫：queryRoomReservation");
       
       // ───────── 方案 A：【場地空間預約分流 - 精準字串對接完全體】 ─────────
-callGasAPI("queryRoomReservation", { phone: userPhone }, function(res) {
-  var loadingEl = document.getElementById(loadingId);
-  if(loadingEl) loadingEl.remove();
-  
-  try {
-    var aiContext = "";
+callGasApi("queryRoomReservation", [userPhone])
+  .then(function(res) {
+    var loadingEl = document.getElementById(loadingId);
+    if(loadingEl) loadingEl.remove();
     
-    // 💡 修正：後端傳回的是純字串，直接判定是否為空、或包含「查無」字眼
-    if (!res || res.trim() === "" || res.includes("查無")) {
-      aiContext = `【系統通知：這支電話目前在試算表中『完全查無場地預約紀錄』。請溫柔告知學員目前系統中還沒有這支手機的空間租借或預約登記唷！】`;
-    } else {
-      // 💡 後端已經幫忙組好漂亮的條列字串了，直接整包塞給 AI，並強迫它遵照格式吐出
-      aiContext = `【系統通知：這支電話『已成功查到場地空間預約紀錄』！以下為後端資料庫撈出的真實預約明細：
+    try {
+      var aiContext = "";
+      
+      // 💡 修正：後端傳回的是純字串，直接判定是否為空、或包含「查無」字眼
+      if (!res || typeof res !== "string" || res.trim() === "" || res.includes("查無")) {
+        aiContext = `【系統通知：這支電話目前在試算表中『完全查無場地預約紀錄』。請溫柔告知學員目前系統中還沒有這支手機的空間租借或預約登記唷！】`;
+      } else {
+        // 💡 後端已經幫忙組好漂亮的條列字串了，直接整包塞給 AI，並強迫它遵照格式吐出
+        aiContext = `【系統通知：這支電話『已成功查到場地空間預約紀錄』！以下為後端資料庫撈出的真實預約明細：
 
 ${res}
 
 請立刻執行核心守則，將上方每一筆預約的教室、日期與時間用溫柔且漂亮的排版呈現給學員，千萬不要漏掉任何一筆！】`;
+      }
+      
+      askGeminiSmartHub(userText, aiContext); 
+    } catch(e) {
+      if (typeof appendAIResponse === "function") {
+          appendAIResponse("處理預約資料時發生錯誤，請稍後再試。");
+      }
+      console.error("預約解析錯誤:", e);
     }
+  })
+  .catch(function(err) {
+    // 💡 防呆：發生網路或系統錯誤時，也要記得把 loading 動畫拿掉
+    var loadingEl = document.getElementById(loadingId);
+    if(loadingEl) loadingEl.remove();
     
-    askGeminiSmartHub(userText, aiContext); 
-  } catch(e) {
-    appendAIResponse("處理預約資料時發生錯誤，請稍後再試。");
-    console.error("預約解析錯誤:", e);
-  }
-});
+    if (typeof appendAIResponse === "function") {
+        appendAIResponse("❌ 查詢預約資料失敗，連線發生異常，請稍後再試。");
+    }
+    console.error("API 查詢錯誤:", err.message || err);
+  });
       
     } else {
       // ───────── 方案 B：【學員查特定電話的「課程報名」紀錄】 ─────────
       console.log("🎯 預設意圖，準備呼叫：queryRegistration");
 
-      callGasAPI("queryRegistration", { phone: userPhone }, function(res) {
-        var loadingEl = document.getElementById(loadingId);
-        if(loadingEl) loadingEl.remove();
-        
-        try {
-          var aiContext = "";
-          
-          // 💡 判斷是否查無紀錄 (防呆空陣列、空物件、或是特定字串)
-          if (!res || JSON.stringify(res) === "{}" || JSON.stringify(res) === "[]" || res === "查無紀錄。") {
-            aiContext = `【系統通知：這支電話目前在試算表中『完全查無報名紀錄』。請立刻執行核心守則第 2 條的查無紀錄罐頭回覆！】`;
-          } 
-          // 💡 判斷如果是「多筆資料」（陣列）
-          else if (Array.isArray(res)) {
-            // 將多筆 JSON 資料在前端先精煉成乾淨的文字清單
-            var recordList = res.map(function(item, index) {
-              return `紀錄 ${index + 1}：
+      callGasApi("queryRegistration", [userPhone])
+  .then(function(res) {
+    var loadingEl = document.getElementById(loadingId);
+    if(loadingEl) loadingEl.remove();
+    
+    try {
+      var aiContext = "";
+      
+      // 💡 判斷是否查無紀錄 (防呆空陣列、空物件、或是特定字串)
+      if (!res || JSON.stringify(res) === "{}" || JSON.stringify(res) === "[]" || res === "查無紀錄。") {
+        aiContext = `【系統通知：這支電話目前在試算表中『完全查無報名紀錄』。請立刻執行核心守則第 2 條的查無紀錄罐頭回覆！】`;
+      } 
+      // 💡 判斷如果是「多筆資料」（陣列）
+      else if (Array.isArray(res)) {
+        // 將多筆 JSON 資料在前端先精煉成乾淨的文字清單
+        var recordList = res.map(function(item, index) {
+          return `紀錄 ${index + 1}：
       - 課程名稱：${item.course || item.課程名稱 || "未提供"}
       - 上課日期/時間：${item.date || item.上課日期 || "未提供"}
       - 繳費對帳狀態：${item.status || item.對帳狀態 || item.狀態 || "確認中"}`;
-            }).join("\n\n");
+        }).join("\n\n");
 
-            aiContext = `【系統通知：這支電話『已成功查到多筆課程報名紀錄』！
+        aiContext = `【系統通知：這支電話『已成功查到多筆課程報名紀錄』！
       請務必將以下所有紀錄【完整、逐筆】溫柔條列展示給顧客，不要漏掉任何一筆：
 
       ${recordList}
 
       請立刻根據上述精煉後的資料進行親切的回覆！】`;
-          } 
-          // 💡 預防萬一：如果是單一物件舊格式
-          else {
-            aiContext = `【系統通知：這支電話『已成功查到課程報名紀錄』！以下為真實資料：\n${JSON.stringify(res)}\n請立刻執行核心守則第 2 條，將裡面的課程名稱、上課日期與對帳狀態溫柔條列出來！】`;
-          }
-          
-          askGeminiSmartHub(userText, aiContext); 
-        } catch(e) {
-          appendAIResponse("處理報名資料時發生錯誤，請稍後再試。");
-          console.error(e);
-        }
-      });
+      } 
+      // 💡 預防萬一：如果是單一物件舊格式
+      else {
+        aiContext = `【系統通知：這支電話『已成功查到課程報名紀錄』！以下為真實資料：\n${JSON.stringify(res)}\n請立刻執行核心守則第 2 條，將裡面的課程名稱、上課日期與對帳狀態溫柔條列出來！】`;
+      }
+      
+      askGeminiSmartHub(userText, aiContext); 
+    } catch(e) {
+      if (typeof appendAIResponse === "function") {
+        appendAIResponse("處理報名資料時發生錯誤，請稍後再試。");
+      }
+      console.error(e);
+    }
+  })
+  .catch(function(err) {
+    // 💡 防呆：發生網路或系統錯誤時，也要記得把 loading 動畫拿掉
+    var loadingEl = document.getElementById(loadingId);
+    if(loadingEl) loadingEl.remove();
+    
+    if (typeof appendAIResponse === "function") {
+        appendAIResponse("❌ 查詢報名紀錄失敗，連線發生異常，請稍後再試。");
+    }
+    console.error("API 查詢錯誤:", err.message || err);
+  });
       
       
     }    
@@ -5943,9 +6023,25 @@ ${res}
     // 💡 修正：加入 try-catch 保護，防止 DOM 或全域變數未載入完成時程式崩潰卡死
     try {
       var pageClone = document.body.cloneNode(true);
-      var unnecessaryTags = pageClone.querySelectorAll('script, style, #ai-chat-widget');
-      unnecessaryTags.forEach(function(el) { el.remove(); });
-      var cleanHtmlStructure = pageClone.innerHTML;
+  
+      // 1. 暴力刪除對 AI 理解「資料結構」毫無幫助的標籤
+      var uselessTags = pageClone.querySelectorAll('script, style, svg, iframe, video, #ai-chat-widget, .loader');
+      uselessTags.forEach(function(el) { el.remove(); });
+
+      // 2. 拔除所有「皮肉 (排版與樣式)」，只留下「骨架 (資料與結構)」
+      var allElements = pageClone.getElementsByTagName('*');
+      for (var i = 0; i < allElements.length; i++) {
+        var el = allElements[i];
+        el.removeAttribute('class'); // 刪除 class
+        el.removeAttribute('style'); // 刪除 style
+        el.removeAttribute('onclick'); // 刪除 onclick
+        el.removeAttribute('oninput'); // 刪除 oninput
+        // 💡 刻意保留：id, name, type, placeholder, value 等「說明書」必備屬性
+      }
+
+      // 3. 壓縮空白換行，進一步縮減體積
+      var cleanHtmlStructure = pageClone.innerHTML.replace(/\s+/g, ' ').trim();
+      console.log("📦 目前清理後的 HTML 字元長度為: " + cleanHtmlStructure.length);
 
       var teachersDataText = "暫無師資資料";
       if (typeof globalSettings !== 'undefined' && globalSettings.teachers) {
@@ -5977,17 +6073,16 @@ ${res}
 /**
  * 全智慧中心：負責把常識與問題噴給後端，並就地精準渲染
  */
-// 🌸 【終極直連大腦版】智慧全功能 AI 櫃檯秘書
 function askGeminiSmartHub(userQuery, dataContext) {
   var msgContainer = document.getElementById('ai-messages');
   var geminiLoadingId = "ai-loading-smart-" + Date.now();
   
   msgContainer.innerHTML += `<div id="${geminiLoadingId}" style="margin-bottom: 8px; color: #888;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #eee;">智慧小助手思考中... 🧠</span></div>`;
   msgContainer.scrollTop = msgContainer.scrollHeight;
-  
   var historyConversationText = aiChatHistory.map(function(chat) {
     return (chat.role === "user" ? "【顧客】: " : "【秘書(你)】: ") + chat.content;
   }).join("\n");
+
 
   var finalPrompt = `你是「微動身活」共享舞蹈空間的智慧型全功能 AI 櫃檯秘書。請根據下方提供的【即時館場資料庫】和【顧客提問】進行回答。
 
@@ -5999,7 +6094,8 @@ ${dataContext}
 2. 報名資料處理：
    - 如果資料庫內包含明細物件（包含 items、totalAmount 等），代表【已查到報名紀錄】。請清楚幫顧客列出他報名的「課程名稱」、「上課日期」以及「繳費對帳狀態（例如：金額正確/對帳中）」，並禮貌地感謝他的參與。
    - 如果資料庫內容顯示 "查無紀錄。" 或為空物件，請用溫柔親切的口吻回答：「幫您核對過囉，目前系統中還沒有這支手機號碼的報名紀錄紀錄唷！再麻煩您幫我確認號碼是否填寫正確，或是直接填寫上方表單送出報名唷！」
-3. 語氣與排版：請維持一貫溫柔、親切、富有活力且專業的櫃檯助理口吻。多用「唷」、「哇」、「放鬆」等親切語氣助詞，善用換行與精簡的條列式排版，讓顧客一眼就能看懂答案。
+3. 語氣與排版：請維持一貫溫柔、親切助理口吻。善用換行與精簡的條列式排版，讓顧客一眼就能看懂答案。
+4. 答案盡量精簡，不要有多餘的贅詞或句子。
 
 【前情提對話歷史紀錄】：
 ${historyConversationText}
@@ -6007,63 +6103,32 @@ ${historyConversationText}
 【顧客目前實際提問】：
 ${userQuery}`;
 
-  // 💡 關鍵直連：設定 Google 官方 Gemini API 鑰匙與連線網址（100% 支持跨網域）
-  var apiKey = "AIzaSyDqWmQ7wqJ9FCpF08PVMeGpN_w7BckmR-I"; 
-  var url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" + apiKey;
-  
-  var requestPayload = {
-    "contents": [
-      { 
-        "role": "user", 
-        "parts": [{"text": finalPrompt}] 
-      }
-    ],
-    "generationConfig": { 
-      "temperature": 0.4, 
-      "maxOutputTokens": 2000 
-    }
-  };
-
-  // 直接對 Google 官方發送安全 POST 請求，不限字數、永不超時！
-  fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(requestPayload)
-  })
-  .then(response => {
-    if (!response.ok) throw new Error("Gemini 官方伺服器回應異常");
-    return response.json();
-  })
-  .then(resJson => {
-    // 💡 收到回應立刻解鎖轉圈圈
+  callGasApi("askAIAssistant", [finalPrompt])
+  .then(function(aiResponse) {
+    // 💡 收到回應立刻解鎖
     var geminiLoadingEl = document.getElementById(geminiLoadingId);
     if(geminiLoadingEl) geminiLoadingEl.remove();
     
-    // 解析官方標準格式撈出答案
-    var aiResponseText = "小助手剛剛不小心發呆了，可以請您再說一次嗎？";
-    if (resJson.candidates && resJson.candidates[0] && resJson.candidates[0].content && resJson.candidates[0].content.parts && resJson.candidates[0].content.parts[0].text) {
-      aiResponseText = resJson.candidates[0].content.parts[0].text;
-    }
-    
-    // 🌸 完美咬合原有的對話歷史紀錄與 appendAIResponse 渲染邏輯
-    var finalResponse = aiResponseText;
+    var finalResponse = aiResponse || "小助手剛剛不小心發呆了，可以請您再說一次嗎？";
     aiChatHistory.push({ role: "model", content: finalResponse });
     appendAIResponse(finalResponse);
   })
-  .catch(err => {
-    console.error("SmartHub 直連 Gemini 官方失敗:", err);
+  .catch(function(err) {
+    // 💡 呼叫後端（Gemini）失敗或斷線時立刻解鎖
     var geminiLoadingEl = document.getElementById(geminiLoadingId);
     if(geminiLoadingEl) geminiLoadingEl.remove();
+    
+    // 將錯誤印在 Console 方便除錯
+    console.error("❌ AI 請求失敗:", err.message || err);
     appendAIResponse("小助手頭有點暈，請再跟我說一次。");
   });
 }
 
-
-// 🌸 【終極直連大腦版】智慧上下文傳送器（精準渲染版）
+/**
+ * 智慧上下文傳送器（精準渲染版）
+ */
 function askGeminiWithContext(userQuery, dataContext, mode) {
-  var msgContainer = document.getElementById('ai-messages'); 
+  var msgContainer = document.getElementById('ai-messages'); // 💡 確保函式內有重新抓取對話框
   var geminiLoadingId = "ai-loading-gemini-" + Date.now();
   
   msgContainer.innerHTML += `<div id="${geminiLoadingId}" style="margin-bottom: 8px; color: #888;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #eee;">智慧助理分析中... 🧠</span></div>`;
@@ -6076,55 +6141,23 @@ function askGeminiWithContext(userQuery, dataContext, mode) {
 
   var finalPrompt = `【系統即時提供給你的館場資料內容】：\n${dataContext}\n\n【顧客目前實際提問】：\n${userQuery}\n\n${systemRole}`;
 
-  // 💡 關鍵直連：設定 Google 官方 Gemini API 鑰匙與連線網址
-  var apiKey = "AIzaSyDqWmQ7wqJ9FCpF08PVMeGpN_w7BckmR-I"; 
-  var url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" + apiKey;
-  
-  var requestPayload = {
-    "contents": [
-      { 
-        "role": "user", 
-        "parts": [{"text": finalPrompt}] 
-      }
-    ],
-    "generationConfig": { 
-      "temperature": 0.4, 
-      "maxOutputTokens": 2000 
-    }
-  };
-
-  // 直接對 Google 官方發送安全 POST 請求
-  fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(requestPayload)
-  })
-  .then(response => {
-    if (!response.ok) throw new Error("Gemini 官方伺服器回應異常");
-    return response.json();
-  })
-  .then(resJson => {
+  callGasApi("askAIAssistant", [finalPrompt])
+  .then(function(aiResponse) {
     // 💡 收到回應，立刻解除第二次的轉圈圈
     var geminiLoadingEl = document.getElementById(geminiLoadingId);
     if(geminiLoadingEl) geminiLoadingEl.remove();
     
-    // 解析官方標準格式撈出文字答案
-    var realAnswerText = "智慧助理目前思緒有點混亂，請稍後再試。";
-    if (resJson.candidates && resJson.candidates[0] && resJson.candidates[0].content && resJson.candidates[0].content.parts && resJson.candidates[0].content.parts[0].text) {
-      realAnswerText = resJson.candidates[0].content.parts[0].text;
-    }
-    
-    // 🌸 完美咬合你最驕傲的獨立就地 HTML 渲染邏輯，防止任何變數卡死！
-    msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: #333;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #f9d5dc; line-height: 1.5; text-align: left; max-width: 80%;">${realAnswerText}</span></div>`;
+    // 直接就地渲染，百分之百不會被其他函式變數卡到！
+    msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: #333;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #f9d5dc; line-height: 1.5; text-align: left; max-width: 80%;">${aiResponse}</span></div>`;
     msgContainer.scrollTop = msgContainer.scrollHeight;
-    
   })
-  .catch(err => {
-    console.error("WithContext 直連 Gemini 官方失敗:", err);
+  .catch(function(err) {
+    // 💡 發生錯誤或斷線時，也要確實拿掉轉圈圈動畫
     var geminiLoadingEl = document.getElementById(geminiLoadingId);
     if(geminiLoadingEl) geminiLoadingEl.remove();
+    
+    // 可以在控制台印出錯誤，方便除錯
+    console.error("❌ AI 請求失敗:", err.message || err);
     appendAIResponse("小助手思緒有點混亂，請稍後再試。");
   });
 }
@@ -6162,121 +6195,29 @@ function appendAIResponse(text) {
     `;
     msgContainer.scrollTop = msgContainer.scrollHeight;
   }
+  console.log(`AI呼叫完成！${performance.now()/1000}`);
 }
 
-  // 填入你剛剛部署完產生的 GAS 網路應用程式 URL (exec結尾)
-const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbygAeXRSqvQb7vmynSDD_O7rvegm0kmRLIAT1VFsOJyZZVs9ex8PNQ-JTsmYKsNX54e/exec";
+  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwxZrhw-7YuIgIgQ0L2fM1O8sDXrL5hVqrsPpt4sbYfZdM6MyoBVHjN2Cgzc7_xRr4/exec";
 
-// 🌸 乾淨流暢版：專供普通功能（查課表、名額、報名）使用的 100% 免 CORS 工具
-function callGasAPI(action, payload, successCallback, failureCallback) {
-  if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("XXXXXX")) {
-    console.error("❌ 未設定有效的 GAS_WEB_APP_URL");
-    if (failureCallback) failureCallback(new Error("未設定後端 API 網址"));
-    return;
-  }
-
-  const callbackName = "gas_cb_" + Math.random().toString(36).substr(2, 9);
-  
-  window[callbackName] = function(res) {
-    delete window[callbackName];
-    const el = document.getElementById(callbackName);
-    if (el) el.remove();
-
-    if (res && res.status === "success") {
-      if (successCallback) successCallback(res.data);
-    } else {
-      if (failureCallback) failureCallback(new Error(res ? res.message : "後端執行失敗"));
+/**
+ * 取代 google.script.run 的統一 API 呼叫器
+ * 💡 這裡使用 text/plain 的原因是為了避開瀏覽器嚴格的 CORS Preflight (OPTIONS) 限制，GAS 解析一樣會成功。
+ */
+function callGasApi(action, params = []) {
+  return fetch(GAS_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({ action: action, params: params })
+  })
+  .then(response => response.json())
+  .then(res => {
+    if (res.status === "error") {
+      throw new Error(res.message);
     }
-  };
-
-  const requestBody = { action: action, payload: payload };
-  const finalUrl = GAS_WEB_APP_URL + 
-                   (GAS_WEB_APP_URL.includes("?") ? "&" : "?") + 
-                   "callback=" + callbackName + 
-                   "&jsonData=" + encodeURIComponent(JSON.stringify(requestBody));
-
-  const script = document.createElement("script");
-  script.id = callbackName;
-  script.src = finalUrl;
-  script.onerror = function() {
-    if (failureCallback) failureCallback(new Error("網路連線或後端專案異常"));
-    delete window[callbackName];
-    script.remove();
-  };
-  document.body.appendChild(script);
-}
-
-  // 🌸 終極直連大腦版：前端直接向 Google 官方索取答案，100% 免疫 CORS 阻擋
-function askAIAssistantDirect(finalPrompt, geminiLoadingId, msgContainer) {
-  
-  // 1. 先用最穩定的管道，跟後端 GAS 索取場館的最新大禮包資訊
-  callGasAPI("getAppInitData", {}, function(settingsData) {
-    
-    // 2. 順利拿到後端資料，開始在前端建立 AI 櫃檯的系統指令
-    var marquee = (settingsData && settingsData.settings && settingsData.settings.marqueeText) || "";
-    var courseIntros = JSON.stringify((settingsData && settingsData.settings && settingsData.settings.courseIntros) || {});
-    
-    var systemInstruction = "你是「微動身活」共享舞蹈空間的 AI 櫃檯小助手。請根據以下資訊溫柔親切地回答顧客問題。\n\n" +
-                            "【館場最新消息】\n" + marquee + "\n\n" +
-                            "【課程介紹】\n" + courseIntros;
-
-    // 3. 💡 設定 Google 官方 Gemini API 鑰匙與網址
-     var apiKey = "AIzaSyDVx05YnQKwbRYd97oDRfVpLCky1YNFPGE"; 
-  
-  var url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" + apiKey;
-    
-    var requestPayload = {
-      "contents": [
-        { 
-          "role": "user", 
-          "parts": [{"text": "【系統指令/你必須遵守的角色設定】：\n" + systemInstruction + "\n\n【使用者目前的訊息】：\n" + finalPrompt}] 
-        }
-      ],
-      "generationConfig": { 
-        "temperature": 0.4, 
-        "maxOutputTokens": 2000 
-      }
-    };
-
-    // 4. 💡 直接對 Google 官方發送 POST 請求，官方端 100% 支持 CORS 跨網域連線！
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(requestPayload)
-    })
-    .then(response => {
-      if (!response.ok) throw new Error("Gemini 官方伺服器連線異常");
-      return response.json();
-    })
-    .then(resJson => {
-      // 解除第二次的轉圈圈 Loader
-      var geminiLoadingEl = document.getElementById(geminiLoadingId);
-      if(geminiLoadingEl) geminiLoadingEl.remove();
-
-      // 解析官方回傳的格式並渲染
-      var aiResponseText = "小助手現在有點頭暈，請稍後再問我，或者點選下方按鈕聯絡 LINE 真人客服人員喔！";
-      if (resJson.candidates && resJson.candidates[0] && resJson.candidates[0].content && resJson.candidates[0].content.parts && resJson.candidates[0].content.parts[0].text) {
-        aiResponseText = resJson.candidates[0].content.parts[0].text;
-      }
-
-      // 完美的就地渲染
-      msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: #333;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #f9d5dc; line-height: 1.5; text-align: left; max-width: 80%;">${aiResponseText}</span></div>`;
-      msgContainer.scrollTop = msgContainer.scrollHeight;
-    })
-    .catch(err => {
-      console.error("前端直連 Gemini 失敗:", err);
-      var geminiLoadingEl = document.getElementById(geminiLoadingId);
-      if(geminiLoadingEl) geminiLoadingEl.remove();
-      msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: red;"><span style="background: #fee2e2; padding: 6px 10px; border-radius: 10px; display: inline-block; line-height: 1.5; text-align: left; max-width: 80%;">❌ 系統連線異常，請稍後再試。</span></div>`;
-    });
-
-  }, function(err) {
-    // 撈取大禮包失敗的防錯
-    var geminiLoadingEl = document.getElementById(geminiLoadingId);
-    if(geminiLoadingEl) geminiLoadingEl.remove();
-    msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: red;"><span style="background: #fee2e2; padding: 6px 10px; border-radius: 10px; display: inline-block; line-height: 1.5; text-align: left; max-width: 80%;">❌ 無法載入館場最新消息，請稍後再試。</span></div>`;
+    return res.data;
   });
 }
 </script>
