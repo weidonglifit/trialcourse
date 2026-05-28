@@ -5977,16 +5977,17 @@ ${res}
 /**
  * 全智慧中心：負責把常識與問題噴給後端，並就地精準渲染
  */
+// 🌸 【終極直連大腦版】智慧全功能 AI 櫃檯秘書
 function askGeminiSmartHub(userQuery, dataContext) {
   var msgContainer = document.getElementById('ai-messages');
   var geminiLoadingId = "ai-loading-smart-" + Date.now();
   
   msgContainer.innerHTML += `<div id="${geminiLoadingId}" style="margin-bottom: 8px; color: #888;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #eee;">智慧小助手思考中... 🧠</span></div>`;
   msgContainer.scrollTop = msgContainer.scrollHeight;
+  
   var historyConversationText = aiChatHistory.map(function(chat) {
     return (chat.role === "user" ? "【顧客】: " : "【秘書(你)】: ") + chat.content;
   }).join("\n");
-
 
   var finalPrompt = `你是「微動身活」共享舞蹈空間的智慧型全功能 AI 櫃檯秘書。請根據下方提供的【即時館場資料庫】和【顧客提問】進行回答。
 
@@ -6006,27 +6007,63 @@ ${historyConversationText}
 【顧客目前實際提問】：
 ${userQuery}`;
 
-  callGasAPI("askAIAssistant", { userMessage: finalPrompt }, function(aiResponse) {
-    // 💡 收到回應立刻解鎖
+  // 💡 關鍵直連：設定 Google 官方 Gemini API 鑰匙與連線網址（100% 支持跨網域）
+  var apiKey = "AIzaSyDqWmQ7wqJ9FCpF08PVMeGpN_w7BckmR-I"; 
+  var url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+  
+  var requestPayload = {
+    "contents": [
+      { 
+        "role": "user", 
+        "parts": [{"text": finalPrompt}] 
+      }
+    ],
+    "generationConfig": { 
+      "temperature": 0.4, 
+      "maxOutputTokens": 2000 
+    }
+  };
+
+  // 直接對 Google 官方發送安全 POST 請求，不限字數、永不超時！
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(requestPayload)
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("Gemini 官方伺服器回應異常");
+    return response.json();
+  })
+  .then(resJson => {
+    // 💡 收到回應立刻解鎖轉圈圈
     var geminiLoadingEl = document.getElementById(geminiLoadingId);
     if(geminiLoadingEl) geminiLoadingEl.remove();
     
-    var finalResponse = aiResponse || "小助手剛剛不小心發呆了，可以請您再說一次嗎？";
+    // 解析官方標準格式撈出答案
+    var aiResponseText = "小助手剛剛不小心發呆了，可以請您再說一次嗎？";
+    if (resJson.candidates && resJson.candidates[0] && resJson.candidates[0].content && resJson.candidates[0].content.parts && resJson.candidates[0].content.parts[0].text) {
+      aiResponseText = resJson.candidates[0].content.parts[0].text;
+    }
+    
+    // 🌸 完美咬合原有的對話歷史紀錄與 appendAIResponse 渲染邏輯
+    var finalResponse = aiResponseText;
     aiChatHistory.push({ role: "model", content: finalResponse });
     appendAIResponse(finalResponse);
-  }, function(err){
-    // 💡 呼叫後端（Gemini）失敗或斷線時立刻解鎖
+  })
+  .catch(err => {
+    console.error("SmartHub 直連 Gemini 官方失敗:", err);
     var geminiLoadingEl = document.getElementById(geminiLoadingId);
     if(geminiLoadingEl) geminiLoadingEl.remove();
     appendAIResponse("小助手頭有點暈，請再跟我說一次。");
   });
 }
 
-/**
- * 智慧上下文傳送器（精準渲染版）
- */
+
+// 🌸 【終極直連大腦版】智慧上下文傳送器（精準渲染版）
 function askGeminiWithContext(userQuery, dataContext, mode) {
-  var msgContainer = document.getElementById('ai-messages'); // 💡 確保函式內有重新抓取對話框
+  var msgContainer = document.getElementById('ai-messages'); 
   var geminiLoadingId = "ai-loading-gemini-" + Date.now();
   
   msgContainer.innerHTML += `<div id="${geminiLoadingId}" style="margin-bottom: 8px; color: #888;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #eee;">智慧助理分析中... 🧠</span></div>`;
@@ -6039,29 +6076,57 @@ function askGeminiWithContext(userQuery, dataContext, mode) {
 
   var finalPrompt = `【系統即時提供給你的館場資料內容】：\n${dataContext}\n\n【顧客目前實際提問】：\n${userQuery}\n\n${systemRole}`;
 
-  // 🌸 改用完全相容輪詢資料結構的前端 AI 渲染連線
-callGasAPI("askAIAssistant", { userMessage: finalPrompt }, function(aiResponse) {
+  // 💡 關鍵直連：設定 Google 官方 Gemini API 鑰匙與連線網址
+  var apiKey = "AIzaSyDqWmQ7wqJ9FCpF08PVMeGpN_w7BckmR-I"; 
+  var url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+  
+  var requestPayload = {
+    "contents": [
+      { 
+        "role": "user", 
+        "parts": [{"text": finalPrompt}] 
+      }
+    ],
+    "generationConfig": { 
+      "temperature": 0.4, 
+      "maxOutputTokens": 2000 
+    }
+  };
+
+  // 直接對 Google 官方發送安全 POST 請求
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(requestPayload)
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("Gemini 官方伺服器回應異常");
+    return response.json();
+  })
+  .then(resJson => {
     // 💡 收到回應，立刻解除第二次的轉圈圈
     var geminiLoadingEl = document.getElementById(geminiLoadingId);
     if(geminiLoadingEl) geminiLoadingEl.remove();
     
-    // 💡 核心相容修改：如果後端送過來的是輪詢後的物件，我們精準撈出裡面的 answer 文字
-    var realAnswerText = aiResponse;
-    if (aiResponse && typeof aiResponse === 'object' && aiResponse.answer) {
-        realAnswerText = aiResponse.answer;
+    // 解析官方標準格式撈出文字答案
+    var realAnswerText = "智慧助理目前思緒有點混亂，請稍後再試。";
+    if (resJson.candidates && resJson.candidates[0] && resJson.candidates[0].content && resJson.candidates[0].content.parts && resJson.candidates[0].content.parts[0].text) {
+      realAnswerText = resJson.candidates[0].content.parts[0].text;
     }
     
-    // 直接就地渲染，百分之百不會被其他函式變數卡到！
+    // 🌸 完美咬合你最驕傲的獨立就地 HTML 渲染邏輯，防止任何變數卡死！
     msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: #333;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #f9d5dc; line-height: 1.5; text-align: left; max-width: 80%;">${realAnswerText}</span></div>`;
     msgContainer.scrollTop = msgContainer.scrollHeight;
     
-}, function(err) {
-    // 💡 發生錯誤或斷線時立刻解鎖
+  })
+  .catch(err => {
+    console.error("WithContext 直連 Gemini 官方失敗:", err);
     var geminiLoadingEl = document.getElementById(geminiLoadingId);
     if(geminiLoadingEl) geminiLoadingEl.remove();
     appendAIResponse("小助手思緒有點混亂，請稍後再試。");
-    console.error("Gemini 連線異常:", err);
-});
+  });
 }
 
 /**
@@ -6102,7 +6167,7 @@ function appendAIResponse(text) {
   // 填入你剛剛部署完產生的 GAS 網路應用程式 URL (exec結尾)
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbygAeXRSqvQb7vmynSDD_O7rvegm0kmRLIAT1VFsOJyZZVs9ex8PNQ-JTsmYKsNX54e/exec";
 
-// 🌸 終極切片 JSONP 版本：完全不走 POST、100% 免疫 CORS 阻擋、支援無限字數傳送
+// 🌸 乾淨流暢版：專供普通功能（查課表、名額、報名）使用的 100% 免 CORS 工具
 function callGasAPI(action, payload, successCallback, failureCallback) {
   if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("XXXXXX")) {
     console.error("❌ 未設定有效的 GAS_WEB_APP_URL");
@@ -6110,50 +6175,6 @@ function callGasAPI(action, payload, successCallback, failureCallback) {
     return;
   }
 
-  // 💡 核心分流：如果是大字數的 AI 助理，啟動前端文字切碎機
-  if (action === "askAIAssistant") {
-    const fullText = payload.userMessage;
-    const chunkSize = 1000; // 每段只抓 1000 字，安全穿透 Google GET 網址長度限制
-    const chunks = [];
-    
-    for (let i = 0; i < fullText.length; i += chunkSize) {
-      chunks.push(fullText.substring(i, i + chunkSize));
-    }
-
-    const transferId = "ai_" + Math.random().toString(36).substr(2, 9);
-    console.log(`📌 啟動 GET 切片安全傳送，共 ${chunks.length} 片。`);
-
-    // 遞迴按順序發送碎片
-    function sendChunk(index) {
-      if (index < chunks.length) {
-        const chunkPayload = {
-          transferId: transferId,
-          chunk: chunks[index],
-          index: index,
-          total: chunks.length
-        };
-        
-        // 呼叫暫存 action 傳送這塊碎片
-        executeJsonp("uploadAIChunk", chunkPayload, function(res) {
-          // 這片傳完，自動傳下一片
-          sendChunk(index + 1);
-        }, failureCallback);
-      } else {
-        // 所有的碎片都安全送達 Google 了！通知後端開始拼裝並啟動 AI 運算
-        executeJsonp("askAIAssistant", { transferId: transferId }, successCallback, failureCallback);
-      }
-    }
-    
-    // 開始發送第一片
-    sendChunk(0);
-  } else {
-    // 💡 其他查課表、查個別預約等小資料，直接走標準 JSONP
-    executeJsonp(action, payload, successCallback, failureCallback);
-  }
-}
-
-// 🌸 底層標準 JSONP 發送核心工具（完全不走 POST，100% 防阻擋）
-function executeJsonp(action, payload, successCallback, failureCallback) {
   const callbackName = "gas_cb_" + Math.random().toString(36).substr(2, 9);
   
   window[callbackName] = function(res) {
@@ -6183,6 +6204,79 @@ function executeJsonp(action, payload, successCallback, failureCallback) {
     script.remove();
   };
   document.body.appendChild(script);
+}
+
+  // 🌸 終極直連大腦版：前端直接向 Google 官方索取答案，100% 免疫 CORS 阻擋
+function askAIAssistantDirect(finalPrompt, geminiLoadingId, msgContainer) {
+  
+  // 1. 先用最穩定的管道，跟後端 GAS 索取場館的最新大禮包資訊
+  callGasAPI("getAppInitData", {}, function(settingsData) {
+    
+    // 2. 順利拿到後端資料，開始在前端建立 AI 櫃檯的系統指令
+    var marquee = (settingsData && settingsData.settings && settingsData.settings.marqueeText) || "";
+    var courseIntros = JSON.stringify((settingsData && settingsData.settings && settingsData.settings.courseIntros) || {});
+    
+    var systemInstruction = "你是「微動身活」共享舞蹈空間的 AI 櫃檯小助手。請根據以下資訊溫柔親切地回答顧客問題。\n\n" +
+                            "【館場最新消息】\n" + marquee + "\n\n" +
+                            "【課程介紹】\n" + courseIntros;
+
+    // 3. 💡 設定 Google 官方 Gemini API 鑰匙與網址
+    var apiKey = "AIzaSyDqWmQ7wqJ9FCpF08PVMeGpN_w7BckmR-I"; 
+    var url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+    
+    var requestPayload = {
+      "contents": [
+        { 
+          "role": "user", 
+          "parts": [{"text": "【系統指令/你必須遵守的角色設定】：\n" + systemInstruction + "\n\n【使用者目前的訊息】：\n" + finalPrompt}] 
+        }
+      ],
+      "generationConfig": { 
+        "temperature": 0.4, 
+        "maxOutputTokens": 2000 
+      }
+    };
+
+    // 4. 💡 直接對 Google 官方發送 POST 請求，官方端 100% 支持 CORS 跨網域連線！
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestPayload)
+    })
+    .then(response => {
+      if (!response.ok) throw new Error("Gemini 官方伺服器連線異常");
+      return response.json();
+    })
+    .then(resJson => {
+      // 解除第二次的轉圈圈 Loader
+      var geminiLoadingEl = document.getElementById(geminiLoadingId);
+      if(geminiLoadingEl) geminiLoadingEl.remove();
+
+      // 解析官方回傳的格式並渲染
+      var aiResponseText = "小助手現在有點頭暈，請稍後再問我，或者點選下方按鈕聯絡 LINE 真人客服人員喔！";
+      if (resJson.candidates && resJson.candidates[0] && resJson.candidates[0].content && resJson.candidates[0].content.parts && resJson.candidates[0].content.parts[0].text) {
+        aiResponseText = resJson.candidates[0].content.parts[0].text;
+      }
+
+      // 完美的就地渲染
+      msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: #333;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #f9d5dc; line-height: 1.5; text-align: left; max-width: 80%;">${aiResponseText}</span></div>`;
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+    })
+    .catch(err => {
+      console.error("前端直連 Gemini 失敗:", err);
+      var geminiLoadingEl = document.getElementById(geminiLoadingId);
+      if(geminiLoadingEl) geminiLoadingEl.remove();
+      msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: red;"><span style="background: #fee2e2; padding: 6px 10px; border-radius: 10px; display: inline-block; line-height: 1.5; text-align: left; max-width: 80%;">❌ 系統連線異常，請稍後再試。</span></div>`;
+    });
+
+  }, function(err) {
+    // 撈取大禮包失敗的防錯
+    var geminiLoadingEl = document.getElementById(geminiLoadingId);
+    if(geminiLoadingEl) geminiLoadingEl.remove();
+    msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: red;"><span style="background: #fee2e2; padding: 6px 10px; border-radius: 10px; display: inline-block; line-height: 1.5; text-align: left; max-width: 80%;">❌ 無法載入館場最新消息，請稍後再試。</span></div>`;
+  });
 }
 </script>
 
