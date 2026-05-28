@@ -6092,7 +6092,7 @@ function appendAIResponse(text) {
   // 填入你剛剛部署完產生的 GAS 網路應用程式 URL (exec結尾)
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbygAeXRSqvQb7vmynSDD_O7rvegm0kmRLIAT1VFsOJyZZVs9ex8PNQ-JTsmYKsNX54e/exec";
 
-// 🌸 終極完美分流版：小資料走 JSONP，大資料（AI、報表提交）走不限字數的純文字 POST 繞過機制
+// 🌸 終極切片 JSONP 版本：完全不走 POST、100% 免疫 CORS 阻擋、支援無限字數傳送
 function callGasAPI(action, payload, successCallback, failureCallback) {
   if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("XXXXXX")) {
     console.error("❌ 未設定有效的 GAS_WEB_APP_URL");
@@ -6100,67 +6100,79 @@ function callGasAPI(action, payload, successCallback, failureCallback) {
     return;
   }
 
-  const requestBody = {
-    action: action,
-    payload: payload
+  // 💡 核心分流：如果是大字數的 AI 助理，啟動前端文字切碎機
+  if (action === "askAIAssistant") {
+    const fullText = payload.userMessage;
+    const chunkSize = 1000; // 每段只抓 1000 字，安全穿透 Google GET 網址長度限制
+    const chunks = [];
+    
+    for (let i = 0; i < fullText.length; i += chunkSize) {
+      chunks.push(fullText.substring(i, i + chunkSize));
+    }
+
+    const transferId = "ai_" + Math.random().toString(36).substr(2, 9);
+    console.log(`📌 啟動 GET 切片安全傳送，共 ${chunks.length} 片。`);
+
+    // 遞迴按順序發送碎片
+    function sendChunk(index) {
+      if (index < chunks.length) {
+        const chunkPayload = {
+          transferId: transferId,
+          chunk: chunks[index],
+          index: index,
+          total: chunks.length
+        };
+        
+        // 呼叫暫存 action 傳送這塊碎片
+        executeJsonp("uploadAIChunk", chunkPayload, function(res) {
+          // 這片傳完，自動傳下一片
+          sendChunk(index + 1);
+        }, failureCallback);
+      } else {
+        // 所有的碎片都安全送達 Google 了！通知後端開始拼裝並啟動 AI 運算
+        executeJsonp("askAIAssistant", { transferId: transferId }, successCallback, failureCallback);
+      }
+    }
+    
+    // 開始發送第一片
+    sendChunk(0);
+  } else {
+    // 💡 其他查課表、查個別預約等小資料，直接走標準 JSONP
+    executeJsonp(action, payload, successCallback, failureCallback);
+  }
+}
+
+// 🌸 底層標準 JSONP 發送核心工具（完全不走 POST，100% 防阻擋）
+function executeJsonp(action, payload, successCallback, failureCallback) {
+  const callbackName = "gas_cb_" + Math.random().toString(36).substr(2, 9);
+  
+  window[callbackName] = function(res) {
+    delete window[callbackName];
+    const el = document.getElementById(callbackName);
+    if (el) el.remove();
+
+    if (res && res.status === "success") {
+      if (successCallback) successCallback(res.data);
+    } else {
+      if (failureCallback) failureCallback(new Error(res ? res.message : "後端執行失敗"));
+    }
   };
 
-  // 💡 核心分流：如果是 AI 助理或報名提交等大資料量功能，強制走純文字 POST 安全通道
-  if (action === "askAIAssistant" || action === "processBatchForm" || action === "processForm" || action === "processSingleForm") {
-    
-    fetch(GAS_WEB_APP_URL, {
-      method: "POST",
-      // 💡 關鍵修改：強制設定為 text/plain（純文字格式），100% 穿透 Google 重新導向的 CORS 封鎖
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      },
-      body: JSON.stringify(requestBody) // 直接將整包大物件轉為字串送出，字數無限
-    })
-    .then(response => {
-      if (!response.ok) throw new Error("網路連線異常，狀態碼: " + response.status);
-      return response.json();
-    })
-    .then(res => {
-      if (res && res.status === "success") {
-        if (successCallback) successCallback(res.data);
-      } else {
-        if (failureCallback) failureCallback(new Error(res ? res.message : "後端執行失敗"));
-      }
-    })
-    .catch(err => {
-      console.error(`POST [${action}] 發生錯誤:`, err);
-      if (failureCallback) failureCallback(err);
-    });
+  const requestBody = { action: action, payload: payload };
+  const finalUrl = GAS_WEB_APP_URL + 
+                   (GAS_WEB_APP_URL.includes("?") ? "&" : "?") + 
+                   "callback=" + callbackName + 
+                   "&jsonData=" + encodeURIComponent(JSON.stringify(requestBody));
 
-  } else {
-    // 💡 一般小資料量功能（如初始化、查課表、查個別預約）維持最穩健的 JSONP (GET)
-    const callbackName = "gas_cb_" + Math.random().toString(36).substr(2, 9);
-    
-    window[callbackName] = function(res) {
-      delete window[callbackName];
-      document.getElementById(callbackName).remove();
-      if (res && res.status === "success") {
-        if (successCallback) successCallback(res.data);
-      } else {
-        if (failureCallback) failureCallback(new Error(res ? res.message : "後端執行失敗"));
-      }
-    };
-
-    const finalUrl = GAS_WEB_APP_URL + 
-                     (GAS_WEB_APP_URL.includes("?") ? "&" : "?") + 
-                     "callback=" + callbackName + 
-                     "&jsonData=" + encodeURIComponent(JSON.stringify(requestBody));
-
-    const script = document.createElement("script");
-    script.id = callbackName;
-    script.src = finalUrl;
-    script.onerror = function() {
-      if (failureCallback) failureCallback(new Error("網路連線或後端專案異常"));
-      delete window[callbackName];
-      script.remove();
-    };
-    document.body.appendChild(script);
-  }
+  const script = document.createElement("script");
+  script.id = callbackName;
+  script.src = finalUrl;
+  script.onerror = function() {
+    if (failureCallback) failureCallback(new Error("網路連線或後端專案異常"));
+    delete window[callbackName];
+    script.remove();
+  };
+  document.body.appendChild(script);
 }
 </script>
 
