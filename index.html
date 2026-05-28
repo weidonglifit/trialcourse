@@ -6097,6 +6097,7 @@ const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbygAeXRSqvQb7vm
  */
 // 🌸 優化版：專門破解 Google CORS 限制的前端 API 連線工具
 // 🌸 終極相容版：移除多餘標頭，100% 順利通過 Google CORS 驗證
+// 🌸 終極 JSONP 版本：100% 破解 Google CORS 封鎖，完全不挑瀏覽器
 function callGasAPI(action, payload, successCallback, failureCallback) {
   if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("XXXXXX")) {
     console.error("❌ 未設定有效的 GAS_WEB_APP_URL");
@@ -6104,40 +6105,47 @@ function callGasAPI(action, payload, successCallback, failureCallback) {
     return;
   }
 
+  // 1. 產生一個隨機唯一的 callback 函式名稱，讓後端回傳時呼叫
+  const callbackName = "gas_cb_" + Math.random().toString(36).substr(2, 9);
+  
+  // 2. 將全域掛載這個臨時函式，等 Google 回傳資料時觸發
+  window[callbackName] = function(res) {
+    // 執行完後立刻消滅它，保持乾淨
+    delete window[callbackName];
+    document.getElementById(callbackName).remove();
+
+    if (res && res.status === "success") {
+      if (successCallback) successCallback(res.data);
+    } else {
+      console.error("後端執行失敗:", res ? res.message : "未知錯誤");
+      if (failureCallback) failureCallback(new Error(res ? res.message : "後端執行失敗"));
+    }
+  };
+
+  // 3. 打包資料，因為走 GET，我們要把資料封裝成網址參數
   const requestBody = {
     action: action,
     payload: payload
   };
 
-  const params = new URLSearchParams();
-  params.append("jsonData", JSON.stringify(requestBody));
+  // 4. 拼裝最終敲門的網址
+  const finalUrl = GAS_WEB_APP_URL + 
+                   (GAS_WEB_APP_URL.includes("?") ? "&" : "?") + 
+                   "callback=" + callbackName + 
+                   "&jsonData=" + encodeURIComponent(JSON.stringify(requestBody));
 
-  fetch(GAS_WEB_APP_URL, {
-    method: "POST",
-    // 💡 核心修改：移除 mode: "cors"，讓瀏覽器改走標準預設跨網域相容路由
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: params.toString()
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error("網路連線異常，狀態碼: " + response.status);
-    }
-    return response.json();
-  })
-  .then(res => {
-    if (res.status === "success") {
-      if (successCallback) successCallback(res.data);
-    } else {
-      console.error("後端執行失敗:", res.message);
-      if (failureCallback) failureCallback(new Error(res.message || "後端執行失敗"));
-    }
-  })
-  .catch(err => {
-    console.error("API 連線發生錯誤:", err);
-    if (failureCallback) failureCallback(err);
-  });
+  // 5. 動態建立 <script> 標籤借道超渡，100% 繞過 CORS
+  const script = document.createElement("script");
+  script.id = callbackName;
+  script.src = finalUrl;
+  script.onerror = function() {
+    console.error("JSONP 連線發生異常");
+    if (failureCallback) failureCallback(new Error("網路連線或後端專案異常"));
+    delete window[callbackName];
+    script.remove();
+  };
+
+  document.body.appendChild(script);
 }
 </script>
 
