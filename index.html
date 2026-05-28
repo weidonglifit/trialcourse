@@ -6095,22 +6095,48 @@ const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbygAeXRSqvQb7vm
 /**
  * 替代 google.script.run 的通用 API 呼叫工具
  */
+// 🌸 優化版：專門破解 Google CORS 限制的前端 API 連線工具
 function callGasAPI(action, payload, successCallback, failureCallback) {
+  if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("XXXXXX")) {
+    console.error("❌ 未設定有效的 GAS_WEB_APP_URL");
+    if (failureCallback) failureCallback(new Error("未設定後端 API 網址"));
+    return;
+  }
+
+  // 💡 關鍵：封裝成完整的 action 請求結構
+  const requestBody = {
+    action: action,
+    payload: payload
+  };
+
+  // 💡 關鍵：改用 URLSearchParams 傳送純文字表單，100% 繞過 Google 的 OPTIONS 預檢阻擋
+  const params = new URLSearchParams();
+  params.append("jsonData", JSON.stringify(requestBody));
+
   fetch(GAS_WEB_APP_URL, {
     method: "POST",
-    mode: "cors", // 開啟跨網域連線
-    headers: { "Content-Type": "text/plain" }, // GAS 接收 JSON 時，用 text/plain 避開 preflight 限制最穩定
-    body: JSON.stringify({ action: action, payload: payload })
+    mode: "cors", // 強制開啟跨網域模式
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded" // 🌸 改用表單型態，破解 CORS 阻擋
+    },
+    body: params.toString()
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("網路連線異常，狀態碼: " + response.status);
+    }
+    return response.json();
+  })
   .then(res => {
     if (res.status === "success") {
       if (successCallback) successCallback(res.data);
     } else {
-      if (failureCallback) failureCallback(new Error(res.message));
+      console.error("後端執行失敗:", res.message);
+      if (failureCallback) failureCallback(new Error(res.message || "後端執行失敗"));
     }
   })
   .catch(err => {
+    console.error("API 連線發生錯誤:", err);
     if (failureCallback) failureCallback(err);
   });
 }
