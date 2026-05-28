@@ -6039,19 +6039,29 @@ function askGeminiWithContext(userQuery, dataContext, mode) {
 
   var finalPrompt = `【系統即時提供給你的館場資料內容】：\n${dataContext}\n\n【顧客目前實際提問】：\n${userQuery}\n\n${systemRole}`;
 
-  callGasAPI("askAIAssistant", { userMessage: finalPrompt }, function(aiResponse) {
+  // 🌸 改用完全相容輪詢資料結構的前端 AI 渲染連線
+callGasAPI("askAIAssistant", { userMessage: finalPrompt }, function(aiResponse) {
     // 💡 收到回應，立刻解除第二次的轉圈圈
     var geminiLoadingEl = document.getElementById(geminiLoadingId);
     if(geminiLoadingEl) geminiLoadingEl.remove();
     
+    // 💡 核心相容修改：如果後端送過來的是輪詢後的物件，我們精準撈出裡面的 answer 文字
+    var realAnswerText = aiResponse;
+    if (aiResponse && typeof aiResponse === 'object' && aiResponse.answer) {
+        realAnswerText = aiResponse.answer;
+    }
+    
     // 直接就地渲染，百分之百不會被其他函式變數卡到！
-    msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: #333;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #f9d5dc; line-height: 1.5; text-align: left; max-width: 80%;">${aiResponse}</span></div>`;
+    msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: #333;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #f9d5dc; line-height: 1.5; text-align: left; max-width: 80%;">${realAnswerText}</span></div>`;
     msgContainer.scrollTop = msgContainer.scrollHeight;
-  }, function(err){
+    
+}, function(err) {
+    // 💡 發生錯誤或斷線時立刻解鎖
     var geminiLoadingEl = document.getElementById(geminiLoadingId);
     if(geminiLoadingEl) geminiLoadingEl.remove();
     appendAIResponse("小助手思緒有點混亂，請稍後再試。");
-  });
+    console.error("Gemini 連線異常:", err);
+});
 }
 
 /**
