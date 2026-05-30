@@ -2665,6 +2665,8 @@
     <small style="color:#f089a1; margin-top: 8px;">查看帳號 ➔</small>
   </div>
 `;
+  let aiStime = 0;
+  let aiEtime = 0;
   // 0. 網頁載入時，自動抓取後端試算表的課程清單填入下拉選單
 // 網頁載入時，直接透過整合函式抓取「全網頁所需的大禮包」
 window.addEventListener('load', function() {
@@ -6023,7 +6025,8 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 function sendAIMessage() {
-  console.log(`進AI呼叫 ${performance.now()/1000} 秒。`);
+  aiStime = performance.now();
+  console.log(`進AI呼叫。`);
   var inputEl = document.getElementById('ai-input');
   var msgContainer = document.getElementById('ai-messages');
   var userText = inputEl.value.trim();
@@ -6326,7 +6329,9 @@ function appendAIResponse(text) {
   var msgContainer = document.getElementById('ai-messages');
   if (msgContainer) {
     // 1. 自動將 AI 回傳的換行符號 \n 轉換成網頁的 <br> 標籤
-    console.log(`AI呼叫完成！！！${text}`);
+    aiEtime = performance.now();
+    let costTime = aiEtime - aiStime;
+    console.log(`AI呼叫完成！！！${costTime/1000} 秒`);
     var processedText = text.replace(/\n/g, '<br>');
     
     // 2. [選配] 自動將 AI 經常用來強調的 **文字** 轉換成 <strong>粗體</strong>
