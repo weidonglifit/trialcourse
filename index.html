@@ -6328,7 +6328,7 @@ function askGeminiWithContext(userQuery, dataContext, mode) {
 function appendAIResponse(text) {
   var msgContainer = document.getElementById('ai-messages');
   aiEtime = performance.now();
-  let costTime = aiEtime - aiStime;
+  let costTime = ((aiEtime - aiStime)/1000).toFixed(3);
   if (msgContainer) {
     // 1. 自動將 AI 回傳的換行符號 \n 轉換成網頁的 <br> 標籤
     var processedText = text.replace(/\n/g, '<br>');
@@ -6356,7 +6356,7 @@ function appendAIResponse(text) {
     `;
     msgContainer.scrollTop = msgContainer.scrollHeight;
   }
-  console.log(`AI呼叫完成！！！${costTime/1000} 秒`);
+  console.log(`AI呼叫完成！！！${costTime} 秒`);
 }
 
   const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzMsKpq2PiUuvvHF_lZhIRIA4KnRC553LFVFLcDPZqD1CArDjBtyjyZeu5kKeg31SM/exec";
