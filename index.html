@@ -1992,6 +1992,72 @@
   /* 稍微調整紙飛機角度，讓它看起來是往前飛 */
   transform: translate(0px, 0px); 
 }
+
+  .popular-booking-wall {
+  width: 100%;
+  margin: 0 auto 25px auto;
+  background: white;
+  border-radius: 15px;
+  padding: 15px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 15px rgba(232, 122, 144, 0.15);
+  border: 1px solid #F4A7B9;
+}
+.popular-booking-title {
+  text-align: center;
+  color: #D05A6E;
+  font-weight: bold;
+  font-size: 1.25rem;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.popular-wall-container {
+  max-height: 280px; /* 超過高度時會出現捲軸，營造出滿滿的稠密感 */
+  overflow-y: auto;
+  padding-right: 5px;
+  /* 隱藏滾動條但保留滾動功能，增加現代感 */
+  scrollbar-width: thin;
+  scrollbar-color: #F4A7B9 transparent;
+}
+.popular-wall-container::-webkit-scrollbar {
+  width: 5px;
+}
+.popular-wall-container::-webkit-scrollbar-thumb {
+  background: #F4A7B9;
+  border-radius: 10px;
+}
+.booking-wall-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: #fdfdfd;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.booking-wall-item:hover {
+  transform: translateX(3px); /* 懸停微動，增加精緻感 */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+.wall-date {
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+.wall-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: white;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
 </style>
 </head>
 <body>
@@ -2404,6 +2470,12 @@
         <div class="rules-container"></div>
       </div>  
       </div>
+        <div class="popular-booking-wall" id="popularBookingWall" style="display:none;">
+        <div class="popular-booking-title">🔥 近期熱門預約動態</div>
+        <div id="popularWallContainer" class="popular-wall-container">
+          <div style="text-align: center; color: #999;">載入中...</div>
+        </div>
+      </div>
 
       <div class="query-section" style="margin-bottom: 30px; background: transparent; padding: 0; border: none;">
         <h3 style="text-align: center; margin-top: 0; color: #2c3e50;">🔍 教室預約查詢</h3>
@@ -2761,7 +2833,30 @@ window.addEventListener('load', function() {
     if (scheduleBodyPast) {
       renderAccordionSchedule(allCourseDataPast, scheduleBodyPast, "SINGLE");
     }
-    
+    const wallSection = document.getElementById('popularBookingWall');
+    const wallContainer = document.getElementById('popularWallContainer');
+    if (wallSection && wallContainer) {
+      if (initData.popularWallData && initData.popularWallData.length > 0) {
+        wallSection.style.display = 'block'; // 顯示外層牆面
+        let wallHtml = '';
+        
+        // 迴圈將每一天的狀態渲染成小卡
+        initData.popularWallData.forEach(item => {
+          wallHtml += `
+            <div class="booking-wall-item" style="border-left: 5px solid ${item.color};">
+              <div class="wall-date">${item.displayDate}</div>
+              <div class="wall-status" style="background-color: ${item.bgColor}; color: ${item.color}; border: 1px solid ${item.color};">
+                ${item.status}
+              </div>
+            </div>
+          `;
+        });
+        wallContainer.innerHTML = wallHtml;
+      } else {
+        // 沒有任何未來預約紀錄時，隱藏整個動態牆區塊 (因為空白牆面無法營造熱絡感)
+        wallSection.style.display = 'none';
+      }
+    }
     // 9. 💡 初始化「單堂下拉選單」與「查詢老師下拉選單」
     initSingleCourseDropdown();
     renderTeacherDropdownUI(initData.teachers);
