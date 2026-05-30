@@ -6327,11 +6327,10 @@ function askGeminiWithContext(userQuery, dataContext, mode) {
 // 💡 升級版：支援格式加工的 AI 回應渲染器
 function appendAIResponse(text) {
   var msgContainer = document.getElementById('ai-messages');
+  aiEtime = performance.now();
+  let costTime = aiEtime - aiStime;
   if (msgContainer) {
     // 1. 自動將 AI 回傳的換行符號 \n 轉換成網頁的 <br> 標籤
-    aiEtime = performance.now();
-    let costTime = aiEtime - aiStime;
-    console.log(`AI呼叫完成！！！${costTime/1000} 秒`);
     var processedText = text.replace(/\n/g, '<br>');
     
     // 2. [選配] 自動將 AI 經常用來強調的 **文字** 轉換成 <strong>粗體</strong>
@@ -6357,7 +6356,7 @@ function appendAIResponse(text) {
     `;
     msgContainer.scrollTop = msgContainer.scrollHeight;
   }
-  console.log(`AI呼叫完成！${performance.now()/1000}`);
+  console.log(`AI呼叫完成！！！${costTime/1000} 秒`);
 }
 
   const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzMsKpq2PiUuvvHF_lZhIRIA4KnRC553LFVFLcDPZqD1CArDjBtyjyZeu5kKeg31SM/exec";
