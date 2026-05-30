@@ -2608,7 +2608,11 @@
     </div>
 
 <div id="ai-chat-widget">
-  <button id="ai-toggle-btn" onclick="toggleAIChat()" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); color: white; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">✨</button>
+  <button id="ai-toggle-btn" onclick="let rot = parseInt(this.dataset.rot || 0) + 360; this.style.transform = 'rotate(' + rot + 'deg)'; this.dataset.rot = rot; toggleAIChat();" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z"/>
+  </svg>
+</button>
   
   <div id="ai-chat-box">
     <div style="background: linear-gradient(135deg, #F4A7B9 0%, #E87A90 100%); color: white; padding: 12px; font-weight: bold; display: flex; justify-content: space-between;">
