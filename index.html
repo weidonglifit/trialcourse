@@ -2608,7 +2608,11 @@
     </div>
 
 <div id="ai-chat-widget">
-  <button id="ai-toggle-btn" onclick="toggleAIChat()" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); color: white; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">🤖</button>
+  <button id="ai-toggle-btn" onclick="toggleAIChat()" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M10.875 16.75a2.5 2.5 0 0 0 2.25-2.25l1.1-4.6a2.5 2.5 0 0 0-2.25-3.05l-4.6-1.1a2.5 2.5 0 0 0-3.05 2.25l-1.1 4.6a2.5 2.5 0 0 0 2.25 3.05l4.6 1.1zm7.5-6.5a1.5 1.5 0 0 0 1.35-1.35l.65-2.7a1.5 1.5 0 0 0-1.83-1.83l-2.7.65a1.5 1.5 0 0 0-1.35 1.35l-.65 2.7a1.5 1.5 0 0 0 1.83 1.83l2.7-.65zM19.5 22.5a1 1 0 0 0 .9-.9l.4-1.8a1 1 0 0 0-1.22-1.22l-1.8.4a1 1 0 0 0-.9.9l-.4 1.8a1 1 0 0 0 1.22 1.22l1.8-.4z" />
+  </svg>
+</button>
   
   <div id="ai-chat-box">
     <div style="background: linear-gradient(135deg, #F4A7B9 0%, #E87A90 100%); color: white; padding: 12px; font-weight: bold; display: flex; justify-content: space-between;">
@@ -5935,7 +5939,7 @@ function toggleAIChat() {
   }
 }
 function fetchTomorrowWeather() {
-  console.log("=== 🔍 天氣功能啟動（中文結構觀測 LOG 版） ===");
+  //console.log("=== 🔍 天氣功能啟動（中文結構觀測 LOG 版） ===");
   
   // 1. 計算明天日期
   var today = new Date();
@@ -5949,7 +5953,7 @@ function fetchTomorrowWeather() {
   var daysOfWeek = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
   var tomorrowDayName = daysOfWeek[tomorrow.getDay()];
 
-  console.log("➔ 📅 [追蹤 1] 目標比對的明天日期字串是:", tomorrowString);
+  //console.log("➔ 📅 [追蹤 1] 目標比對的明天日期字串是:", tomorrowString);
 
   // 預設安全墊底值
   aiTomorrowWeatherText = "【教室所在地：新竹市北區 官方即時氣象預報】\n" +
