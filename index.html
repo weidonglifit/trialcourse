@@ -2711,7 +2711,7 @@
   <div class="modal-content" onclick="event.stopPropagation()">
     <span class="modal-close-x" onclick="closeQRCodeModal()">×</span>
     <div id="qrcodeModalBody" style="text-align: center; padding: 10px;">
-      <h3 style="color: #d14d72; margin-bottom:15px; margin-top: 0;">📱 產生報到 QRCode</h3>
+      <h3 style="color: #d14d72; margin-bottom:15px; margin-top: 0;">產生報到 QRCode</h3>
       
       <div id="qrErrorMsg" style="display: none; color: #e74c3c; background-color: #fdf2f4; border: 1px solid #f9d5dc; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.95em; font-weight: bold; text-align: left;"></div>
       
@@ -4984,7 +4984,7 @@ function closeOverlay() {
         if (aiWidget) {
             aiWidget.classList.add('show');
         }
-      document.getElementById('qrcode-widget').classList.add('show');
+      //document.getElementById('qrcode-widget').classList.add('show');
         
         setTimeout(() => {
             overlay.style.display = 'none';
