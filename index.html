@@ -2074,6 +2074,49 @@
   letter-spacing: 1px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
+
+  /* QRCode 左下角懸浮按鈕的外殼 (與 AI 助手對稱) */
+#qrcode-widget {
+  position: fixed;
+  bottom: 20px;
+  left: 20px; /* 放在左下角 */
+  z-index: 99999;
+  
+  /* 初始隱藏與縮小 */
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+  transition: opacity 0.5s ease-out, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 顯示時的狀態 */
+#qrcode-widget.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+/* QRCode 按鈕本體 */
+#qrcode-toggle-btn {
+  width: 60px; 
+  height: 60px; 
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); 
+  color: white; 
+  border: none; 
+  cursor: pointer; 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+  display: flex;
+  align-items: center; 
+  justify-content: center; 
+  font-weight: bold;
+  font-size: 13px; /* 稍微縮小字體以塞入 QRCode */
+  transition: transform 0.3s ease;
+}
+
+#qrcode-toggle-btn:active {
+  transform: scale(0.92);
+}
 </style>
 </head>
 <body>
@@ -2659,6 +2702,35 @@
   </div>
 </div>
 
+
+  <div id="qrcode-widget">
+  <button id="qrcode-toggle-btn" onclick="openQRCodeModal()">QRCode</button>
+</div>
+
+<div id="qrcodeModalOverlay" class="modal-overlay" onclick="closeQRCodeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <span class="modal-close-x" onclick="closeQRCodeModal()">×</span>
+    <div id="qrcodeModalBody" style="text-align: center; padding: 10px;">
+      <h3 style="color: #d14d72; margin-bottom:15px; margin-top: 0;">📱 產生報到 QRCode</h3>
+      
+      <div id="qrErrorMsg" style="display: none; color: #e74c3c; background-color: #fdf2f4; border: 1px solid #f9d5dc; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.95em; font-weight: bold; text-align: left;"></div>
+      
+      <div class="field" style="text-align: left;">
+        <label>請輸入手機號碼</label>
+        <input type="tel" id="qrPhoneNumber" placeholder="09XXXXXXXX" maxlength="10" inputmode="numeric" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd; border-radius:6px;">
+      </div>
+      
+      <button onclick="generateQRCode()" class="btn-universal" style="background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); width:100%; margin-top:10px;">
+        產生 QRCode
+      </button>
+      
+      <div id="qrcodeDisplay" style="margin-top: 25px; display: none; text-align: center;">
+        <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">請將此 QRCode 出示給櫃檯或設備掃描</p>
+        <img id="qrcodeImg" src="" alt="QRCode" style="max-width: 200px; width: 100%; border: 5px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 10px;">
+      </div>
+    </div>
+  </div>
+</div>
 
 <footer style="text-align: center; padding: 30px 20px 10px 20px; font-size: 16px; color: #666; clear: both; width: 100%; box-sizing: border-box; margin-top: 40px; border-top: 1px solid #eee;">
         <p style="margin: 0;">&copy; 2026 微動身活 共享舞蹈空間.<br>All Rights Reserved.<br>地址：新竹市東大路二段685號</p>
@@ -4912,13 +4984,51 @@ function closeOverlay() {
         if (aiWidget) {
             aiWidget.classList.add('show');
         }
+      document.getElementById('qrcode-widget').classList.add('show');
         
         setTimeout(() => {
             overlay.style.display = 'none';
         }, 800);
     }
 }
+// 打開 QRCode 視窗
+function openQRCodeModal() {
+  document.getElementById('qrcodeModalOverlay').classList.add('active');
+}
 
+// 關閉 QRCode 視窗並還原狀態
+function closeQRCodeModal() {
+  document.getElementById('qrcodeModalOverlay').classList.remove('active');
+  // 延遲清空內容，避免淡出動畫時發生閃爍
+  setTimeout(() => {
+    document.getElementById('qrPhoneNumber').value = "";
+    document.getElementById('qrErrorMsg').style.display = "none";
+    document.getElementById('qrcodeDisplay').style.display = "none";
+    document.getElementById('qrcodeImg').src = "";
+  }, 300); 
+}
+
+// 產生 QRCode
+function generateQRCode() {
+  const phone = document.getElementById('qrPhoneNumber').value.trim();
+  const errorMsg = document.getElementById('qrErrorMsg');
+  
+  // 簡單的防呆檢查：是否為 09 開頭且剛好 10 碼
+  if (phone.length !== 10 || !phone.startsWith('09')) {
+    errorMsg.style.display = 'block';
+    errorMsg.innerHTML = "⚠️ 請輸入正確的手機號碼 (09開頭，共10碼)";
+    return;
+  }
+  
+  errorMsg.style.display = 'none';
+  
+  // 使用免費穩定的 API 產生 QRCode (將手機號碼編碼作為 QRCode 內容)
+  const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(phone);
+  
+  const img = document.getElementById('qrcodeImg');
+  img.src = qrUrl;
+  document.getElementById('qrcodeDisplay').style.display = 'block';
+}
 function initSingleCourseDropdown() {
   const inputEl = document.getElementById('singleCourseSelect');
   if (!inputEl) return;
