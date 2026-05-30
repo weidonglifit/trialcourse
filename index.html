@@ -1958,7 +1958,41 @@
   border-radius: 10px;
 }
 </style>
+<style>
+.btn-send-paperplane {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin: 0 0 0 5px;
+  padding: 0;
+  background: #E87A90;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
+.btn-send-paperplane:hover {
+  background: #d16b81;
+}
+/* 💡 滑鼠懸停時，紙飛機往右上角微微起飛的動態 */
+.btn-send-paperplane:hover svg {
+  transform: translate(2px, -2px);
+}
+
+.btn-send-paperplane:active {
+  transform: scale(0.92);
+}
+
+.btn-send-paperplane svg {
+  transition: transform 0.2s ease;
+  /* 稍微調整紙飛機角度，讓它看起來是往前飛 */
+  transform: translate(0px, 0px); 
+}
+</style>
 </head>
 <body>
 
@@ -2514,7 +2548,12 @@
     </div>
     <div style="display: flex; padding: 8px; border-top: 1px solid #eee; background: white;">
       <input type="text" id="ai-input" placeholder="請輸入您的問題..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 20px; outline: none;" onkeypress="if(event.keyCode==13) sendAIMessage()">
-      <button onclick="sendAIMessage()" style="width: auto; margin: 0 0 0 5px; padding: 8px 12px; background: #E87A90; border-radius: 20px; border: none; color: white;">發送</button>
+      <button onclick="sendAIMessage()" class="btn-send-paperplane">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
     </div>
   </div>
 </div>
