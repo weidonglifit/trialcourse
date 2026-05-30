@@ -6198,7 +6198,8 @@ ${res}
 
      var brainContext = "【💡 現實世界明天天氣預報資訊】:\n" + aiTomorrowWeatherText +
                           "\n\n【💡 微動身活場館生活常見問題 FAQ】:\n" + JSON.stringify(aiStoreConfig) +
-                          "\n\n【微動身活當前開課課表與名額 name:課程名稱,dates:課程日期如果要計算剩餘課堂數要用天數來計算,room:上課教室,pricePerClass:期課每堂價格如果是只報名單堂要+30,maxCapacity:最大人數,remaining:剩餘人數名額】：\n" + JSON.stringify(allCourseData) + 
+                          "\n\n【微動身活期課課表與名額(未來) name:課程名稱,dates:課程日期如果要計算剩餘課堂數要用天數來計算,room:上課教室,pricePerClass:期課每堂價格如果是只報名單堂要+30,maxCapacity:最大人數,remaining:剩餘人數名額】：\n" + JSON.stringify(allCourseData) + 
+                          "\n\n【微動身活當月開課課表與名額(現在) name:課程名稱,dates:課程日期如果要計算剩餘課堂數要用天數來計算,room:上課教室,pricePerClass:期課每堂價格如果是只報名單堂要+30,maxCapacity:最大人數,remaining:剩餘人數名額】：\n" + JSON.stringify(allCourseDataPast) + 
                           "\n\n【各課程的詳細介紹特色】：\n" + JSON.stringify(globalSettings.courseIntros) +
                           "\n\n【官方全體師資團隊詳細簡介資料庫】:\n" + teachersDataText +
                           "\n\n【目前網頁的 HTML 介面結構】:\n" + cleanHtmlStructure;
