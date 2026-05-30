@@ -6065,6 +6065,8 @@ function sendAIMessage() {
     if (isAskingReservation) {
       // ───────── 方案 A：【學員查特定電話的「場地空間預約」紀錄】 ─────────
       console.log("🎯 偵測到關鍵字，準備呼叫：queryRoomReservation");
+      appendAIResponse("請直接到教室預約 > 教室預約查詢，輸入電話查詢");
+      return;
       
       // ───────── 方案 A：【場地空間預約分流 - 精準字串對接完全體】 ─────────
 callGasApi("queryRoomReservation", [userPhone])
@@ -6109,6 +6111,9 @@ ${res}
     } else {
       // ───────── 方案 B：【學員查特定電話的「課程報名」紀錄】 ─────────
       console.log("🎯 預設意圖，準備呼叫：queryRegistration");
+appendAIResponse("請直接到課程報名 > 報名與繳費查詢，輸入電話查詢");
+      return;
+
 
       callGasApi("queryRegistration", [userPhone])
   .then(function(res) {
