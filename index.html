@@ -6319,6 +6319,7 @@ function appendAIResponse(text) {
   var msgContainer = document.getElementById('ai-messages');
   if (msgContainer) {
     // 1. 自動將 AI 回傳的換行符號 \n 轉換成網頁的 <br> 標籤
+    console.log(`AI呼叫完成！！！${text}`);
     var processedText = text.replace(/\n/g, '<br>');
     
     // 2. [選配] 自動將 AI 經常用來強調的 **文字** 轉換成 <strong>粗體</strong>
