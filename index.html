@@ -1973,18 +1973,37 @@
   color: white;
   cursor: pointer;
   transition: all 0.2s ease;
+  overflow: hidden; /* 確保飛機飛出去時被按鈕邊緣遮罩 */
 }
 
-.btn-send-paperplane:hover {
-  background: #d16b81;
-}
-/* 💡 滑鼠懸停時，紙飛機往右上角微微起飛的動態 */
-.btn-send-paperplane:hover svg {
-  transform: translate(2px, -2px);
-}
-
+/* 保持按下去按鈕會縮小的回饋感 (這在手機上體驗很好) */
 .btn-send-paperplane:active {
   transform: scale(0.92);
+}
+
+/* 定義紙飛機飛出去並重置的動畫 */
+@keyframes fly-out {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(25px, -25px); /* 往右上角飛出 */
+    opacity: 0; /* 同時漸隱 */
+  }
+  50% {
+    transform: translate(-25px, 25px); /* 在看不見的時候，瞬間移動到左下角 */
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0); /* 飛回正中央原位 */
+    opacity: 1;
+  }
+}
+
+/* 當按鈕加上 .is-flying 類別時，內部的 svg 執行飛行動畫 */
+.btn-send-paperplane.is-flying svg {
+  animation: fly-out 0.6s ease-out forwards;
 }
 
 .btn-send-paperplane svg {
@@ -2040,10 +2059,7 @@
   box-shadow: 0 2px 6px rgba(0,0,0,0.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.booking-wall-item:hover {
-  transform: translateX(3px); /* 懸停微動，增加精緻感 */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-}
+
 .wall-date {
   font-size: 1.15rem;
   font-weight: bold;
@@ -2633,7 +2649,7 @@
     </div>
     <div style="display: flex; padding: 8px; border-top: 1px solid #eee; background: white;">
       <input type="text" id="ai-input" placeholder="請輸入您的問題..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 20px; outline: none;" onkeypress="if(event.keyCode==13) sendAIMessage()">
-      <button onclick="sendAIMessage()" class="btn-send-paperplane">
+      <button onclick="this.classList.add('is-flying'); setTimeout(() => this.classList.remove('is-flying'), 600); sendAIMessage();" class="btn-send-paperplane">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="2" x2="11" y2="13"></line>
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
