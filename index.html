@@ -62,7 +62,18 @@
     .info-box { background-color: #FFD1DC; padding: 15px; padding-bottom: 5px; margin-bottom: 25px; font-size: 0.95em; border-radius: 15px; }
     .field { margin-bottom: 20px; }
     label { display: block; font-weight: bold; font-size: 1.1em; margin-bottom: 8px; border-left: 4px solid #D05A6E; padding-left: 7px;}
-    input[type="text"], input[type="email"], input[type="tel"] { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+      .pink-highlight {
+        font-size: 1.2em;
+        padding-left: 10px;
+        display: inline-block; /* 確保高光背景剛好包覆文字寬度 */
+        background: linear-gradient(transparent 60%, #F4A7B980 60%);
+        color: #d14d72;        /* 品牌深粉色字體 */
+        font-weight: bold;     /* 讓重點文字自動加粗 */
+        padding: 0 4px;        /* 讓螢光筆稍微超出文字左右一點點，視覺更自然 */
+        border-radius: 2px;    /* 高光邊緣加上微圓角，不那麼死板 */
+        margin-bottom: 8px;
+    }
+    input[type="text"], input[type="email"], input[type="tel"] { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 30px; font-size: 16px; }
       .checkbox-group {
       display: block; /* 移除 flex，改用最穩定的 block */
       padding: 10px;
@@ -581,20 +592,6 @@
     z-index: 10000;
     /* 預設不給陰影 */
     box-shadow: none; 
-}
-
-/* 當螢幕寬度大於 1024px 時（電腦版），才加入模糊柔邊 */
-@media (min-width: 1024px) {
-    #video-overlay::after {
-        box-shadow: inset 0 0 80px 40px #fff;
-    }
-}
-
-#intro-video {
-    min-width: 100%;
-    min-height: 100%;
-    object-fit: cover;
-    display: block;
 }
 
 /* 進階立體課程卡片 */
@@ -1535,28 +1532,54 @@
 .course-info div { color: #888; font-size: 0.85rem; }
 
 #opening-notice {
-    position: absolute; /* 相對於 video-overlay 定位 */
-    top: 7%;           /* 距離頂部 10% */
+    position: absolute; 
+    top: 7%;           
     left: 50%;
     transform: translateX(-50%);
-    z-index: 10001;     /* 高於影片層 */
-    background-color: rgba(128, 128, 128, 0.7); /* 灰色半透明 */
+    z-index: 10001;    
+    
+    /* 漸層半透明背景 */
+    background: linear-gradient(135deg, #F4A7B999 0%, #E87A9099 100%);
+    
+    /* 🌟 新增：毛玻璃特效 (背後的影片會被模糊，質感大升級) */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    
+    /* 🌟 新增：Flexbox 讓 SVG 和文字完美置中對齊 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px; /* 圖示與文字的間距 */
+    
     color: white;
-    padding: 12px 20px;
+    padding: 10px 24px;
     border-radius: 50px;
-    font-size: 1.3rem;
-    font-weight: bold;
-    letter-spacing: 2px;
-    pointer-events: none; /* 點擊事件穿透，不影響影片操作 */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    
+    /* 調整邊框陰影，加上一點內發光讓立體感更好 */
+    box-shadow: 0 4px 15px rgba(244,167,185,0.2), inset 0 0 8px rgba(255,255,255,0.3);
+    
+    pointer-events: none; 
     white-space: nowrap; 
     width: auto;
     min-width: fit-content;
     
-    /* 動畫：由大縮小 + 淡入 */
     animation: opening-notice-anim 8s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
 }
 
+/* 針對文字的微調 */
+#opening-notice .notice-text {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    line-height: 1;
+    margin-bottom: 2px; /* 微調垂直視覺置中 */
+}
+
+    #opening-notice .notice-icon {
+    width: auto;  /* 寬度：你可以根據 PNG 實際狀況微調大小 */
+    height: 35px; /* 高度：建議跟寬度一樣保持正方形比例 */
+    object-fit: contain; /* 確保圖片完整顯示，不會被擠壓變形 */
+}
 @keyframes opening-notice-anim {
     0% {
         opacity: 0;
@@ -1576,6 +1599,7 @@
     100% { transform: translate(-50%, 0) scale(1); /* 回到正常位置 */ }
 }
 
+  
 .notice-pulse-container {
     width: 100%; 
     background: linear-gradient(135deg, #FFF0F2 0%, #FFE5E9 100%); 
@@ -1998,35 +2022,37 @@
 }
 
 /* 定義紙飛機飛出去並重置的動畫 */
-@keyframes fly-out {
-  0% {
-    transform: translate(0, 0);
-    opacity: 1;
+@keyframes fly-out-step {
+  0% { 
+    transform: translate(0, 0); 
+    opacity: 1; 
   }
-  40% {
-    transform: translate(25px, -25px); /* 往右上角飛出 */
-    opacity: 0; /* 同時漸隱 */
+  100% { 
+    transform: translate(25px, -25px); 
+    opacity: 0; 
   }
-  50% {
-    transform: translate(-25px, 25px); /* 在看不見的時候，瞬間移動到左下角 */
-    opacity: 0;
+}
+
+/* 後半段：單純負責從左下角出現並飛回正中央 */
+@keyframes fly-in-step {
+  0% { 
+    transform: translate(-25px, 25px); 
+    opacity: 0; 
   }
-  100% {
-    transform: translate(0, 0); /* 飛回正中央原位 */
-    opacity: 1;
+  100% { 
+    transform: translate(0, 0); 
+    opacity: 1; 
   }
 }
 
 /* 當按鈕加上 .is-flying 類別時，內部的 svg 執行飛行動畫 */
 .btn-send-paperplane.is-flying svg {
-  animation: fly-out 0.6s ease-out forwards;
+  animation: 
+    fly-out-step 0.3s ease-in forwards,
+    fly-in-step 0.3s 0.3s ease-out forwards;
 }
 
-.btn-send-paperplane svg {
-  transition: transform 0.2s ease;
-  /* 稍微調整紙飛機角度，讓它看起來是往前飛 */
-  transform: translate(0px, 0px); 
-}
+
 
   .popular-booking-wall {
   width: 100%;
@@ -2133,16 +2159,92 @@
 #qrcode-toggle-btn:active {
   transform: scale(0.92);
 }
+/* --- 1. 電影級攝影機推進特效 (Ken Burns Effect) --- */
+#intro-image-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://raw.githubusercontent.com/weidonglifit/course/refs/heads/main/wd44.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 1;
+    
+    /* 動畫核心：10秒持續緩慢放大，營造空間感與時間流動感 */
+    animation: cinematicPan 10s ease-out forwards;
+}
+
+/* --- 2. 質感漸層遮罩 --- */
+.overlay-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* 使用深色漸層，讓白色的字體可以完美凸顯，也增加舞蹈教室的沉穩感 */
+    background: linear-gradient(135deg, rgba(44, 62, 80, 0.6) 0%, rgba(232, 122, 144, 0.4) 100%);
+    z-index: 2;
+}
+
+/* --- 動畫設定：從模糊甦醒到緩慢推進 --- */
+@keyframes cinematicPan {
+    0% {
+        transform: scale(1) translate(0, 0);
+        filter: blur(10px) brightness(0.7); /* 初始模糊，像剛睜開眼睛 */
+    }
+    15% {
+        filter: blur(0px) brightness(1); /* 約 1.5 秒後瞬間對焦，抓住注意力 */
+    }
+    100% {
+        transform: scale(1.15) translate(-1%, -1%); /* 緩慢放大 1.15 倍 */
+        filter: blur(0px) brightness(1);
+    }
+}
+
+/* --- 3. 呼吸感載入文字 --- */
+.loading-subtitle {
+    position: absolute;
+    top: calc(7% + 75px); /* 精準定位在您原本的膠囊正下方 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+    font-size: 0.95rem;
+    letter-spacing: 3px;
+    color: #ffffff;
+    font-weight: bold;
+    /* 1.5 秒的呼吸律動 */
+    animation: breathText 1.5s infinite ease-in-out;
+}
+
+@keyframes breathText {
+    0%, 100% { opacity: 0.4; text-shadow: none; }
+    50% { opacity: 1; text-shadow: 0 0 10px rgba(255,255,255,0.8); }
+}
+
 </style>
 </head>
 <body>
 
 <div id="video-overlay">
-    <video id="intro-video" autoplay muted playsinline>
-        <source src="https://github.com/weidonglifit/course/raw/refs/heads/main/wd5ss.mp4" type="video/mp4">
-        您的瀏覽器不支援影片播放。
-    </video>
-    <div id="opening-notice">微動身活</div>
+    <div id="intro-image-bg"></div>
+    
+    <div class="overlay-mask"></div>
+
+    <div id="opening-notice" style="display:none;">
+        <svg width="34" height="34" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="14" stroke="white" stroke-width="1.5" fill="none" />
+            <g transform="translate(4, 4) rotate(-45 12 12)">
+              <circle cx="16.5" cy="7.5" r="3.5" fill="white" />
+              <path d="M 3 13 Q 7.5 9, 12 13 T 21 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </g>
+        </svg>
+        <span class="notice-text">WEI DONG</span>
+    </div>
+
+    <div class="loading-subtitle">系統資料連線中...</div>
+
     <button id="skip-btn" onclick="closeOverlay()">Skip</button>
 </div>
 
@@ -2228,18 +2330,16 @@
   </div>
 
   <div id="fullTermSection" class="sub-tab-content active">
-    <h3 id="all-course-title" style="text-align: center; margin-top: 0;">...</h3>
+    <h3 id="all-course-title" style="text-align: center; margin-top: 0; font-size: 1.5em;">...</h3>
     <form id="regForm">
       <div class="form-row">
         <div class="field">
-          <label>姓名</label>
+            <span class="pink-highlight">姓名</span>
           <input type="text" name="name" placeholder="請輸入學員姓名" required>
         </div>
 
         <div class="input-group">
-            <label for="queryPhone">
-                電話 <span id="coursePhoneStatus" class="status-icon"></span>
-            </label>
+            <span class="pink-highlight" for="queryPhone">電話</span>
             <input type="tel" id="queryPhone" name="phone" placeholder="09XXXXXXXX" 
                   class="field" maxlength="10" inputmode="numeric" 
                   oninput="validateCoursePhone(this)">
@@ -2247,19 +2347,19 @@
       </div>
     <div class="form-row">
       <div class="field">
-        <label>LINE ID</label>
+          <span class="pink-highlight">LINE ID</span>
         <input type="text" name="lineId" placeholder="方便後續聯繫" required>
       </div>
       
       <div class="field">
-        <label>匯款末5碼</label>
+          <span class="pink-highlight">匯款末5碼</span>
         <input type="text" name="bankId" maxlength="5" placeholder="請輸入帳號末 5 碼" inputmode="numeric" oninput="validateNumber(this)" required>
       </div>
     </div>
 
     <div class="form-row">
         <div class="field" style="--flex-grow: 5;">
-            <label>電子郵件</label>
+            <span class="pink-highlight">電子郵件</span>
             <input type="email" name="email" placeholder="example@mail.com" required>
           </div>
 
@@ -2297,7 +2397,7 @@
             </div>
           </div>
         </div>
-        <label>預約課程</label>
+          <span class="pink-highlight">預約課程</span>
         <span style="color: red; font-size: 0.95em;">請直接點選課程(可複選)</span>
         
         <div class="day-tabs" style="position: relative;">
@@ -2344,14 +2444,14 @@
   </div>
 
   <div id="singleCourseSection" class="sub-tab-content" style="display:none;">
-    <h3 id="single-course-title" style="text-align: center; margin-top: 0;">...</h3>
+    <h3 id="single-course-title" style="text-align: center; margin-top: 0; font-size: 1.5em;">...</h3>
   <div id="singleOpenNotice" style="text-align:center; color: #e74c3c; font-weight:bold; display:none; padding: 20px;">
     單堂報名尚未開放
   </div>
 
   <div id="singleFormContent">
     <div class="field" id="singleCourseWrapper">
-      <label>選擇課程</label>
+        <span class="pink-highlight">選擇課程</span>
       <div class="expand-input-container" id="expandInputContainer">
         <div class="expand-header">
           <span class="expand-title">點選欲報名課程</span>
@@ -2370,7 +2470,7 @@
     </div>
 
     <div id="singleDateContainer" class="field" style="margin-top: 15px;">
-      <label>選擇日期 (單選)</label>
+        <span class="pink-highlight">選擇日期 (單選)</span>
       <div id="dateRadioGroup" class="checkbox-group" style="min-height: 50px;">
         <p style="color: #999; font-size: 0.9em;">請先選擇課程...</p>
       </div>
@@ -2378,28 +2478,28 @@
 
     <div class="form-row">
       <div class="field">
-        <label>姓名</label>
+          <span class="pink-highlight">姓名</span>
         <input type="text" id="sName" placeholder="請輸入真實姓名">
       </div>
       <div class="field">
-        <label>電話</label>
+          <span class="pink-highlight">電話</span>
         <input type="tel" id="sPhone" oninput="validateSinglePhone(this)" placeholder="09XXXXXXXX" maxlength="10" inputmode="numeric">
       </div>
     </div>
     
     <div class="form-row">
       <div class="field">
-        <label>LINE ID</label>
+          <span class="pink-highlight">LINE ID</span>
         <input type="text" id="sLine" placeholder="方便後續聯繫">
       </div>
       <div class="field">
-        <label>匯款末5碼</label>
+          <span class="pink-highlight">匯款末5碼</span>
         <input type="text" id="sBank" maxlength="5" placeholder="請輸入帳號末 5 碼" inputmode="numeric" oninput="validateNumber(this)">
       </div>
     </div>
 
     <div class="field">
-      <label>電子郵件</label>
+        <span class="pink-highlight">電子郵件</span>
       <input type="email" id="sEmail" placeholder="example@mail.com">
     </div>
 
@@ -2448,10 +2548,10 @@
 
     <hr>
     <div class="query-section">
-      <h3 style="text-align: center; margin-top: 0;">🔍 報名與繳費查詢</h3>
+      <h3 style="text-align: center; margin-top: 0; font-size: 1.5em;">🔍 報名與繳費查詢</h3>
     <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
       <div class="field" style="flex: 1; margin-bottom: 0;">
-        <label style="display: block; margin-bottom: 8px;">請輸入報名電話</label>
+          <span class="pink-highlight">請輸入報名電話</span>
         <input type="tel" id="realQueryPhone" placeholder="輸入電話查詢預約狀態" maxlength="10" pattern="\d{10}" 
               style="width: 100%; border-radius: 20px 0 0 20px; height: 60px; box-sizing: border-box;">
       </div>
@@ -2471,10 +2571,10 @@
 
     <hr>
     <div class="query-section">
-      <h3 style="text-align: center; margin-top: 0;">📅 課程日期查詢</h3>
+      <h3 style="text-align: center; margin-top: 0; font-size: 1.5em;">📅 課程日期查詢</h3>
 <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
   <div class="field" id="queryCourseWrapper" style="flex: 1; margin-bottom: 0;">
-    <label style="display: block; margin-bottom: 8px;">請選擇課程名稱</label>
+      <span class="pink-highlight">請選擇課程名稱</span>
     
     <div class="expand-input-container" id="queryInputContainer">
       <div class="expand-header">
@@ -2501,10 +2601,10 @@
       <hr>
       <br>
       <div class="query-section">
-            <h3 style="text-align: center; margin-top: 0;">🔍 老師查詢</h3>
+            <h3 style="text-align: center; margin-top: 0; font-size: 1.5em;">🔍 老師查詢</h3>
 <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
   <div class="field" style="flex: 1; margin-bottom: 0;">
-    <label style="display: block; margin-bottom: 8px;">老師課程查詢</label>
+      <span class="pink-highlight">老師課程查詢</span>
     
     <div class="wd-dropdown-container" id="customTeacherSearchDropdown">
       <div class="wd-dropdown-trigger" onclick="toggleCustomDropdown('customTeacherSearchDropdown')" 
@@ -2553,10 +2653,10 @@
       </div>
 
       <div class="query-section" style="margin-bottom: 30px; background: transparent; padding: 0; border: none;">
-        <h3 style="text-align: center; margin-top: 0; color: #2c3e50;">🔍 教室預約查詢</h3>
+        <h3 style="text-align: center; margin-top: 0; color: #2c3e50; font-size: 1.5em;">🔍 教室預約查詢</h3>
         <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
     <div class="field" style="flex: 1; margin-bottom: 0;">
-      <label style="display: block; margin-bottom: 8px;">請輸入預約電話</label>
+        <span class="pink-highlight">請輸入預約電話</span>
       <input type="tel" id="queryRoomPhone" placeholder="輸入電話查詢教室預約紀錄" maxlength="10" 
              style="width: 100%; border-radius: 20px 0 0 20px; height: 60px; box-sizing: border-box; border: 1px solid #ccc; font-size: 16px;">
     </div>
@@ -2577,11 +2677,11 @@
       </div>
 
       <hr>
-      <h3 style="text-align: center; margin-top: 0; color: #2c3e50;">🏢 開始教室預約</h3>
+      <h3 style="text-align: center; margin-top: 0; color: #2c3e50; font-size: 1.5em;">🏢 開始教室預約</h3>
       
  
   <div class="field">
-    <label>選擇教室</label>
+      <span class="pink-highlight">選擇教室</span>
     
     <div class="wd-dropdown-container" id="customRoomDropdown">
       <div class="wd-dropdown-trigger" onclick="toggleCustomDropdown('customRoomDropdown')">
@@ -2598,7 +2698,7 @@
 </div>
 
   <div class="field" id="dateSection">
-    <label>選擇日期(一個月)</label>
+      <span class="pink-highlight">選擇日期(一個月)</span>
     <input type="text" id="roomDate" placeholder="請先選擇教室" style="height: 48px !important; border-radius: 8px !important;" readonly>
   </div>
 
@@ -2614,7 +2714,7 @@
         </div>
         
                 <div class="field">
-                  <label>預約時數</label>
+                    <span class="pink-highlight">預約時數</span>
                   
                   <div class="wd-dropdown-container" id="customDurationDropdown">
                     <div class="wd-dropdown-trigger" onclick="toggleCustomDropdown('customDurationDropdown')">
@@ -2631,29 +2731,29 @@
                 </div>
 
                 <div class="field">
-                  <label>選擇的開始時間</label>
+                    <span class="pink-highlight">選擇的開始時間</span>
                   <input type="text" id="startTimeSelect" readonly placeholder="請點擊上方表格按鈕" 
                         style="cursor: not-allowed;">
                 </div>
         
         <div class="form-row">
     <div class="field">
-        <label>姓名</label>
+        <span class="pink-highlight">姓名</span>
         <input type="text" id="rName" placeholder="請輸入真實姓名" required>
     </div>
     <div class="field">
-        <label for="rPhone">電話</label>
+        <span class="pink-highlight" for="rPhone">電話</span>
         <input type="tel" id="rPhone" placeholder="09XXXXXXXX" maxlength="10" inputmode="numeric" oninput="validateRoomPhone(this)">
     </div>
 </div>
         <div class="form-row">
           <div class="field">
-                <label>LINE ID</label>
+              <span class="pink-highlight">LINE ID</span>
                 <input type="text" id="rLine" placeholder="方便後續聯繫" required>
           </div>
           
           <div class="field">
-        <label>匯款末5碼</label>
+              <span class="pink-highlight">匯款末5碼</span>
         <input type="text" 
               id="rBank" 
               placeholder="請輸入帳號末 5 碼" 
@@ -2664,7 +2764,7 @@
         </div>
         </div>
         <div class="field">
-                <label>電子郵件</label>
+            <span class="pink-highlight">電子郵件</span>
                 <input type="email" id="rEmail" placeholder="example@mail.com" required>
           </div>
         <div style="text-align: center; margin-top: 20px;">
@@ -2683,10 +2783,14 @@
     </div>
 
 <div id="ai-chat-widget">
-  <button id="ai-toggle-btn" onclick="let rot = parseInt(this.dataset.rot || 0) + 360; this.style.transform = 'rotate(' + rot + 'deg)'; this.dataset.rot = rot; toggleAIChat();" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
-  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z"/>
-  </svg>
+  <button id="ai-toggle-btn" onclick="let rot = parseInt(this.dataset.rot || 0) + 360; this.style.transform = 'rotate(' + rot + 'deg)'; this.dataset.rot = rot; toggleAIChat();" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); padding: 7px;">
+  <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="16" cy="16" r="14" stroke="white" stroke-width="1.5" fill="none" />
+        <g transform="translate(4, 4) rotate(-45 12 12)">
+            <circle cx="16.5" cy="7.5" r="3.5" fill="white" />
+            <path d="M 3 13 Q 7.5 9, 12 13 T 21 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+        </g>
+    </svg> 
 </button>
   
   <div id="ai-chat-box">
@@ -2732,7 +2836,7 @@
       <div id="qrErrorMsg" style="display: none; color: #e74c3c; background-color: #fdf2f4; border: 1px solid #f9d5dc; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.95em; font-weight: bold; text-align: left;"></div>
       
       <div class="field" style="text-align: left;">
-        <label>請輸入手機號碼</label>
+          <span class="pink-highlight">輸入手機號碼</span>
         <input type="tel" id="qrPhoneNumber" placeholder="09XXXXXXXX" maxlength="10" inputmode="numeric" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd; border-radius:6px;">
       </div>
       
@@ -2770,7 +2874,7 @@
   var aiTomorrowWeatherText = "正在連線氣象局獲取最新預報中資訊...";
   var aiChatHistory = []; // 💡 用來儲存對話歷史紀錄的陣列，格式為 [{role: "user", content: "..."}, {role: "model", content: "..."}]
   var aiStoreConfig = {
-  "停車資訊": "300新竹市北區東大路537號對面停車場（步行3分鐘）",
+  "停車資訊": "300新竹市北區東大路537號對面停車場（步行3分鐘，公立停車場，非合作或特約）",
   "場館設施": "教室內備有冷熱飲水機、專屬男女更衣室以及置物櫃。為了維護舞蹈教室的木地板，進來上課請記得自備「乾淨的室內運動鞋」或換穿我們的室內拖鞋唷！",
   "廁所在哪裡": "一進門的走廊到底左手邊就是男女化妝室囉。",
   "官方LINE": "@843qpnet",
@@ -2793,7 +2897,21 @@
 window.addEventListener('load', function() {
   const startTime = performance.now(); 
   console.log("開始載入資料...");
-  
+  // 輪播載入狀態字，有效降低體感等待時間
+const loadingTexts = ["連線至微動身活...", "正在獲取資料...", "正在獲取最新課表...", "準備就緒..."];
+let textIdx = 0;
+const subtitleEl = document.querySelector('.loading-subtitle');
+
+if (subtitleEl) {
+    // 每 1.5 秒切換一次文字
+    const textTimer = setInterval(() => {
+        textIdx = (textIdx + 1) % loadingTexts.length;
+        subtitleEl.innerText = loadingTexts[textIdx];
+    }, 1500);
+
+    // 記得在原本的 closeOverlay() 函數中把這個 Timer 清掉
+    // clearInterval(textTimer); 
+}
   callGasApi("getAppInitData")
   .then(function(initData) {
     
@@ -3003,7 +3121,7 @@ window.addEventListener('load', function() {
     const endTime = performance.now();
     // 3. 計算差值並換算成秒數 (保留三位小數)
     const durationSeconds = ((endTime - startTime) / 1000).toFixed(3);
-    
+    closeOverlay();
     console.log(`🎉 載入並渲染成功！總共花費了 ${durationSeconds} 秒。`);
   })
   .catch(function(error) {
@@ -3490,12 +3608,12 @@ function askEmergencyContactSingle(baseData, btn, output, isSingleCourse) {
       <div id="emergencyErrorMsg" style="display: none; color: #e74c3c; background-color: #fdf2f4; border: 1px solid #f9d5dc; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.95em; font-weight: bold; text-align: left;"></div>
       
       <div class="field" style="text-align: left;">
-        <label>聯絡人姓名</label> 
-        <input type="text" id="emergencyName" placeholder="請輸入姓名" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd; border-radius:6px;"> 
+      <span class="pink-highlight">聯絡人姓名</span>
+        <input type="text" id="emergencyName" placeholder="請輸入姓名" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd;"> 
       </div>
       <div class="field" style="text-align: left; margin-top: 15px;">
-        <label>聯絡人電話</label> 
-        <input type="tel" id="emergencyPhone" placeholder="09XXXXXXXX" maxlength="10" inputmode="numeric" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd; border-radius:6px;"> 
+      <span class="pink-highlight">聯絡人電話</span>
+        <input type="tel" id="emergencyPhone" placeholder="09XXXXXXXX" maxlength="10" inputmode="numeric" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd;"> 
       </div>
       <div style="display: flex; gap: 10px; margin-top: 20px;"> 
         <button id="skipEmergencyBtn" class="btn-universal" style="background: #858585; flex: 1;">不填寫</button> 
@@ -4841,15 +4959,21 @@ document.getElementById('teacherSearchInput').addEventListener('change', functio
     return;
   }
 
-  // 3. 檢查全域資料狀態
-  if (!allCourseData || allCourseData.length === 0) {
+  // 3. 安全合併「現有課程」與「過去課程」資料
+  // 確保如果陣列尚未載入(undefined)時，會以空陣列 [] 代替，避免程式報錯
+  const currentData = allCourseData || [];
+  const pastData = allCourseDataPast || [];
+  const combinedData = [...currentData, ...pastData];
+
+  // 檢查合併後的資料狀態
+  if (combinedData.length === 0) {
     resultDiv.innerHTML = "<div class='result-card-anim' style='color: orange; text-align:center;'>資料載入中，請稍候再試...</div>";
     return;
   }
 
-  // 4. 過濾並過度該老師的所有課程 (排除含有「★」的項目)
-  const filteredCourses = allCourseData.filter(c => 
-    c.name.includes(teacherName) && !c.name.includes('★')
+  // 4. 過濾出該老師的所有課程 (排除含有「★」的項目)
+  const filteredCourses = combinedData.filter(c => 
+    c.name && c.name.includes(teacherName) && !c.name.includes('★')
   );
 
   // 5. 渲染結果
@@ -4871,29 +4995,31 @@ document.getElementById('teacherSearchInput').addEventListener('change', functio
     
     filteredCourses.forEach(course => {
       // --- 1. 解析時間與名稱 (安全抓取，避免格式錯誤) ---
-const rawCourseName = course.name || "";
-const namePartsFull = rawCourseName.split(" ");
+      const rawCourseName = course.name || "";
+      const namePartsFull = rawCourseName.split(" ");
 
-// 課程名稱與老師 (例如: "Zumba-Grace")
-const nameTeacherPart = namePartsFull[0] || ""; 
-const subParts = nameTeacherPart.split("-");
-const cKey = (subParts[0] || "").trim().replace(/'/g, "\\'");
-const tKey = (subParts[1] || "").trim().replace(/'/g, "\\'");
+      // 課程名稱與老師 (例如: "Zumba-Grace")
+      const nameTeacherPart = namePartsFull[0] || ""; 
+      const subParts = nameTeacherPart.split("-");
+      const cKey = (subParts[0] || "").trim().replace(/'/g, "\\'");
+      const tKey = (subParts[1] || "").trim().replace(/'/g, "\\'");
 
-// 星期與時間段
-const weekText = (namePartsFull[1] || "").trim();
-const fullTimeStr = namePartsFull[2] || "";
-const tParts = fullTimeStr.split("-");
-const startTime = tParts[0] || "--:--";
-const endTime = tParts[1] || "--:--";
+      // 星期與時間段
+      const weekText = (namePartsFull[1] || "").trim();
+      const fullTimeStr = namePartsFull[2] || "";
+      const tParts = fullTimeStr.split("-");
+      const startTime = tParts[0] || "--:--";
+      const endTime = tParts[1] || "--:--";
 
-// --- 2. 計算價格與堂數
-const dateArray = course.dates.split(",").filter(s => s.trim() !== "");
-const totalClasses = dateArray.length;
-const totalPrice = totalClasses * (course.pricePerClass || 0);
+      // --- 2. 計算價格與堂數 (若有需要) ---
+      // 這裡確保 dates 有值才進行 split，避免 past data 結構不同造成錯誤
+      const rawDates = course.dates || "";
+      const dateArray = rawDates.split(",").filter(s => s.trim() !== "");
+      const totalClasses = dateArray.length;
+      const totalPrice = totalClasses * (course.pricePerClass || 0);
 
-// --- 3. 組裝定版 HTML (套用 result-card-anim 動畫) ---
-html += `
+      // --- 3. 組裝定版 HTML (套用 result-card-anim 動畫) ---
+      html += `
     <div class="course-card result-card-anim" onclick="openCombinedDrawer('${cKey}', '${tKey}', this)" style="cursor: pointer; margin-top: 10px;">
         <div class="card-inner">
             <div class="card-front" style="display: flex; align-items: center; padding: 15px; border-left: 6px solid #F4A7B9;">
@@ -4962,33 +5088,21 @@ function injectCommonRules() {
 // 確保在頁面載入後執行
 window.addEventListener('load', () => {
   const openingNotice = document.getElementById('opening-notice');
-  if (openingNotice) {
+  if (0) {
     const today = new Date();
     // 設定截止日期為 2026 年 5 月 24 日 的凌晨 00:00:00
     // (JavaScript 的月份是從 0 開始算，所以 4 代表 5 月)
     const targetDate = new Date(2026, 4, 24); 
 
     if (today < targetDate) {
-      openingNotice.innerText = "微動身活";
+      openingNotice.innerText = "WEI DONG";
     } else {
-      openingNotice.innerText = "微動身活";
+      openingNotice.innerText = "WEI DONG";
     }
   }
   injectCommonRules();
-        const video = document.getElementById('intro-video');
-        const MAX_WAIT_TIME = 6000; // 設定最大等待時間（例如 10 秒）
-
-        // 啟動計時器
-        const backupTimer = setTimeout(() => {
-            console.log("保護機制觸發：影片可能卡住或未結束，強制關閉");
-            closeOverlay();
-        }, MAX_WAIT_TIME);
-
-        // 原本的監聽器
-        video.onended = function() {
-            clearTimeout(backupTimer); // 如果正常結束，就清除計時器
-            closeOverlay();
-        };
+               
+   
 });
 
 function closeOverlay() {
@@ -5005,6 +5119,7 @@ function closeOverlay() {
         setTimeout(() => {
             overlay.style.display = 'none';
         }, 800);
+        clearInterval(textTimer); 
     }
 }
 // 打開 QRCode 視窗
@@ -5474,7 +5589,7 @@ function initCourseIntroDropdown() {
         const isOpening = allCourseData.some(course => course.name.includes(name));
         
         // 如果沒有在報名清單中，加上 (未開課) 標籤
-        const displayName = isOpening ? name : name + " (未開課)";
+        const displayName = isOpening ? name : name + "";
         
         option.value = name; // value 保持原名，方便後續對應資料庫
         option.text = displayName;
@@ -5671,20 +5786,7 @@ function initVenueList() {
 }
 
 
-const video = document.getElementById('intro-video');
-const skipBtn = document.getElementById('skip-btn');
 
-video.addEventListener('timeupdate', function() {
-    // 取得影片總時長
-    const duration = video.duration;
-    // 取得目前播放秒數
-    const currentTime = video.currentTime;
-
-    // 如果目前時間大於總時長的一半 (且 duration 不是 NaN)
-    if (duration > 0 && currentTime > ((duration * 2) / 3)) {
-        skipBtn.classList.add('show');
-    }
-});
 // 在你的 <script> 標籤內加入這一行即可
 document.addEventListener("touchstart", function() {}, true);
 
