@@ -2906,6 +2906,7 @@
 `;
   let aiStime = 0;
   let aiEtime = 0;
+  let textTimer;
   // 0. 網頁載入時，自動抓取後端試算表的課程清單填入下拉選單
 // 網頁載入時，直接透過整合函式抓取「全網頁所需的大禮包」
 window.addEventListener('load', function() {
@@ -2917,12 +2918,10 @@ let textIdx = 0;
 const subtitleTextEl = document.getElementById('loading-text-content');
 
 if (subtitleTextEl) {
-    const textTimer = setInterval(() => {
+    textTimer = setInterval(() => {
         textIdx = (textIdx + 1) % loadingTexts.length;
         subtitleTextEl.innerText = loadingTexts[textIdx];
     }, 1500);
-
-    // 在原本的 closeOverlay() 中可以加入 clearInterval(textTimer); 停止計時
 }
   callGasApi("getAppInitData")
   .then(function(initData) {
@@ -5118,6 +5117,9 @@ window.addEventListener('load', () => {
 });
 
 function closeOverlay() {
+    if (textTimer) {
+        clearInterval(textTimer);
+    }
     const overlay = document.getElementById('video-overlay');
     if (overlay) {
         overlay.classList.add('exit-animation'); // 直接套用 CSS 動畫
@@ -5130,8 +5132,7 @@ function closeOverlay() {
         
         setTimeout(() => {
             overlay.style.display = 'none';
-        }, 800);
-        
+        }, 800);        
     }
 }
 // 打開 QRCode 視窗
