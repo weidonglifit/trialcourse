@@ -2228,6 +2228,27 @@
     50% { opacity: 1; text-shadow: 0 0 10px rgba(255,255,255,0.8); }
 }
 
+/* 定義敲擊時的微光外擴動畫 */
+@keyframes typePulse {
+    0% { 
+        box-shadow: 0 0 0 0 rgba(232, 122, 144, 0.4); 
+        border-color: #E87A90; 
+        transform: scale(1.01); /* 瞬間微幅放大 */
+    }
+    50% { 
+        box-shadow: 0 0 10px 4px rgba(232, 122, 144, 0.1); 
+    }
+    100% { 
+        box-shadow: 0 0 0 0 rgba(232, 122, 144, 0); 
+        border-color: #F4A7B9; 
+        transform: scale(1); /* 回歸原狀 */
+    }
+}
+
+/* 觸發動畫的 class */
+.typing-pulse-effect {
+    animation: typePulse 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
 </style>
 </head>
 <body>
@@ -5112,6 +5133,22 @@ window.addEventListener('load', () => {
     }
   }
   injectCommonRules();
+
+  // 尋找所有的文字、電話、信箱輸入框
+  const textInputs = document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]');
+
+  textInputs.forEach(input => {
+      input.addEventListener('input', function() {
+          // 1. 先移除舊的 class，確保連續打字時動畫能重新觸發
+          this.classList.remove('typing-pulse-effect');
+          
+          // 2. 強制瀏覽器重繪 (Reflow) 
+          void this.offsetWidth; 
+          
+          // 3. 加上動畫 class
+          this.classList.add('typing-pulse-effect');
+      });
+  });
                
    
 });
