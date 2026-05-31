@@ -1612,7 +1612,7 @@
     text-align: center;
     
     /* 綁定慢速縮放呼吸動畫 */
-    //animation: soft-pulse 3s ease-in-out infinite;
+    /* animation: soft-pulse 3s ease-in-out infinite; */
 }
 
 /* 2. 提示框主標題 */
@@ -1663,7 +1663,7 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   text-align: center;
   /* 綁定與提示框相同的呼吸動畫，讓視覺更具一體感 */
-  //animation: soft-pulse 3s ease-in-out infinite;
+  /* animation: soft-pulse 3s ease-in-out infinite; */
 }
 
 .countdown-box {
@@ -2913,7 +2913,7 @@ window.addEventListener('load', function() {
   const startTime = performance.now(); 
   console.log("開始載入資料...");
   // 輪播載入狀態字，有效降低體感等待時間
-const loadingTexts = ["連線至微動身活...", "正在獲取資料...", "正在獲取最新課表...", "準備就緒..."];
+const loadingTexts = ["連線至微動身活...", "正在獲取資料...", "正在獲取資料......", "正在獲取最新課表...", "正在獲取最新課表......", "準備就緒..."];
 let textIdx = 0;
 const subtitleTextEl = document.getElementById('loading-text-content');
 
