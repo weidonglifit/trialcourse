@@ -2582,8 +2582,16 @@
 
 
     <hr>
-    <div class="query-section">
-      <h3 style="text-align: center; margin-top: 0; font-size: 1.5em;">🔍 報名與繳費查詢</h3>
+    <div id="querySystemContainer" style="margin-top: 30px;">
+  <div class="tabs child-tabs" style="margin-top: 20px;">
+    <div id="query-ghost-tab" class="tab-btn ghost-active" style="display:none; position:absolute; z-index:10; pointer-events:none;"></div>
+    
+    <button class="tab-btn sub-tab active" onclick="openQueryTab(event, 'queryRegistrationSection')" style="font-size: 15px;">繳費查詢</button>
+    <button class="tab-btn sub-tab" onclick="openQueryTab(event, 'queryCourseDateSection')" style="font-size: 15px;">課程日期</button>
+    <button class="tab-btn sub-tab" onclick="openQueryTab(event, 'queryTeacherSection')" style="font-size: 15px;">老師查詢</button>
+  </div>
+
+  <div id="queryRegistrationSection" class="sub-tab-content active query-section">
     <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
       <div class="field" style="flex: 1; margin-bottom: 0;">
           <span class="pink-highlight">請輸入報名電話</span>
@@ -2593,73 +2601,57 @@
       <button type="button" 
             class="btn-universal" 
             id="queryBtn" 
-            style="background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); 
-                  width: 30%; height: 48px; margin: 0; 
+            style="background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); width: 30%; height: 48px; margin: 0; 
                   border-radius: 0 30px 30px 0; /* 銜接處設為直角 */
                   border: 1px solid #E87A90; border-left: none;">
       查詢報名
-    </button>
+      </button>
     </div>
-      <div id="queryResult" class="result-msg" style="color: #34495e; background-color: #FFD1DC; border-radius: 20px;"></div>
-      
-    </div>
-
-    <hr>
-    <div class="query-section">
-      <h3 style="text-align: center; margin-top: 0; font-size: 1.5em;">📅 課程日期查詢</h3>
-<div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
-  <div class="field" id="queryCourseWrapper" style="flex: 1; margin-bottom: 0;">
-      <span class="pink-highlight">請選擇課程名稱</span>
-    
-    <div class="expand-input-container" id="queryInputContainer">
-      <div class="expand-header">
-        <span class="expand-title">期課課表</span>
-        <span class="expand-close" onclick="closeQueryCourse(event)">×</span>
-      </div>
-      
-      <input type="text" 
-            id="itemQueryName" 
-            readonly 
-            placeholder="🔍 點擊此處開啟期課課表..." 
-            onclick="openQueryCourse()" 
-            style="width: 100%; border-radius: 30px; height: 48px; box-sizing: border-box; border: 1px solid #ccc; padding: 12px 15px; font-size: 16px; background-color: #ffffff; cursor: pointer; transition: background 0.2s;">
-            
-      <div class="expand-content" id="queryCourseContent"></div>
-    </div>
+    <div id="queryResult" class="result-msg" style="color: #34495e; background-color: #FFD1DC; border-radius: 20px;"></div>
   </div>
-  
-</div>
-      <div id="itemQueryResult" class="result-msg" style="color: #34495e; background-color: #FFD1DC; border-radius: 20px;"></div>
-      
-    </div>
 
-      <hr>
-      <br>
-      <div class="query-section">
-            <h3 style="text-align: center; margin-top: 0; font-size: 1.5em;">🔍 老師查詢</h3>
-<div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
-  <div class="field" style="flex: 1; margin-bottom: 0;">
-      <span class="pink-highlight">老師課程查詢</span>
-    
-    <div class="wd-dropdown-container" id="customTeacherSearchDropdown">
-      <div class="wd-dropdown-trigger" onclick="toggleCustomDropdown('customTeacherSearchDropdown')" 
-          style="border-radius: 30px; height: 48px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-        <span class="selected-text">正在載入老師名單...</span>
-        <span class="arrow">▼</span>
+  <div id="queryCourseDateSection" class="sub-tab-content query-section" style="display:none;">
+    <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
+      <div class="field" id="queryCourseWrapper" style="flex: 1; margin-bottom: 0;">
+          <span class="pink-highlight">請選擇課程名稱</span>
+        <div class="expand-input-container" id="queryInputContainer">
+          <div class="expand-header">
+            <span class="expand-title">期課課表</span>
+            <span class="expand-close" onclick="closeQueryCourse(event)">×</span>
+          </div>
+          <input type="text" 
+                id="itemQueryName" 
+                readonly 
+                placeholder="🔍 點擊此處開啟期課課表..." 
+                onclick="openQueryCourse()" 
+                style="width: 100%; border-radius: 30px; height: 48px; box-sizing: border-box; border: 1px solid #ccc; padding: 12px 15px; font-size: 16px; background-color: #ffffff; cursor: pointer; transition: background 0.2s;">
+          <div class="expand-content" id="queryCourseContent"></div>
+        </div>
       </div>
-      
-      <ul class="wd-dropdown-menu" id="customTeacherSearchMenu">
-      </ul>
     </div>
+    <div id="itemQueryResult" class="result-msg" style="color: #34495e; background-color: #FFD1DC; border-radius: 20px;"></div>
+  </div>
 
-    <select id="teacherSearchInput" style="display: none;">
-      <option value="">正在載入老師名單...</option>
-    </select>
-  </div> 
+  <div id="queryTeacherSection" class="sub-tab-content query-section" style="display:none;">
+    <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
+      <div class="field" style="flex: 1; margin-bottom: 0;">
+          <span class="pink-highlight">老師課程查詢</span>
+        <div class="wd-dropdown-container" id="customTeacherSearchDropdown">
+          <div class="wd-dropdown-trigger" onclick="toggleCustomDropdown('customTeacherSearchDropdown')" 
+              style="border-radius: 30px; height: 48px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <span class="selected-text">正在載入老師名單...</span>
+            <span class="arrow">▼</span>
+          </div>
+          <ul class="wd-dropdown-menu" id="customTeacherSearchMenu"></ul>
+        </div>
+        <select id="teacherSearchInput" style="display: none;">
+          <option value="">正在載入老師名單...</option>
+        </select>
+      </div> 
+    </div>
+    <div id="teacherQueryResult" class="result-msg" style="color: #34495e; background-color: #FFD1DC; border-radius: 20px;"></div>
+  </div>
 </div>
-        <div id="teacherQueryResult" class="result-msg" style="color: #34495e; background-color: #FFD1DC; border-radius: 20px;"></div>
-      </div>
-
 
   </div>
 
@@ -3274,7 +3266,82 @@ function renderTeacherDropdownUI(teachers) {
 }
   
 
-  // 1. 處理報名提交
+  function openQueryTab(evt, tabName) {
+  const targetBtn = evt.currentTarget; 
+  const parentNode = targetBtn.parentElement; 
+  const ghost = document.getElementById('query-ghost-tab'); 
+  const currentActiveBtn = parentNode.querySelector(".tab-btn.active"); 
+
+  // 防呆：如果點擊的是同一個按鈕，或者找不到當前激活按鈕，就直接切換不跑動畫
+  if (!currentActiveBtn || currentActiveBtn === targetBtn) { 
+    executeQueryTabSwitch(targetBtn, parentNode, tabName); 
+    return;
+  } 
+
+  if (ghost && parentNode) { 
+    // 1. 計算相對父容器的起點與終點座標 
+    const pRect = parentNode.getBoundingClientRect(); 
+    const cRect = currentActiveBtn.getBoundingClientRect();
+    const tRect = targetBtn.getBoundingClientRect(); 
+    const startX = cRect.left - pRect.left; 
+    const startY = cRect.top - pRect.top;
+    const endX = tRect.left - pRect.left; 
+    const endY = tRect.top - pRect.top; 
+
+    // 2. 同步幽靈卡片的尺寸 
+    ghost.style.width = cRect.width + "px";
+    ghost.style.height = cRect.height + "px"; 
+
+    // 3. 注入 CSS 衝刺變數 
+    ghost.style.setProperty('--sx', startX + "px"); 
+    ghost.style.setProperty('--sy', startY + "px");
+    ghost.style.setProperty('--ex', endX + "px"); 
+    ghost.style.setProperty('--ey', endY + "px"); 
+
+    // 4. 表演真假卡片切換 
+    currentActiveBtn.classList.remove('active'); 
+    ghost.classList.remove('ghost-moving'); 
+    void ghost.offsetWidth; // 強制重繪 
+    ghost.classList.add('ghost-moving');
+    
+    // 5. 動畫結束後復原狀態並完成切換 
+    setTimeout(() => { 
+      ghost.classList.remove('ghost-moving'); 
+      currentActiveBtn.style.opacity = "1"; 
+      executeQueryTabSwitch(targetBtn, parentNode, tabName); 
+    }, 350); // 與 CSS 動畫時間保持一致
+  } else { 
+    executeQueryTabSwitch(targetBtn, parentNode, tabName);
+  } 
+}
+
+function executeQueryTabSwitch(targetBtn, parentNode, tabName) { 
+  // 切換按鈕樣式 
+  const btns = parentNode.querySelectorAll(".tab-btn");
+  for (let i = 0; i < btns.length; i++) { 
+    btns[i].classList.remove("active"); 
+  } 
+  targetBtn.classList.add("active"); 
+
+  // 切換下方內容區區塊
+  const sections = ['queryRegistrationSection', 'queryCourseDateSection', 'queryTeacherSection'];
+  for (let i = 0; i < sections.length; i++) {
+    const el = document.getElementById(sections[i]);
+    if(el) {
+      el.classList.remove("active");
+      el.style.display = "none";
+    }
+  }
+
+  // 顯示指定的區塊
+  const targetContent = document.getElementById(tabName);
+  if (targetContent) { 
+    targetContent.classList.add("active"); 
+    targetContent.style.display = "block"; 
+  } 
+}
+
+
  
 // 1. 處理報名提交 (含時間衝突防呆)
 document.getElementById('regForm').addEventListener('submit', function(e) {
