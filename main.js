@@ -771,7 +771,22 @@ function collectNextParticipant(currentIdx, totalCount, list, baseData, btn, out
 function renderAccordionSchedule(courseSource, containerElement, type) {
   const days = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];
   const englishDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  let termText = "";
+  const titleEl = document.getElementById('single-course-title');
+  if (titleEl && titleEl.innerText) {
+    const match = titleEl.innerText.match(/[\(（](.*?)[\)）]/);
+    if (match) {
+      termText = match[1];
+    }
+  }
   let accordionHtml = '<div class="accordion-container">';
+  if (termText) {
+    accordionHtml += `
+      <div style="text-align: center; padding: 10px 0 15px 0; color: #d14d72; font-weight: bold; font-size: 1.25em; letter-spacing: 2px;">
+        ${termText}
+      </div>
+    `;
+  }
 
   days.forEach((day, index) => {
     // 過濾屬於該天且不含系統標記的課程
