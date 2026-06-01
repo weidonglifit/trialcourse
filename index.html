@@ -6260,45 +6260,37 @@ function openExpandedCourse() {
   const sourceTable = document.getElementById('schedule-content-past');
   
   if (!container || !contentBox || !sourceTable) return;
+
+  // ✨ 關鍵修復 1：將彈窗移到 body 最外層，徹底擺脫所有父層級的限制！
+  document.body.appendChild(container);
   
-  // 1. 先把本月課表的 HTML 搬進內容區（這時元件還是隱藏的，不會干擾視覺） 
   contentBox.innerHTML = sourceTable.innerHTML;
-  
-  // 2. 先把關鍵的 expanded 滿版定位加上去，讓它擁有 fixed 定位
   container.classList.add('expanded');
-  document.body.style.overflow = 'hidden'; // 防止底層網頁跟著捲動 [cite: 1063]
+  document.body.style.overflow = 'hidden'; 
   
-  // 💡 解決動畫消失與跳動的核心秘密：
-  // 透過 setTimeout 延遲 20 毫秒，強制讓瀏覽器「先完成 HTML 渲染」，再「引進動畫屬性」。
-  // 並且在動畫播完時，直接用 JS 把 transform 鎖死在螢幕中央！
   setTimeout(function() {
     container.style.animation = "expandFlipIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards";
-    
-    // 400毫秒（動畫結束時），把動態 animation 拔掉，直接改寫 inline style 固定位置
     setTimeout(function() {
       container.style.animation = "none";
       container.style.transform = "translate(-50%, -50%) perspective(1000px) rotateX(0deg) scale(1)";
     }, 400);
-    
   }, 20);
 }
 
-/**
- * 關閉放大視窗
- */
 function closeExpandedCourse(event) {
-  if (event) event.stopPropagation(); // 防止事件冒泡 [cite: 1064]
+  if (event) event.stopPropagation(); 
   
   const container = document.getElementById('expandInputContainer');
   if (container) {
-    // 呼叫退場動畫
-    container.style.transform = ""; // 清空 inline style 鎖定
+    container.style.transform = "";
     container.style.animation = "expandFlipOut 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards";
-    
     setTimeout(function() {
       container.classList.remove('expanded');
       container.style.animation = "";
-      document.body.style.overflow = ''; // 恢復底層網頁捲動 [cite: 1065]
+      document.body.style.overflow = ''; 
+
+      // ✨ 關鍵修復 2：動畫結束後，把它放回原本的包裝層裡面
+      document.getElementById('singleCourseWrapper').appendChild(container);
     }, 350);
   }
 }
@@ -6310,51 +6302,46 @@ function closeExpandedCourse(event) {
 function openQueryCourse() {
   const container = document.getElementById('queryInputContainer');
   const contentBox = document.getElementById('queryCourseContent');
-  const sourceTable = document.getElementById('schedule-content'); // 讀取期課課表
+  const sourceTable = document.getElementById('schedule-content'); 
   const inputEl = document.getElementById('itemQueryName');
-  
   if (!container || !contentBox || !sourceTable) return;
   
-  // 1. 先把期課課表的 HTML 搬進內容區
-  contentBox.innerHTML = sourceTable.innerHTML;
+  // ✨ 關鍵修復 3：移到 body 最外層
+  document.body.appendChild(container);
   
-  // 2. 先把關鍵的 expanded 滿版定位加上去，讓它擁有 fixed 定位
+  contentBox.innerHTML = sourceTable.innerHTML;
   container.classList.add('expanded');
-  document.body.style.overflow = 'hidden'; // 防止底層網頁跟著捲動
+  document.body.style.overflow = 'hidden';
+  
   if (inputEl) {
     inputEl.style.display = 'none';
   }
-  // 💡 解決動畫消失與跳動的核心秘密：
-  // 透過 setTimeout 延遲 20 毫秒，強制讓瀏覽器「先完成 HTML 渲染」，再「引進動畫屬性」。
-  // 並且在動畫播完時，直接用 JS 把 transform 鎖死在螢幕中央！
+
   setTimeout(function() {
     container.style.animation = "expandFlipIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards";
-    
-    // 400毫秒（動畫結束時），把動態 animation 拔掉，直接改寫 inline style 固定位置
     setTimeout(function() {
       container.style.animation = "none";
       container.style.transform = "translate(-50%, -50%) perspective(1000px) rotateX(0deg) scale(1)";
     }, 400);
-    
   }, 20);
 }
 
-/**
- * ✨ 全新仿造函數：關閉期課課表放大視窗
- */
 function closeQueryCourse(event) {
-  if (event) event.stopPropagation(); // 防止事件冒泡
+  if (event) event.stopPropagation(); 
   const inputEl = document.getElementById('itemQueryName');
   const container = document.getElementById('queryInputContainer');
+  
   if (container) {
-    // 呼叫退場動畫
-    container.style.transform = ""; // 清空 inline style 鎖定
+    container.style.transform = "";
     container.style.animation = "expandFlipOut 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards";
-    
     setTimeout(function() {
       container.classList.remove('expanded');
       container.style.animation = "";
-      document.body.style.overflow = ''; // 恢復底層網頁捲動
+      document.body.style.overflow = ''; 
+
+      // ✨ 關鍵修復 4：放回原本的查詢包裝層裡面
+      document.getElementById('queryCourseWrapper').appendChild(container);
+
       if (inputEl) {
         inputEl.style.display = 'block';
       }
