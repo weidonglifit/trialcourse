@@ -2278,8 +2278,8 @@ document.getElementById('teacherSearchInput').addEventListener('change', functio
 
   // 3. 安全合併「現有課程」與「過去課程」資料
   // 確保如果陣列尚未載入(undefined)時，會以空陣列 [] 代替，避免程式報錯
-  const currentData = allCourseData || [];
-  const pastData = allCourseDataPast || [];
+  const currentData = (allCourseData || []).map(c => ({ ...c, courseType: '期課課程' }));
+  const pastData = (allCourseDataPast || []).map(c => ({ ...c, courseType: '本月課程' }));
   const combinedData = [...currentData, ...pastData];
 
   // 檢查合併後的資料狀態
@@ -2334,6 +2334,8 @@ document.getElementById('teacherSearchInput').addEventListener('change', functio
       const dateArray = rawDates.split(",").filter(s => s.trim() !== "");
       const totalClasses = dateArray.length;
       const totalPrice = totalClasses * (course.pricePerClass || 0);
+      const tagBgColor = course.courseType === '期課課程' ? '#d14d72' : '#f089a1';
+      const tagHtml = `<span style="background: ${tagBgColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75em; margin-right: 6px; white-space: nowrap;">${course.courseType}</span>`;
 
       // --- 3. 組裝定版 HTML (套用 result-card-anim 動畫) ---
       html += `
@@ -2373,8 +2375,9 @@ document.getElementById('teacherSearchInput').addEventListener('change', functio
                 </div>
 
                 <div style="flex: 1; text-align: left; min-width: 0;">
-                    <div class="card-title" style="margin-bottom: 4px; font-weight: bold; color: #d14d72; font-size: 1.1em;">
-                        📌 ${cKey}
+                    <div class="card-title" style="margin-bottom: 4px; font-weight: bold; color: #d14d72; font-size: 1.1em; display: flex; align-items: center; flex-wrap: wrap;">
+                        ${tagHtml}
+                        <span>📌 ${cKey}</span>
                     </div>
                     <small style="color: #f089a1; display: block; margin-top: 6px;">點擊查看課程與老師簡介 ➔</small>
                 </div>
