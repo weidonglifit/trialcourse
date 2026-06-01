@@ -2345,11 +2345,12 @@
     cursor: pointer;
 }
 
-/* 📸 照片放大燈箱 (Lightbox) 樣式 */
+/* 📸 照片放大燈箱 (Lightbox) 樣式 - 升級淡入淡出+縮放特效版 */
 .photo-modal {
-    display: none; /* 預設隱藏 */
+    display: flex;       /* 💡 始終維持 Flex 佈局以利圖片居中 */
+    visibility: hidden;  /* 🚨 關鍵修改：預設改用 visibility 隱藏，才能完美觸發淡出動畫！ */
     position: fixed;
-    z-index: 9999; /* 確保疊在最上層，包含抽屜之上 */
+    z-index: 9999;       /* 確保疊在最上層，包含抽屜之上 */
     top: 0;
     left: 0;
     width: 100%;
@@ -2358,12 +2359,13 @@
     justify-content: center;
     align-items: center;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    /* 💡 讓透明度與可見度同時跑 0.3 秒的流暢過渡 */
+    transition: opacity 0.3s ease, visibility 0.3s ease; 
 }
 
 /* 啟動時的類別 */
 .photo-modal.show {
-    display: flex;
+    visibility: visible; /* 顯示外層黑底 */
     opacity: 1;
 }
 
@@ -2373,14 +2375,15 @@
     max-height: 85%;
     object-fit: contain;
     border-radius: 8px;
-    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
-    transform: scale(0.9); /* 預設稍微縮小 */
-    transition: transform 0.3s ease;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    transform: scale(0.85); /* 💡 預設縮小到 0.85 倍，營造從深處彈出來的電影感 */
+    /* 運用高級的彈性貝茲曲線 (cubic-bezier)，讓縮放動作帶有一絲絲極其優雅的果凍回彈感 */
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); 
 }
 
 /* 彈窗出現時圖片放大回 100% 的動畫效果 */
 .photo-modal.show .photo-modal-content {
-    transform: scale(1);
+    transform: scale(1); /* 點擊時優雅放大回原本大小 */
 }
 
 /* 右上角關閉按鈕 */
