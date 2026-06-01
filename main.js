@@ -1,0 +1,4022 @@
+
+  var canSubmitByQuota = false; // 用來記錄名額是否正常
+  var canSubmitByPhone = false; // 用來記錄名額是否正常
+  var roomPriceMap = {};
+  var allCourseData = [];
+  var allCourseDataPast = [];
+  var allRoomBookState = [];
+  var globalSingleBookedMap = {};
+  var globalDiscountRate = 0.9;
+  var earlyBirdDate = "";
+  var earlyBirdDiscount = 1;
+  var globalAccountNumber = "";
+  var globalSettings = {};
+  var aiTomorrowWeatherText = "正在連線氣象局獲取最新預報中資訊...";
+  var aiChatHistory = []; // 💡 用來儲存對話歷史紀錄的陣列，格式為 [{role: "user", content: "..."}, {role: "model", content: "..."}]
+  var aiStoreConfig = {
+  "停車資訊": "300新竹市北區東大路537號對面停車場（步行3分鐘，公立停車場，非合作或特約）",
+  "場館設施": "教室內備有冷熱飲水機、專屬男女更衣室以及置物櫃。為了維護舞蹈教室的木地板，進來上課請記得自備「乾淨的室內運動鞋」或換穿我們的室內拖鞋唷！",
+  "廁所在哪裡": "一進門的走廊到底左手邊就是男女化妝室囉。",
+  "官方LINE": "@843qpnet",
+  "外部課程": "6月20/21/27/28共四天有「用 AI 打造你的全自動化數位商店」課程，報名方式請洽官LINE"
+};
+  const COMMON_INFO_BTNS = `
+  <div class="info-card-btn" onclick="toggleDrawer('rules-content', '教室使用規章')">
+    <span style="font-size: 1.5em;">教室規章</span>
+    <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
+  </div>
+  <div class="info-card-btn" onclick="toggleDrawer('payment-info-content', '匯款帳戶資訊')">
+    <span style="font-size: 1.5em;">匯款資訊</span>
+    <small style="color:#f089a1; margin-top: 8px;">查看帳號 ➔</small>
+  </div>
+`;
+  let aiStime = 0;
+  let aiEtime = 0;
+  let textTimer;
+  // 0. 網頁載入時，自動抓取後端試算表的課程清單填入下拉選單
+// 網頁載入時，直接透過整合函式抓取「全網頁所需的大禮包」
+window.addEventListener('load', function() {
+  const startTime = performance.now(); 
+  console.log("開始載入資料...");
+  // 輪播載入狀態字，有效降低體感等待時間
+const loadingTexts = ["連線至微動身活...", "正在獲取最新課表...", "正在獲取最新課表....", "正在獲取資料...", "準備就緒..."];
+let textIdx = 0;
+const subtitleTextEl = document.getElementById('loading-text-content');
+
+if (subtitleTextEl) {
+    textTimer = setInterval(() => {
+        textIdx = (textIdx + 1) % loadingTexts.length;
+        subtitleTextEl.innerText = loadingTexts[textIdx];
+    }, 1500);
+}
+  callGasApi("getAppInitData")
+  .then(function(initData) {
+    
+    // 1. 將後端抓回的資料直接塞入全域變數中，供各功能隨時撈取
+    globalSettings = initData.settings;
+    allCourseData = initData.currentCourses; 
+    allCourseDataPast = initData.pastCourses;
+    allRoomBookState = initData.popularWallData;
+    globalSingleBookedMap = initData.singleBookedMap;
+    
+    // 2. 處理網頁與表單標題
+    //document.getElementById('main-title').innerText = globalSettings.title[0] + "\n課程報名｜教室預約";
+    document.getElementById('main-title').innerText = "課程報名｜教室預約";
+    document.getElementById('all-course-title').innerText = "📝 整期課程報名 (" + globalSettings.title[1] + ")";
+    document.getElementById('single-course-title').innerText = "🎟️ 單堂課程報名 (" + globalSettings.title[2] + ")";
+
+    // 3. 處理跑馬燈邏輯
+    // 💡 處理最新消息：支援換行、反光、10秒定時由下往上升高輪播
+    const newsBoardEl = document.getElementById('news-board-content');
+    if (globalSettings.marqueeText && newsBoardEl) {
+      // 1. 將讀入的文字依照「換行符號」切分成陣列，並過濾掉空白行
+      const newsLines = globalSettings.marqueeText.split(/\r?\n/).map(line => line.trim()).filter(line => line !== "");
+      
+      if (newsLines.length > 0) {
+        let currentLineIndex = 0;
+        
+        // ✨ 新增的 NEWS 標籤：粉底(使用一點漸層增加質感)、白字、左右半圓(border-radius)
+        const newsBadge = `<span style="background: linear-gradient(135deg, #FFD1DC 0%, #E87A90 100%); color: white; padding: 2px 7px; border-radius: 50px; font-size: 0.55em; font-weight: bold; margin-right: 5px; display: inline-block; vertical-align: middle; box-shadow: 0 2px 5px rgba(232, 122, 144, 0.2);">NEW</span>`;
+        
+        // 初始化顯示第一行 (注意：改成 innerHTML，並用 span 包住文字以對齊)
+        newsBoardEl.innerHTML = newsBadge + `<span style="vertical-align: middle;">${newsLines[currentLineIndex]}</span>`;
+        
+        // 2. 建立每 10 秒切換一行的核心計時器
+        setInterval(function() {
+          // A. 現有文字加上 .exit 類別往上滑出
+          newsBoardEl.classList.add('exit');
+          
+          setTimeout(function() {
+            // B. 計算下一行的索引，若到最後一行則歸零重複
+            currentLineIndex = (currentLineIndex + 1) % newsLines.length;
+            
+            // C. 改變文字內容，並將文字瞬間移到下方 (.enter 狀態)
+            // 注意：這裡也改成 innerHTML，讓每次動畫切換時都帶著 NEWS 標籤
+            newsBoardEl.innerHTML = newsBadge + `<span style="vertical-align: middle;">${newsLines[currentLineIndex]}</span>`;
+            newsBoardEl.classList.remove('exit');
+            newsBoardEl.classList.add('enter');
+            
+            // D. 強制瀏覽器重繪 (Reflow) 確保動畫平順
+            void newsBoardEl.offsetWidth;
+            
+            // E. 移除 .enter，讓文字順暢地從下方滑入置中到位
+            newsBoardEl.classList.remove('enter');
+          }, 600); // 600ms 剛好對應 CSS 退場動畫完成的時間
+          
+        }, 5000); // 10000ms 代表每 10 秒鐘換下一行
+        
+      } else {
+        newsBoardEl.parentNode.style.display = 'none';
+      }
+    } else if (newsBoardEl) {
+      newsBoardEl.parentNode.style.display = 'none';
+    }
+
+    // 4. 配置折扣與早鳥日期參數
+    globalDiscountRate = globalSettings.discount;
+    earlyBirdDate = globalSettings.earlyBirdDate;
+    earlyBirdDiscount = globalSettings.earlyBirdDiscount;
+    
+    const targetDate = new Date(earlyBirdDate);
+    targetDate.setHours(23, 59, 59, 999);
+
+    if (earlyBirdDate && new Date().getTime() <= targetDate.getTime()) {
+      const countdownContainer = document.getElementById('earlybird-countdown-container');
+      const dEl = document.getElementById('cd-days');
+      const hEl = document.getElementById('cd-hours');
+      const mEl = document.getElementById('cd-minutes');
+      const sEl = document.getElementById('cd-seconds');
+
+      function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = targetDate.getTime() - now;
+
+        // 2. 如果超過了目標時間，隱藏計時器並停止清除定時器
+        if (distance < 0) {
+          if (countdownContainer) countdownContainer.style.display = 'none';
+          clearInterval(countdownInterval);
+          return;
+        }
+
+        // 3. 計算天、時、分、秒
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // 4. 補零優化並渲染到畫面上
+        if (countdownContainer && countdownContainer.style.display === 'none') {
+          countdownContainer.style.display = 'block'; // 確保時間未到時可見
+        }
+        if (dEl) dEl.innerText = String(days).padStart(2, '0');
+        if (hEl) hEl.innerText = String(hours).padStart(2, '0');
+        if (mEl) mEl.innerText = String(minutes).padStart(2, '0');
+        if (sEl) sEl.innerText = String(seconds).padStart(2, '0');
+      }
+
+      // 立即執行一次，防止每秒定時器產生 1 秒的初始化空白延遲
+      updateCountdown();
+      const countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    // 5. 處理銀行匯款帳戶文字顯示
+    const bank = globalSettings.bank;
+    const bankStr = `${bank.bankCode}（${bank.bankName}）`;
+    document.querySelectorAll('.bank-info-display').forEach(el => { el.textContent = bankStr; });
+    document.querySelectorAll('.account-number-display').forEach(el => { el.textContent = bank.accountNumber; });
+    globalAccountNumber = bank.accountNumber;
+    const fullAccountStr = `${bankStr}\n${bank.accountNumber}`;
+    document.querySelectorAll('.account-display').forEach(el => { el.textContent = fullAccountStr; });
+
+    // 6. 初始化教室選擇下拉選單
+    const selectRoom = document.getElementById('roomSelect');
+    if (selectRoom && globalSettings.rooms) {
+      selectRoom.innerHTML = '<option value="">-- 請選擇教室 --</option>';
+      let priceHtml = "";
+      globalSettings.rooms.forEach(function(room) {
+          const option = document.createElement('option');
+          option.value = room.name; option.text = room.name;
+          selectRoom.appendChild(option);
+          roomPriceMap[room.name] = room.price;
+          priceHtml += `• ${room.name}：<strong>${room.price}/小時</strong><br>`;
+      });
+      const priceDisplay = document.getElementById('room-price-display');
+      if (priceDisplay) { priceDisplay.innerHTML = priceHtml; }
+    }
+    syncToCustomRoomDropdown();
+
+    // 7. 💡 渲染「當期整期課表表單與手風琴」
+    if (initData.openTimestamp) {
+      if (initData.serverTime >= initData.openTimestamp) {
+        var scheduleBody = document.getElementById('schedule-body');
+        if (scheduleBody) {
+          // 將課表內容替換為漂亮的「課表準備中」提示框
+          scheduleBody.innerHTML = `
+            <div style="
+              padding: 40px 20px; 
+              text-align: center; 
+              color: #D05A6E; 
+              background-color: #fff5f7; 
+              border: 2px dashed #E87A90; 
+              border-radius: 12px; 
+              margin: 20px auto;
+              max-width: 90%;
+            ">
+              <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+              <div style="font-size: 1.2rem; font-weight: bold; letter-spacing: 1px;">最新課表準備中，敬請期待！</div>
+            </div>
+          `;
+          }
+      } else {
+        renderCurrentCoursesUI(initData.currentCourses);
+      }
+    } else {
+      renderCurrentCoursesUI(initData.currentCourses);
+    }
+
+    // 8. 💡 渲染「前期單堂課程手風琴」
+    const scheduleBodyPast = document.getElementById('schedule-body-past');
+    if (scheduleBodyPast) {
+      renderAccordionSchedule(allCourseDataPast, scheduleBodyPast, "SINGLE");
+    }
+    const wallSection = document.getElementById('popularBookingWall');
+    const wallContainer = document.getElementById('popularWallContainer');
+    if (wallSection && wallContainer) {
+      if (initData.popularWallData && initData.popularWallData.length > 0) {
+        wallSection.style.display = 'block'; // 顯示外層牆面
+        let wallHtml = '';
+        
+        // 迴圈將每一天的狀態渲染成小卡
+        initData.popularWallData.forEach(item => {
+          wallHtml += `
+            <div class="booking-wall-item" style="border-left: 5px solid ${item.color};">
+              <div class="wall-date">${item.displayDate}</div>
+              <div class="wall-status" style="background-color: ${item.bgColor}; color: ${item.color}; border: 1px solid ${item.color};">
+                ${item.status}
+              </div>
+            </div>
+          `;
+        });
+        wallContainer.innerHTML = wallHtml;
+      } else {
+        // 沒有任何未來預約紀錄時，隱藏整個動態牆區塊 (因為空白牆面無法營造熱絡感)
+        wallSection.style.display = 'none';
+      }
+    }
+    // 9. 💡 初始化「單堂下拉選單」與「查詢老師下拉選單」
+    initSingleCourseDropdown();
+    renderTeacherDropdownUI(initData.teachers);
+    syncToCustomTeacherSearchDropdown();
+
+    // 10. 💡 判斷單堂課程報名是否開放與分頁引導限制
+    if (initData.openTimestamp) {
+      if (initData.serverTime >= initData.openTimestamp) {
+        var btnFullTerm = document.getElementById('btn-full-term');
+        var btnSingleClass = document.getElementById('btn-single-class');
+        if (btnFullTerm && btnSingleClass) {
+          btnFullTerm.disabled = true;
+          btnSingleClass.disabled = false;
+          openSubTab({ currentTarget: btnSingleClass }, 'singleCourseSection');
+        }
+      }
+    }
+
+    // 💡 渲染「活動照片」到抽屜中 (乾淨無事件版)
+    const picBody = document.getElementById('pic-body');
+    if (picBody) {
+        if (initData.photos && initData.photos.length > 0) {
+            picBody.innerHTML = '';
+            initData.photos.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = 'photo-card';
+                img.setAttribute('referrerpolicy', 'no-referrer');
+                // 👉 這裡不寫任何 onclick 屬性了，確保語法 100% 安全不卡死！
+                picBody.appendChild(img);
+            });
+        } else {
+            picBody.innerHTML = '<p style="color: #999; text-align: center; width: 100%;">目前沒有活動照片</p>';
+        }
+    }
+
+    const endTime = performance.now();
+    // 3. 計算差值並換算成秒數 (保留三位小數)
+    const durationSeconds = ((endTime - startTime) / 1000).toFixed(3);
+    closeOverlay();
+    console.log(`🎉 載入並渲染成功！總共花費了 ${durationSeconds} 秒。`);
+  })
+  .catch(function(error) {
+    console.error("❌ 系統初始化失敗:", error);
+    // 可視需求在這裡加入讓使用者知道載入失敗的 UI 提示
+  }); // 🔄 改為只呼叫這一個整合大禮包函式
+});
+
+// 抽出：單獨處理當期整期課程的 UI 渲染器
+function renderCurrentCoursesUI(courses) {
+  const select = document.getElementById('itemQueryName');
+  const checkboxContainer = document.getElementById('checkbox-container');
+  const scheduleBody = document.getElementById('schedule-body');
+  const days = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];
+  const englishDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  select.innerHTML = '<option value="">-- 請選擇課程 --</option>'; 
+  checkboxContainer.innerHTML = ''; 
+
+  courses.forEach(function(courseObj) {
+    const courseName = courseObj.name;
+    const option = document.createElement('option');
+    option.value = courseName; option.text = courseName;
+    if (courseName.includes("★")) { option.disabled = true; option.style.fontWeight = "bold"; }
+    select.appendChild(option);
+
+    if (!courseName.includes("★")) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'course-anim-wrapper';
+      let courseDay = "";
+      days.forEach(function(d) { if (courseName.includes(d)) courseDay = d; });
+      wrapper.setAttribute('data-day', courseDay);
+      wrapper.style.display = "none";
+
+      const label = document.createElement('label');
+      label.className = 'checkbox-item';
+      const input = document.createElement('input');
+      input.type = 'checkbox'; input.name = 'items'; input.value = courseName;
+      input.onchange = updateSelectedDisplay;
+
+      const span = document.createElement('span');
+      span.className = 'no-wrap-text';
+
+      try {
+        const parts = courseName.split(" ");
+        if (parts.length >= 3) {
+          const nameTeacher = parts[0].split("-");
+          span.innerHTML = `
+            <strong style="color: #d14d72; font-size: 1.05rem;">${nameTeacher[0]}</strong> 
+            <span style="color: #7f8c8d; font-size: 0.9rem;">(${nameTeacher[1] || ""})</span><br>
+            <span style="background: #FFF5F7; color: #E87A90; padding: 2px 6px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #F4A7B9; text-align: center; display: block; width: 80px; margin-top: 1px;">${parts[2]}</span>`;
+        } else { span.innerText = courseName; }
+      } catch (err) { span.innerText = courseName; }
+
+      label.appendChild(input); label.appendChild(span);
+      wrapper.appendChild(label); checkboxContainer.appendChild(wrapper);
+    }
+  });
+
+  // 預設切換至今天星期的分頁
+  const currentDay = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"][new Date().getDay()];
+  filterDay(currentDay, null);
+
+  // 渲染大課表手風琴 (整期)
+  if (scheduleBody) {
+    let accordionHtml = '<div class="accordion-container">';
+    days.forEach((day, index) => {
+      const dayCourses = courses.filter(c => c.name.includes(day) && !c.name.includes('★'));
+      accordionHtml += `
+        <div class="day-card">
+          <div class="card-header" onclick="toggleAccordion(this)">
+            <span>${day} <small style="font-weight:normal; opacity:0.6; margin-left:5px;">${englishDays[index]}</small></span>
+            <span class="arrow" style="transition: transform 0.3s;">▼</span>
+          </div>
+          <div class="card-body">`;
+
+      if (dayCourses.length > 0) {
+        dayCourses.sort((a, b) => {
+          const timeA = a.name.match(/\d{2}:\d{2}/); const timeB = b.name.match(/\d{2}:\d{2}/);
+          return (timeA && timeB) ? timeA[0].localeCompare(timeB[0]) : 0;
+        });
+        dayCourses.forEach(course => {
+          const parts = course.name.split(" "); const nameTeacher = parts[0].split("-");
+          const timeRange = parts[2] || ""; const remaining = course.remaining; const max = course.maxCapacity;
+          const times = timeRange.split("-");
+          const quotaHtml = (remaining <= 0) ? `<br><span style="color:red; font-weight:bold;">(已額滿)</span>` : `<br><span style="color:#4CAF50;">(尚餘名額 ${remaining}/${max})</span>`;
+          accordionHtml += `
+            <div class="accordion-course-item" style="cursor: pointer;" title="點擊直接加入預約" onclick="selectFromScheduleSingle('${course.name.replace(/'/g, "\\'")}')">
+              <div class="time-tag"><span>${times[0] || ""}</span><div class="time-line"></div><span>${times[1] || ""}</span></div>
+              <div class="course-info"><b>${nameTeacher[0]}</b> - ${nameTeacher[1] || ""} ${quotaHtml}</div>
+            </div>`;
+        });
+      } else {
+        accordionHtml += `<div style="padding:15px; color:#ccc; text-align:center;">今日暫無排課</div>`;
+      }
+      accordionHtml += `</div></div>`;
+    });
+    accordionHtml += '</div>';
+    scheduleBody.innerHTML = accordionHtml;
+  }
+}
+
+// 抽出：單獨處理老師查詢下拉選單的 UI 渲染器
+function renderTeacherDropdownUI(teachers) {
+  const select = document.getElementById('teacherSearchInput');
+  select.innerHTML = '<option value="">請選擇老師</option>';
+  if (teachers.length === 0) {
+    select.innerHTML = '<option value="">無老師資料</option>';
+    return;
+  }
+  teachers.forEach(function(name) {
+    const option = document.createElement('option');
+    option.value = name; option.text = name;
+    select.appendChild(option);
+  });
+}
+  
+
+  function openQueryTab(evt, tabName) {
+  const targetBtn = evt.currentTarget; 
+  const parentNode = targetBtn.parentElement; 
+  const ghost = document.getElementById('query-ghost-tab'); 
+  const currentActiveBtn = parentNode.querySelector(".tab-btn.active"); 
+
+  if (!currentActiveBtn || currentActiveBtn === targetBtn) { 
+    executeQueryTabSwitch(targetBtn, parentNode, tabName); 
+    return;
+  } 
+
+  if (ghost && parentNode) { 
+    const pRect = parentNode.getBoundingClientRect(); 
+    const cRect = currentActiveBtn.getBoundingClientRect();
+    const tRect = targetBtn.getBoundingClientRect(); 
+    const startX = cRect.left - pRect.left; 
+    const startY = cRect.top - pRect.top;
+    const endX = tRect.left - pRect.left; 
+    const endY = tRect.top - pRect.top; 
+
+    // 同步幽靈按鈕內部的文字與尺寸，飛過去時才最自然
+    ghost.innerText = currentActiveBtn.innerText;
+    ghost.style.width = cRect.width + "px";
+    ghost.style.height = cRect.height + "px"; 
+
+    ghost.style.setProperty('--sx', startX + "px"); 
+    ghost.style.setProperty('--sy', startY + "px");
+    ghost.style.setProperty('--ex', endX + "px"); 
+    ghost.style.setProperty('--ey', endY + "px"); 
+
+    currentActiveBtn.classList.remove('active'); 
+    ghost.classList.remove('ghost-moving'); 
+    void ghost.offsetWidth; 
+    ghost.classList.add('ghost-moving');
+    
+    setTimeout(() => { 
+      ghost.classList.remove('ghost-moving'); 
+      currentActiveBtn.style.opacity = "1"; 
+      executeQueryTabSwitch(targetBtn, parentNode, tabName); 
+    }, 350);
+  } else { 
+    executeQueryTabSwitch(targetBtn, parentNode, tabName);
+  } 
+}
+
+function executeQueryTabSwitch(targetBtn, parentNode, tabName) { 
+  const btns = parentNode.querySelectorAll(".tab-btn");
+  for (let i = 0; i < btns.length; i++) { 
+    btns[i].classList.remove("active"); 
+  } 
+  targetBtn.classList.add("active"); 
+
+  // 精準只隱藏查詢系統旗下的分頁，不再干擾外部報名系統
+  const contents = document.getElementsByClassName("query-tab-content");
+  for (let i = 0; i < contents.length; i++) {
+    contents[i].classList.remove("active");
+    contents[i].style.display = "none";
+    // ✨ 順便移除淡入 class，確保下次切換回來時能重新觸發動畫
+    contents[i].classList.remove("fade-in-section");
+  }
+
+  const targetContent = document.getElementById(tabName);
+  if (targetContent) { 
+    targetContent.classList.add("active"); 
+    targetContent.style.display = "block"; 
+    
+    // ✨ 魔法兩行：強制瀏覽器重繪 (Reflow)，並掛上淡入動畫
+    void targetContent.offsetWidth; 
+    targetContent.classList.add("fade-in-section");
+  } 
+}
+
+ 
+// 1. 處理報名提交 (含時間衝突防呆)
+document.getElementById('regForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const output = document.getElementById('regOutput');
+  const pCount = parseInt(document.getElementById('participantCount').value) || 1;
+  
+  // --- [保留邏輯 1：基礎驗證] ---
+  const agreement = document.getElementById('agreementCheckbox');
+  if (!agreement.checked) {
+    output.style.color = "#e74c3c";
+    output.innerHTML = "⚠️ <b>請先勾選：</b>「本人已詳細閱讀相關資訊」後再提交。";
+    output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  if (!canSubmitByQuota) {
+    output.style.color = "#e74c3c";
+    output.innerHTML = "⚠️ <b>無法提交！</b><br>您未選擇課程或包含「已額滿」項目，請修正後再提交。";
+    output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  
+  if (!canSubmitByPhone) {
+    output.style.color = "#e74c3c";
+    output.innerHTML = "⚠️ <b>無法提交！</b><br>請輸入正確的電話格式。";
+    output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // --- [保留邏輯 2：衝突檢查] ---
+  const checkboxes = document.querySelectorAll('input[name="items"]:checked');
+  const selectedItems = Array.from(checkboxes).map(cb => cb.value);
+
+  if (selectedItems.length >= 2) {
+    let conflicts = [];
+    let parsedItems = [];
+    selectedItems.forEach(item => {
+      try {
+        const parts = item.split(" ");
+        const day = parts[1];
+        const timePart = parts[2].split("-");
+        const start = timePart[0].split(":");
+        const end = timePart[1].split(":");
+        const startMin = parseInt(start[0]) * 60 + parseInt(start[1]);
+        const endMin = parseInt(end[0]) * 60 + parseInt(end[1]);
+        parsedItems.push({ name: item, day: day, start: startMin, end: endMin });
+      } catch (err) { console.error("解析失敗: " + item); }
+    });
+
+    for (let i = 0; i < parsedItems.length; i++) {
+      for (let j = i + 1; j < parsedItems.length; j++) {
+        const a = parsedItems[i];
+        const b = parsedItems[j];
+        if (a.day === b.day && a.start < b.end && b.start < a.end) {
+          conflicts.push(`「${a.name}」 與 「${b.name}」`);
+        }
+      }
+    }
+
+    if (conflicts.length > 0) {
+      output.style.color = "#e74c3c";
+      output.innerHTML = "⚠️ <b>報名時間衝突！</b><br>" + conflicts.join("<br>");
+      output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+  }
+
+  // --- [新增邏輯：收集多人資料] ---
+  const formData = new FormData(this);
+  const baseData = {};
+  formData.forEach((value, key) => { baseData[key] = value; });
+  baseData["items"] = selectedItems;
+
+  if (pCount > 1) {
+    baseData.email = baseData.email + "(" + baseData.name + ")";
+  }
+
+  let participants = [{ name: baseData.name, phone: baseData.phone }];
+
+  if (pCount > 1) {
+    collectNextParticipant(2, pCount, participants, baseData, btn, output);
+  } else {
+    askEmergencyContactSingle(baseData, btn, output);
+  }
+});
+
+/**
+ * 從課表點擊課程後，自動關閉抽屜並在表單中勾選
+ */
+
+function selectFromScheduleSingle(courseName) {
+  const expandContainer = document.getElementById('expandInputContainer');
+  const queryContainer = document.getElementById('queryInputContainer');
+  const singleTabBtn = document.getElementById('btn-single-class');
+
+  const isSingleExpanded = expandContainer && expandContainer.classList.contains('expanded');
+  const isQueryExpanded = queryContainer && queryContainer.classList.contains('expanded');
+  
+  if (!isSingleExpanded && !isQueryExpanded) {
+    return; 
+  }
+
+  // 💡 1. 分流判斷：如果是從「查詢日期（期課）」的滿版抽屜點擊的
+  if (isQueryExpanded) {
+    closeDrawer();      // 關閉可能開啟的側邊欄
+    closeQueryCourse(); // 執行專屬的關閉期課抽屜與還原邏輯
+
+    const queryInput = document.getElementById('itemQueryName');
+    if (queryInput) {
+      queryInput.value = courseName;              // 填入選擇的課程名稱
+      queryInput.classList.add('field-success'); // 給它一個成功的綠框反饋
+      
+      // 讓輸入框重新變回 block 顯示
+      queryInput.style.display = 'block';
+      
+      // 捲動回該輸入框頂端
+      queryInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      queryInput.dispatchEvent(new Event('change'));
+    }
+    return; // 填完期課文字框後直接中斷
+  }
+
+  // 💡 2. 分流判斷：如果是從「單堂報名」的滿版抽屜點擊的
+  if (isSingleExpanded) {
+    // 只有當單堂報名分頁是 active 狀態時才處理（保留你原本的防呆機制）
+      closeDrawer();
+      closeExpandedCourse();
+
+      const singleInput = document.getElementById('singleCourseSelect');
+      if (singleInput) {
+        singleInput.value = courseName;             // 填入選擇的課程名稱
+        singleInput.classList.add('field-success'); // 順手給它一個成功的綠框反饋
+        
+        // 觸發載入該課程對應的單堂可報名日期
+        if (typeof loadSingleDates === 'function') {
+          loadSingleDates();
+        }
+        
+        // 捲動回單堂表單頂端
+        singleInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return; // 填完單堂文字框後直接中斷
+    
+  }
+}
+
+function selectFromSchedule(courseName) {
+  // 1. 關閉側邊抽屜
+  closeDrawer();
+
+  // 2. 解析星期，自動切換到對應的分頁
+  const days = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];
+  let targetDay = "";
+  days.forEach(d => { if(courseName.includes(d)) targetDay = d; });
+  
+  if (targetDay) {
+    filterDay(targetDay, null);
+  }
+
+  // 3. 延遲執行勾選（等待 filterDay 的動畫完成）
+  setTimeout(() => {
+    const checkboxes = document.querySelectorAll('input[name="items"]');
+    checkboxes.forEach(cb => {
+      if (cb.value === courseName) {
+        cb.checked = true; // 執行勾選
+        
+        // 觸發原始的更新邏輯（計算金額與顯示清單）
+        updateSelectedDisplay();
+        
+        // 捲動到選擇結果區塊，讓使用者確認
+        const targetSection = document.getElementById('selected-courses-section');
+        if (targetSection) {
+          targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    });
+  }, 400); // 這裡的延遲時間需略長於 filterDay 的動畫時間 (320ms)
+}
+
+// 連鎖彈窗收集函數
+
+function collectNextParticipant(currentIdx, totalCount, list, baseData, btn, output) {
+  const injectionPoint = document.getElementById('modalInjectionPoint');
+  injectionPoint.innerHTML = `
+    <div style="padding: 15px; text-align: center;">
+      <h3 style="color: #d14d72; margin-bottom:15px;">第 ${currentIdx} 位學員資料</h3>
+      
+      <div id="extraErrorMsg" style="display: none; color: #e74c3c; background-color: #fdf2f4; border: 1px solid #f9d5dc; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.95em; font-weight: bold; text-align: left;"></div>
+      
+      <div class="field" style="text-align: left;">
+        <label>學員姓名</label>
+        <input type="text" id="extraName" placeholder="請輸入姓名" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd; border-radius:6px;">
+      </div>
+      <div class="field" style="text-align: left; margin-top: 15px;">
+        <label>學員電話</label>
+        <input type="tel" id="extraPhone" placeholder="09XXXXXXXX" maxlength="10" inputmode="numeric" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd; border-radius:6px;">
+      </div>
+      <button id="confirmExtraBtn" class="btn-universal" style="background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); width:100%; margin-top:20px;">下一步</button>
+    </div>
+  `;
+  document.getElementById('paymentModalOverlay').classList.add('active');
+
+  document.getElementById('confirmExtraBtn').onclick = function() {
+    const n = document.getElementById('extraName').value.trim();
+    const p = document.getElementById('extraPhone').value.trim();
+    const errorEl = document.getElementById('extraErrorMsg');
+    
+    // 初始化隱藏錯誤訊息，並移除先前的紅框樣式
+    errorEl.style.display = 'none';
+    document.getElementById('extraName').classList.remove('field-error');
+    document.getElementById('extraPhone').classList.remove('field-error');
+
+    // --- 開始進行細緻的格式檢查 ---
+    let errors = [];
+    if (!n) {
+      errors.push("⚠️ 請填寫學員姓名");
+      document.getElementById('extraName').classList.add('field-error');
+    }
+    
+    if (p.length === 0) {
+      errors.push("⚠️ 請填寫學員電話");
+      document.getElementById('extraPhone').classList.add('field-error');
+    } else if (p.length < 10 || !p.startsWith('09')) {
+      errors.push("⚠️ 電話格式不正確 (須為 09 開頭的 10 位數字)");
+      document.getElementById('extraPhone').classList.add('field-error');
+    }
+
+    // 若有錯誤，呈現提示區塊並中斷程序
+    if (errors.length > 0) {
+      errorEl.innerHTML = errors.join("<br>");
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    // 通過驗證，寫入資料庫陣列
+    list.push({ name: n, phone: p });
+    if (currentIdx < totalCount) {
+      collectNextParticipant(currentIdx + 1, totalCount, list, baseData, btn, output);
+    } else {
+      document.getElementById('paymentModalOverlay').classList.remove('active');
+      executeBatchSubmit(list, baseData, btn, output);
+    }
+  };
+}
+
+/**
+ * 📅 核心重構：建立高彈性的手風琴課表渲染器 (支援整期與前期單堂)
+ */
+function renderAccordionSchedule(courseSource, containerElement, type) {
+  const days = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];
+  const englishDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  let accordionHtml = '<div class="accordion-container">';
+
+  days.forEach((day, index) => {
+    // 過濾屬於該天且不含系統標記的課程
+    const dayCourses = courseSource.filter(c => 
+      c.name.includes(day) && !c.name.includes('★')
+    );
+
+    accordionHtml += `
+      <div class="day-card">
+        <div class="card-header" onclick="toggleAccordion(this)">
+          <span>${day} <small style="font-weight:normal; opacity:0.6; margin-left:5px;">${englishDays[index]}</small></span>
+          <span class="arrow" style="transition: transform 0.3s;">▼</span>
+        </div>
+        <div class="card-body">`;
+
+    if (dayCourses.length > 0) {
+      // 依據課表時間先後進行排序
+      dayCourses.sort((a, b) => {
+        const timeA = a.name.match(/\d{2}:\d{2}/);
+        const timeB = b.name.match(/\d{2}:\d{2}/);
+        return (timeA && timeB) ? timeA[0].localeCompare(timeB[0]) : 0;
+      });
+
+      dayCourses.forEach(course => {
+        const parts = course.name.split(" ");
+        const nameTeacher = parts[0].split("-"); 
+        const timeRange = parts[2] || "";
+        const remaining = course.remaining;
+        const max = course.maxCapacity;
+        const times = timeRange.split("-"); 
+        const startTime = times[0] || "";
+        const endTime = times[1] || "";
+
+        // 名額狀態顯示 (單堂與整期共用此剩餘名額邏輯，可依後端邏輯自由調整)
+        const quotaHtml = (remaining <= 0) 
+          ? `<br><span style="color:red; font-weight:bold;">(已額滿)</span>` 
+          : `<br><span style="color:#4CAF50;">(名額請至單堂報名確認)</span>`;
+
+        accordionHtml += `
+          <div class="accordion-course-item" 
+              onclick="selectFromScheduleSingle('${course.name.replace(/'/g, "\\'")}')" 
+              style="cursor: pointer;"
+              title="點擊直接將此課程帶入表單">
+            <div class="time-tag">
+              <span>${startTime}</span>
+              <div class="time-line"></div>
+              <span>${endTime}</span>
+            </div>
+            <div class="course-info">
+              <b>${nameTeacher[0]}</b> - ${nameTeacher[1] || ""} ${quotaHtml}
+            </div>
+          </div>`;
+      });
+    } else {
+      accordionHtml += `<div style="padding:15px; color:#ccc; text-align:center;">今日暫無排課</div>`;
+    }
+
+    accordionHtml += `</div></div>`;
+  });
+
+  accordionHtml += '</div>';
+  containerElement.innerHTML = accordionHtml;
+}
+// 批次送出函數
+/**
+ * 修改後的批次提交：改為「一次打包」送出，最穩定。
+ */
+function executeBatchSubmit(list, baseData, btn, output) {
+  btn.disabled = true;
+  // 如果 1 人就不顯示人數
+  const btnText = list.length > 1 ? `提交中 (${list.length}人)...` : "提交中...";
+  btn.innerText = btnText;
+  
+  output.style.color = "#34495e";
+  output.innerText = "正在處理報名資料，請稍候...";
+
+  // 修改：直接呼叫一個專門處理「多人」的後端函數
+  callGasApi("processBatchForm", [baseData, list])
+    .then(function(res) {
+      // 成功後直接執行原本的結尾邏輯
+      finalizeBatch(list.length, list.length, btn, output);
+    })
+    .catch(function(err) {
+      output.style.color = "red";
+      // 注意：catch 抓到的 err 如果是字串，直接印出即可；若是 Error 物件則印出 err.message
+      const errorMsg = err.message || err;
+      output.innerText = "❌ 提交失敗：" + errorMsg;
+      btn.disabled = false;
+      btn.innerText = "提交報名";
+    }); // 此函數需在後端 (GS檔) 增加
+}
+
+function finalizeBatch(s, t, btn, output) {
+  btn.disabled = false; btn.innerText = "提交報名";
+  output.style.color = "green"; output.innerHTML = `✅ 已成功處理 ${s} 位學員報名。請用手機號碼查詢確認報名狀態。`;
+  const paymentInfoHtml = document.getElementById('paymentInfo').innerHTML;
+  document.getElementById('modalInjectionPoint').innerHTML = paymentInfoHtml;
+  document.getElementById('paymentModalOverlay').classList.add('active');
+  document.getElementById('regForm').reset();
+  updateSelectedDisplay();
+}
+
+// 通用緊急聯絡人彈窗收集函數（支援整期與單堂）
+function askEmergencyContactSingle(baseData, btn, output, isSingleCourse) {
+  const injectionPoint = document.getElementById('modalInjectionPoint');
+  injectionPoint.innerHTML = `
+    <div style="padding: 15px; text-align: center;">
+      <h3 style="color: #d14d72; margin-bottom:15px;">🚨 緊急聯絡人資訊</h3> 
+      <p style="font-size: 0.9em; color: #666; margin-bottom: 20px;">(選填) 為了您的安全，建議填寫</p> 
+      
+      <div id="emergencyErrorMsg" style="display: none; color: #e74c3c; background-color: #fdf2f4; border: 1px solid #f9d5dc; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.95em; font-weight: bold; text-align: left;"></div>
+      
+      <div class="field" style="text-align: left;">
+      <span class="pink-highlight">聯絡人姓名</span>
+        <input type="text" id="emergencyName" placeholder="請輸入姓名" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd;"> 
+      </div>
+      <div class="field" style="text-align: left; margin-top: 15px;">
+      <span class="pink-highlight">聯絡人電話</span>
+        <input type="tel" id="emergencyPhone" placeholder="09XXXXXXXX" maxlength="10" inputmode="numeric" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd;"> 
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 20px;"> 
+        <button id="skipEmergencyBtn" class="btn-universal" style="background: #858585; flex: 1;">不填寫</button> 
+        <button id="submitEmergencyBtn" class="btn-universal" style="background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); flex: 1;">提交報名</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('paymentModalOverlay').classList.add('active');
+
+  // 輔助檢查與分流送出
+  function handleNext(emergencyStr) {
+    document.getElementById('paymentModalOverlay').classList.remove('active');
+    if (isSingleCourse) {
+      executeSingleCourseSubmit(baseData, emergencyStr, btn, output);
+    } else {
+      executeSingleSubmit(baseData, emergencyStr, btn, output);
+    }
+  }
+
+  // 點擊「提交報名」
+  document.getElementById('submitEmergencyBtn').onclick = function() {
+    const eName = document.getElementById('emergencyName').value.trim();
+    const ePhone = document.getElementById('emergencyPhone').value.trim();
+    const errorEl = document.getElementById('emergencyErrorMsg');
+    
+    // 初始化隱藏錯誤訊息，並移除先前的紅框樣式
+    errorEl.style.display = 'none';
+    document.getElementById('emergencyName').classList.remove('field-error');
+    document.getElementById('emergencyPhone').classList.remove('field-error');
+    
+    let info = "";
+    
+    if (eName && ePhone) {
+      // 深度檢查：既然兩個都填了，就順便幫忙檢查電話格式
+      if (!ePhone.startsWith('09') || ePhone.length !== 10) {
+        errorEl.innerHTML = "⚠️ 聯絡人電話格式不正確 (須為 09 開頭的 10 位數字)";
+        errorEl.style.display = 'block';
+        document.getElementById('emergencyPhone').classList.add('field-error');
+        return;
+      }
+      info = "緊急聯絡人：" + eName + " (" + ePhone + ")";
+    } else {
+      // 欄位沒填完整（一個有填一個沒填）
+      let missingFields = [];
+      if (!eName) {
+        missingFields.push("「聯絡人姓名」");
+        document.getElementById('emergencyName').classList.add('field-error');
+      }
+      if (!ePhone) {
+        missingFields.push("「聯絡人電話」");
+        document.getElementById('emergencyPhone').classList.add('field-error');
+      }
+      
+      errorEl.innerHTML = `⚠️ 請完整填寫 ${missingFields.join('與')}，<br>或直接點擊下方「不填寫」按鈕。`;
+      errorEl.style.display = 'block';
+      return;
+    }
+    
+    handleNext(info);
+  };
+
+  // 點擊「不填寫」
+  document.getElementById('skipEmergencyBtn').onclick = function() {
+    handleNext("");
+  };
+}
+
+/**
+ * [新增] 執行最終的 1 人提交 (帶入緊急聯絡人資訊)
+ */
+function executeSingleSubmit(baseData, emergencyInfo, btn, output) {
+  btn.disabled = true;
+  btn.innerText = "提交中...";
+  output.style.color = "#34495e";
+  output.innerText = "正在處理報名資料...";
+
+  // 1. 將單人的姓名與電話打包成符合後端規格的陣列
+  var singleParticipantList = [
+    { name: baseData.name, phone: baseData.phone }
+  ];
+
+  // 2. 改為呼叫後端的 processBatchForm 進入同一個 LOCK 排隊
+  // 將原本的三個參數，用陣列 [ ] 包起來一起傳給後端
+callGasApi("processBatchForm", [baseData, singleParticipantList, emergencyInfo])
+    .then(function() {
+      // 成功後一樣執行 finalizeBatch，傳入 1 代表完成 1 人報名
+      finalizeBatch(1, 1, btn, output); 
+    })
+    .catch(function(err) {
+      output.style.color = "red";
+      // 防呆：確保不論 err 是字串還是 Error 物件都能正確印出錯誤訊息
+      const errorMsg = err.message || err;
+      output.innerText = "❌ 提交失敗：" + errorMsg;
+      btn.disabled = false;
+      btn.innerText = "提交報名";
+    }); // 這裡改呼叫 Batch 函式
+}
+
+// 輔助函式：切換手風琴展開
+function toggleAccordion(header) {
+  const card = header.parentElement;
+  const isOpen = card.classList.contains('active');
+
+  
+
+  document.querySelectorAll('.day-card').forEach(c => {
+    if(c !== card) c.classList.remove('active');
+  });
+
+
+  if (isOpen) {
+    card.classList.remove('active');
+  } else {
+    card.classList.add('active');
+  }
+}
+
+
+// 封裝原本的提交邏輯
+  function submitForm(formElement, btn, output) {
+    btn.disabled = true;
+    btn.innerText = "提交中...";
+    output.innerText = "";
+
+    // 1. 🌟 必須先手動將 HTML 的 Form 轉換為 JavaScript Object
+const formData = new FormData(formElement);
+const formObj = {};
+formData.forEach((value, key) => { 
+    // 確保如果表單有多選框 (checkbox，例如相同的 name)，會被轉成陣列
+    if (formObj[key]) {
+        if (!Array.isArray(formObj[key])) {
+            formObj[key] = [formObj[key]];
+        }
+        formObj[key].push(value);
+    } else {
+        formObj[key] = value; 
+    }
+});
+
+// 2. 呼叫後端 API
+// 對應後端的 processForm(formData, emergencyInfo)，第二個參數如果沒有就傳空字串
+callGasApi("processForm", [formObj, ""])
+  .then(function(res) {
+      output.style.color = "green";
+      output.innerHTML = "✅ " + res;
+
+      const paymentInfoHtml = document.getElementById('paymentInfo').innerHTML;
+      const injectionPoint = document.getElementById('modalInjectionPoint');
+      injectionPoint.innerHTML = `<div style="display:block !important; border:none; background:none; margin:0;">${paymentInfoHtml}</div>`;
+      document.getElementById('paymentModalOverlay').classList.add('active');
+
+      // 1. 重設表單基礎欄位（姓名、電話、LINE ID、Email、末5碼）
+      formElement.reset();
+      document.getElementById('agreementCheckbox').checked = false;
+      
+      // 2. 清空「選擇的課程」顯示區塊，恢復到初始狀態
+      const selectedList = document.getElementById('selected-list');
+      if (selectedList) {
+        selectedList.innerHTML = '<span style="color: #999; font-weight: bold;">尚未選擇課程</span>';
+      }
+
+      // 3. 移除電話欄位的成功/錯誤樣式標記
+      const phoneInput = document.getElementById('queryPhone');
+      if (phoneInput) {
+        phoneInput.classList.remove('field-success', 'field-error');
+      }
+
+      // 4. 重設星期篩選（預設回到當天或清空顯示）
+      const currentDay = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"][new Date().getDay()];
+      filterDay(currentDay, null);
+
+      btn.disabled = false;
+      btn.innerText = "提交報名";
+
+      // 選擇性：3秒後清空成功訊息
+      setTimeout(() => { output.innerText = ""; }, 3000);
+
+  })
+  .catch(function(err) {
+      output.style.color = "red";
+      const errorMsg = err.message || err;
+      output.innerText = "❌ 提交失敗：" + errorMsg;
+      btn.disabled = false;
+      btn.innerText = "提交報名";
+  });
+  }
+
+/**
+ * 從後端抓取最新課程資料並刷新前端介面（含全域變數、下拉選單、勾選框與課表）
+ */
+
+  // 2. 處理報名查詢
+// 修改原本的 queryBtn 監聽器
+document.getElementById('queryBtn').addEventListener('click', function() {
+    const phone = document.getElementById('realQueryPhone').value;
+    const resultDiv = document.getElementById('queryResult');
+    const btn = this;
+
+    if (!phone) {
+        resultDiv.innerHTML = "<span style='color: red;'>請輸入電話號碼以供查詢</span>";
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader"></div>';
+    resultDiv.innerText = "";
+
+    callGasApi("queryRegistration", [phone])
+    .then(function(res) {
+        if (res === "查無紀錄。") {
+            resultDiv.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">${res}</div>`;
+        } else if (res.error) {
+            resultDiv.innerHTML = `<div style="color: red;">${res.error}</div>`;
+        } else {
+            // 1. 顯示總金額標題
+            let html = `<div style="font-size: 1.15em; color: #d14d72; margin: 15px 0 10px 0; font-weight: bold; border-bottom: 2px solid #F4A7B9; display: inline-block; padding-bottom: 5px;">
+                          ${res.summary.discountDesc}
+                        </div><br>
+                        <span style="font-size: 0.9em; color: green; line-height: 1;">僅供複查，若已繳費無須在意</span><br>`;
+
+            // 2. 組裝課程卡片
+            // 2. 組裝課程卡片（包含當期整期、當期單堂、以及歷史前期紀錄）
+            res.items.forEach(item => {
+              // 1. 先統一解析課程與老師名稱 (避免重複撰寫導致卡住)
+              // 格式範例: "Zumba-Grace 週日 16:00-16:55"
+              const rawName = item.name || "";
+              const nameParts = rawName.split(" ");
+              
+              // 取得課程與星期，若格式不對則回傳原名
+              const displayName = (nameParts.length >= 2) ? (nameParts[0]) : rawName;
+              const dayText = (nameParts.length >= 2) ? (nameParts[1].trim()) : "";
+              
+              // 安全抓取時間段
+              const fullTimeRange = (nameParts.length >= 3) ? nameParts[2] : "";
+              const timeParts = fullTimeRange.includes("-") ? fullTimeRange.split("-") : ["--:--", "--:--"];
+              const startTime = timeParts[0] || "--:--";
+              const endTime = timeParts[1] || "--:--";
+
+              // 2. 解析 cKey 與 tKey (用於抽屜功能，增加單引號轉義防止語法報錯)
+              const subParts = nameParts[0] ? nameParts[0].split("-") : ["", ""];
+              const cKey = (subParts[0] || "").trim().replace(/'/g, "\\'");
+              const tKey = (subParts[1] || "").trim().replace(/'/g, "\\'");
+
+              // --- 3. 樣式與文字分流核心配置 ---
+              let primaryColor = "#F4A7B9"; // 預設當期整期：粉色
+              let darkColor = "#d14d72";
+              let typeLabel = "📌 預約期課";
+              let shadowStyle = "rgba(232, 122, 144, 0.3)";
+              let bgGradient = "linear-gradient(135deg, #FFF5F7 0%, #FFD1DC 100%)";
+              let priceDisplayStr = "";
+              let paySt = "";
+
+              if (item.isPaid) {
+                paySt = `<span style="color: #2ecc71; font-size: 0.9em; font-weight: normal;">✅ 已完成繳費</span>`;
+              } else {
+                paySt = `<span style="color: #f39c12; font-size: 0.9em; font-weight: normal;">⏳ 管理人員對帳中</span>`;
+              }
+              if (item.period === "PAST") {
+                // 如果是前期歷史紀錄：改為莫蘭迪沉穩灰色調，不計算與顯示金額
+                primaryColor = "#D2A8B0";
+                darkColor = "#9C5E6D";
+                typeLabel = "⏳ 當期課程";
+                shadowStyle = "rgba(156, 94, 109, 0.3)";
+                bgGradient = "linear-gradient(135deg, #F9F5F6 0%, #E6D5D8 100%)";
+                priceDisplayStr = `共 ${item.count} 堂 (本期預約)`;
+                paySt = "";
+              } else if (item.type === "SINGLE") {
+                // 如果是當期單堂：維持藍色調
+                primaryColor = "#3498db";
+                darkColor = "#2980b9";
+                typeLabel = "🎟️ 當期單堂";
+                shadowStyle = "rgba(52, 152, 219, 0.3)";
+                bgGradient = "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)";
+                priceDisplayStr = `單堂預約 ${item.amount} 元`;
+              } else {
+                // 當期整期課程：正常計算金額
+                const ebTag = item.isEarlyBird ? " (早鳥)" : "";
+                priceDisplayStr = `共 ${item.count} 堂 ${item.amount} 元 ${ebTag}`;
+              }
+
+              // --- 4. 輸出通用 3D 翻轉卡片模板 ---
+              html += `
+                  <div class="course-card result-card-anim" onclick="openCombinedDrawer('${cKey}', '${tKey}', this)" style="cursor: pointer; margin-top: 10px;">
+                      <div class="card-inner">
+                          <div class="card-front" style="display: flex; align-items: center; padding: 15px; border-left: 6px solid ${primaryColor}; background: #ffffff;">
+                              
+                              <div style="width: 70px; flex-shrink: 0; margin-right: 15px; text-align: center;">
+                                  <div class="time-tag" style="
+                                      background: ${primaryColor}; 
+                                      display: flex; 
+                                      flex-direction: column; 
+                                      align-items: center; 
+                                      justify-content: center; 
+                                      width: 70px; 
+                                      height: 70px;
+                                      margin: 0 auto;
+                                      border-radius: 12px;
+                                      color: white; 
+                                      box-sizing: border-box;
+                                      box-shadow: 0 4px 8px ${shadowStyle};">
+                                      <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${startTime}</span>
+                                      <div class="time-line" style="width: 2px; height: 10px; background: rgba(255,255,255,0.7); margin: 4px 0;"></div>
+                                      <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${endTime}</span>
+                                  </div>
+                                  <span style="
+                                      font-size: 0.95em; 
+                                      font-weight: bold; 
+                                      color: ${darkColor};
+                                      margin: 8px auto 0 auto; 
+                                      display: block; 
+                                      width: 100%;
+                                      text-align: center;">
+                                      ${dayText || nameParts[1] || ""}
+                                  </span>
+                              </div>
+
+                              <div style="flex: 1; text-align: left; min-width: 0;">
+                                  <div class="card-title" style="margin-bottom: 4px; font-weight: bold; color: ${darkColor}; font-size: 1.1em;">
+                                      ${displayName} <span style="font-size: 0.85em; color: #7f8c8d; font-weight: normal;">(${item.userName})</span>
+                                  </div>
+                                  <div class="card-detail" style="font-size: 0.9em; color: #555;">日期：${item.dates}</div>
+                                  <div class="card-detail" style="color: ${darkColor}; font-weight: bold; margin-top: 6px; font-size: 0.95em;">
+                                      ${priceDisplayStr}<br>${paySt}
+                                  </div>
+                                  <small style="color: ${primaryColor}; display: block; margin-top: 6px;">點擊查看課程與老師簡介 ➔</small>
+                              </div>
+                          </div>
+                          
+                          <div class="card-back" style="background: ${bgGradient}; border-color: ${primaryColor}; color: ${darkColor};">
+                              <div style="font-weight: bold;">查看詳細介紹...</div>
+                          </div>
+                      </div>
+                  </div>`;
+            });
+            resultDiv.innerHTML = html;
+
+            // 3. 渲染個人課表 (過濾：僅渲染「整期(FULL)」的課程)
+            const userFullCourseNames = res.items
+                .filter(item => item.type === "FULL")
+                .map(item => item.name.trim());
+            
+            const matchedCourses = allCourseData.filter(c => {
+                return userFullCourseNames.some(uName => c.name.includes(uName));
+            });
+        }
+
+        btn.disabled = false;
+        btn.innerText = "立即查詢";
+    })
+    .catch(function(err) {
+        // 增加防呆：處理網路錯誤或伺服器錯誤，避免按鈕永久卡住
+        const errorMsg = err.message || err;
+        resultDiv.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">❌ 查詢失敗：${errorMsg}</div>`;
+        btn.disabled = false;
+        btn.innerText = "立即查詢";
+    });
+});
+
+  // 3. 處理課程日期查詢
+  document.getElementById('itemQueryName').addEventListener('change', function() {
+    const itemName = document.getElementById('itemQueryName').value;
+    const resultDiv = document.getElementById('itemQueryResult');
+    
+    if (!itemName) {
+        resultDiv.innerHTML = "<span style='color: red;'>請選擇課程名稱</span>";
+        return;
+    }
+
+    if (!allCourseData || allCourseData.length === 0) {
+        resultDiv.innerHTML = "<span style='color: orange;'>資料載入中，請稍候再試...</span>";
+        return;
+    }
+
+    const course = allCourseData.find(c => c.name === itemName);
+
+    if (course) {
+    // --- 1. 解析名稱、老師、星期與時間 ---
+    // 假設 itemName 格式為 "課程-老師 星期 時間範圍"
+    var fullParts = itemName.split(" "); 
+    var nameTeacherPart = fullParts[0]; // "課程-老師"
+    var weekPart = fullParts[1] ? fullParts[1].trim() : ""; // "週日"
+    var timePart = fullParts[2] ? fullParts[2].trim() : ""; // "16:00-16:55"
+
+    // 解析 cKey 與 tKey (用於抽屜)
+    var nameParts = nameTeacherPart.split("-");
+    var cKey = nameParts[0] ? nameParts[0].trim() : "";
+    var tKey = nameParts[1] ? nameParts[1].trim() : "";
+
+    // 解析開始與結束時間
+    var timeRange = timePart.split("-");
+    var startTime = timeRange[0] || "--:--";
+    var endTime = timeRange[1] || "--:--";
+
+    // --- 2. 計算價格與堂數 ---
+    const dateString = course.dates; 
+    const pricePerClass = course.pricePerClass;
+    const dateArray = dateString.split(",").filter(s => s.trim() !== "");
+    const totalClasses = dateArray.length;
+    const totalPrice = totalClasses * pricePerClass;
+
+    // --- 3. 渲染為定版小卡片格式 ---
+    let cardHtml = `
+      <div class="course-card result-card-anim" onclick="openCombinedDrawer('${cKey.replace(/'/g, "\\'")}', '${tKey.replace(/'/g, "\\'")}', this)" style="cursor: pointer; margin-top: 10px;">
+          <div class="card-inner">
+              <div class="card-front" style="display: flex; align-items: center; padding: 15px; border-left: 6px solid #F4A7B9;">
+                  
+                  <div style="width: 70px; flex-shrink: 0; margin-right: 15px; text-align: center;">
+                      <div class="time-tag" style="
+                          background: #F4A7B9; 
+                          display: flex; 
+                          flex-direction: column; 
+                          align-items: center; 
+                          justify-content: center; 
+                          width: 70px; 
+                          height: 70px; 
+                          margin: 0 auto; 
+                          border-radius: 12px; 
+                          color: white; 
+                          box-sizing: border-box;
+                          box-shadow: 0 4px 8px rgba(232, 122, 144, 0.3);">
+                          <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${startTime}</span>
+                          <div class="time-line" style="width: 2px; height: 10px; background: rgba(255,255,255,0.7); margin: 4px 0;"></div>
+                          <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${endTime}</span>
+                      </div>
+                      <span style="
+                          font-size: 0.95em; 
+                          font-weight: bold; 
+                          color: #d14d72; 
+                          margin: 8px auto 0 auto; 
+                          display: block; 
+                          width: 100%;
+                          text-align: center;">
+                          ${weekPart}
+                      </span>
+                  </div>
+
+                  <div style="flex: 1; text-align: left; min-width: 0;">
+                      <div class="card-title" style="margin-bottom: 4px; font-weight: bold; color: #d14d72; font-size: 1.1em;">
+                          📌 ${nameTeacherPart}
+                      </div>
+                      <div class="card-detail" style="font-size: 0.9em; color: #555;">日期：${dateString}</div>
+                      <div class="card-detail" style="color: #e74c3c; font-weight: bold; margin-top: 6px; font-size: 0.95em;">
+                          共 ${totalClasses} 堂 ${totalPrice} 元
+                      </div>
+                      <small style="color: #f089a1; display: block; margin-top: 6px;">點擊查看課程與老師簡介 ➔</small>
+                  </div>
+              </div>
+              
+              <div class="card-back">
+                  <div style="font-weight: bold;">查看詳細介紹...</div>
+              </div>
+          </div>
+      </div>`;
+    
+    resultDiv.innerHTML = cardHtml;
+} else {
+        resultDiv.innerText = "目前查無此項目的日期資訊。";
+    }
+});
+
+    
+
+function filterDay(day, evt) {
+  const container = document.querySelector('.day-tabs');
+  // 安全檢查：若 DOM 尚未生成則靜默跳出，防止腳本卡死
+  if (!container) return; 
+
+  const ghost = document.getElementById('day-ghost-tab');
+  const tabs = document.querySelectorAll('.day-tab:not(#day-ghost-tab)');
+  const currentActive = container.querySelector('.day-tab.active-day');
+  
+  // 1. 定義目標按鈕 (適應自動歸位需求)
+  let targetTab = (evt && evt.currentTarget) ? evt.currentTarget : null;
+  if (!targetTab) {
+    const searchLabel = day.replace('週', '');
+    tabs.forEach(tab => {
+      if (tab.innerText.trim() === searchLabel) targetTab = tab;
+    });
+  }
+
+  // 2. 核心邏輯分流
+  if (evt && targetTab && currentActive && targetTab !== currentActive) {
+    // --- 執行人為點擊的衝刺動畫 ---
+    const pRect = container.getBoundingClientRect();
+    const cRect = currentActive.getBoundingClientRect();
+    const tRect = targetTab.getBoundingClientRect();
+
+    // 同步外觀與文字
+    ghost.style.width = cRect.width + "px";
+    ghost.style.height = cRect.height + "px";
+    ghost.innerText = currentActive.innerText;
+
+    // 適應原本 ghost-dash 的變數注入
+    // 注意：CSS 內已有 calc(var(--sy) - 6px)，這裡直接給予相對座標
+    ghost.style.setProperty('--sx', (cRect.left - pRect.left) + "px");
+    ghost.style.setProperty('--sy', (cRect.top - pRect.top + 2) + "px");
+    ghost.style.setProperty('--ex', (tRect.left - pRect.left) + "px");
+    ghost.style.setProperty('--ey', (tRect.top - pRect.top + 2) + "px");
+
+    // 觸發切換
+    currentActive.classList.remove('active-day');
+    ghost.classList.remove('day-ghost-moving');
+    void ghost.offsetWidth; // 強制瀏覽器重繪以啟動動畫
+    ghost.classList.add('day-ghost-moving');
+
+    setTimeout(() => {
+      ghost.classList.remove('day-ghost-moving');
+      targetTab.classList.add('active-day');
+    }, 320);
+  } else {
+    // --- 執行初始化自動歸位 (不計算座標，避免報錯卡死) ---
+    tabs.forEach(tab => tab.classList.remove('active-day'));
+    if (targetTab) {
+      targetTab.classList.add('active-day');
+    }
+  }
+
+  // 3. 處理課程顯示與隱藏 (原本動畫邏輯)
+  const allWrappers = document.querySelectorAll('.course-anim-wrapper');
+  let hasCourse = false;
+  allWrappers.forEach(div => {
+    if (div.getAttribute('data-day') === day) {
+      div.classList.add('active-show');
+      hasCourse = true;
+    } else {
+      div.classList.remove('active-show');
+    }
+  });
+
+  // 4. 更新無課程提示
+  const cbContainer = document.getElementById('checkbox-container');
+  if (cbContainer) {
+    let noMsg = document.getElementById('no-course-notice');
+    if (noMsg) noMsg.remove();
+    if (!hasCourse) {
+      const p = document.createElement('p');
+      p.id = 'no-course-notice';
+      p.style = "text-align:center; color:#999; padding:20px; font-size:0.9em;";
+      p.innerText = "☕ 該日暫無課程安排";
+      cbContainer.appendChild(p);
+    }
+  }
+}
+
+      let currentStatusData = []; // 全域變數儲存當前教室狀態
+
+      // 1. 初始化日期選單限制
+//14天
+let fp;
+
+function checkDateTrigger() {
+    const dateInput = document.getElementById('roomDate');
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setDate(today.getDate() + 31);
+
+    dateInput.disabled = false;
+    dateInput.placeholder = "選擇日期";
+    // 如果已經初始化過，就更新設定；否則就建立新的
+    if (!fp) {
+        fp = flatpickr("#roomDate", {
+            disableMobile: "true", // 關鍵：禁止手機彈出原生滾輪
+            dateFormat: "Y-m-d",
+            minDate: "today",      // 鎖死今天以前
+            maxDate: maxDate,      // 鎖死 14 天以後
+            // 當日期改變時觸發原本的 fetchRoomStatus
+            onChange: function(selectedDates, dateStr) {
+                if (dateStr) {
+                  const msgDiv = document.getElementById('roomstatusmsg');
+                  if (msgDiv) {
+                      msgDiv.innerHTML = "<span style='color: #3498db;'>⌛ 教室預約狀態載入中，請稍候...</span>";
+                      msgDiv.style.display = "block"; // 確保區塊是顯示狀態
+                  }
+                    fetchRoomStatus(); 
+                }
+            },
+            locale: {
+                firstDayOfWeek: 1 // 週一開始
+            }
+        });
+    } else {
+        // 若已存在，僅更新範圍
+        fp.set("minDate", "today");
+        fp.set("maxDate", maxDate);
+    }
+
+    document.getElementById('dateSection').style.display = 'block';
+    updatePriceList();
+}
+
+// 輔助函式：確保日期格式正確且不跳時區
+function formatDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+// 針對 iPhone 的防呆檢查
+function handleDateChange(input, min, max) {
+    const selectedDate = input.value;
+    if (!selectedDate) return;
+
+    if (selectedDate < min || selectedDate > max) {
+        input.value = ""; // 強制清空
+        return;
+    }
+    
+    // 原本的邏輯：抓取教室狀態
+    fetchRoomStatus();
+}
+
+      // 2. 抓取教室狀態並生成表格
+function fetchRoomStatus() {
+  const room = document.getElementById('roomSelect').value;
+  const dateString = document.getElementById('roomDate').value;
+  const body = document.getElementById('roomTableBody');
+  const head = document.getElementById('roomTableHead');
+  
+  if (!room || !dateString) return;
+  body.innerHTML = '<tr><td colspan="4">讀取時段中...</td></tr>';
+
+  const weekDays = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+  const d = new Date(dateString);
+  const selectedDayName = weekDays[d.getDay()];
+  const dateParts = dateString.split("-");
+  const formattedDate = parseInt(dateParts[1]) + "/" + parseInt(dateParts[2]);
+
+  const timeSlots = [
+    "09:00-09:30", "09:30-10:00", "10:00-10:30", "10:30-11:00",
+    "11:00-11:30", "11:30-12:00", "12:00-12:30", "12:30-13:00", "13:00-13:30", "13:30-14:00",
+    "14:00-14:30", "14:30-15:00", "15:00-15:30", "15:30-16:00",
+    "16:00-16:30", "16:30-17:00", "17:00-17:30", "17:30-18:00",
+    "18:00-18:30", "18:30-19:00", "19:00-19:30", "19:30-20:00", "20:00-20:30", "20:30-21:00"
+  ];
+  
+  let localStatusGrid = timeSlots.map(slot => ({ time: slot, status: "可預約" }));
+
+  const tToM = (t) => {
+    const p = t.trim().split(":");
+    return parseInt(p[0]) * 60 + parseInt(p[1]);
+  };
+
+  allCourseData.forEach(course => {
+    if (course.room === room && course.name.includes(selectedDayName) && course.dates.includes(formattedDate)) {
+      const timeMatch = course.name.match(/\d{2}:\d{2}-\d{2}:\d{2}/);
+      if (timeMatch) {
+        const [taskStart, taskEnd] = timeMatch[0].split("-").map(tToM);
+        localStatusGrid.forEach(slot => {
+          const [slotStart, slotEnd] = slot.time.split("-").map(tToM);
+          if (taskStart < slotEnd && taskEnd > slotStart) { slot.status = "課程"; }
+        });
+      }
+    }
+  });
+
+  
+    allCourseDataPast.forEach(course => {
+      if (course.room === room && course.name.includes(selectedDayName) && course.dates.includes(formattedDate)) {
+        const timeMatch = course.name.match(/\d{2}:\d{2}-\d{2}:\d{2}/);
+        if (timeMatch) {
+          const [taskStart, taskEnd] = timeMatch[0].split("-").map(tToM);
+          localStatusGrid.forEach(slot => {
+            const [slotStart, slotEnd] = slot.time.split("-").map(tToM);
+            if (taskStart < slotEnd && taskEnd > slotStart) { slot.status = "課程"; }
+          });
+        }
+      }
+    });
+  
+
+
+
+  callGasApi("getRoomStatus", [room, dateString])
+  .then(function(serverStatus) {
+    currentStatusData = localStatusGrid.map((item, idx) => {
+      if (item.status === "課程") return item;
+      return serverStatus[idx];
+    });
+
+    // 修改表頭：顯示為兩組「時間/狀態」
+    head.innerHTML = `
+      <th>時間</th><th>${selectedDayName} 預約狀態</th>
+      <th>時間</th><th>${selectedDayName} 預約狀態</th>`;
+
+    let html = "";
+    const totalSlots = currentStatusData.length;
+    const half = Math.ceil(totalSlots / 2); // 將資料分成兩半
+
+    for (let i = 0; i < half; i++) {
+      html += "<tr>";
+      
+      // --- 左半部 (第 i 個) ---
+      html += renderSlotCell(currentStatusData[i], i);
+      
+      // --- 右半部 (第 i + half 個) ---
+      if (i + half < totalSlots) {
+        html += renderSlotCell(currentStatusData[i + half], i + half);
+      } else {
+        html += "<td></td><td></td>"; // 補空白格
+      }
+      
+      html += "</tr>";
+    }
+    
+    const msgDiv = document.getElementById('roomstatusmsg');
+    if (msgDiv) {
+        msgDiv.innerHTML = ""; 
+        msgDiv.style.display = "none"; // 隱藏區塊
+    }
+    body.innerHTML = html;
+    document.getElementById('statusTableSection').style.display = 'block';
+    updateAvailableTimes();
+  })
+  .catch(function(err) {
+    // 增加例外處理，避免查詢失敗時畫面卡死或沒有提示
+    console.error("❌ 讀取教室狀態失敗:", err);
+    const msgDiv = document.getElementById('roomstatusmsg');
+    if (msgDiv) {
+        const errorMsg = err.message || err;
+        msgDiv.innerHTML = `<span style="color: red;">❌ 查詢失敗：${errorMsg}</span>`; 
+        msgDiv.style.display = "block";
+    }
+  });
+}
+
+function renderSlotCell(item, index) {
+  let displayStatus = item.status;
+  let fontColor = displayStatus === "可預約" ? "green" : "red";
+  let statusContent = displayStatus;
+
+  if (displayStatus === "可預約") {
+    const prev = currentStatusData[index - 1];
+    const next = currentStatusData[index + 1];
+    if ((!prev || prev.status !== "可預約") && (!next || next.status !== "可預約")) {
+      statusContent = "不可預約";
+      fontColor = "#999";
+    } else {
+      const startTime = item.time.split("-")[0];
+      statusContent = `<button type="button" class="time-slot-btn" 
+                data-index="${index}" data-time="${startTime}"
+                onclick="selectStartTime('${startTime}', this)"
+                style="width: 90%; padding: 2px 0; background: #E87A90; color: white; border: none; border-radius: 11px; cursor: pointer; font-size: 16px; display: block; margin: auto; max-height: 26px; font-weight:normal;">
+                ${startTime}
+              </button>`;
+    }
+  }
+
+  return `
+    <td style="font-weight:bold; background:#fafafa;">${item.time}</td>
+    <td style="color:${fontColor}; font-weight:bold;">${statusContent}</td>`;
+}
+
+// 點擊表格按鈕時，將時間填入文字框，並改變按鈕顏色
+function selectStartTime(time, btnEl) {
+  document.getElementById('startTimeSelect').value = time;
+  
+  // 恢復所有按鈕顏色
+  document.querySelectorAll('.time-slot-btn').forEach(b => {
+    b.style.background = "#E87A90";
+    b.style.fontWeight = "normal";
+  });
+  // 讓選中的按鈕變色
+  btnEl.style.background = "#D05A6E";
+  btnEl.style.fontWeight = "bold";
+}
+
+function updateAvailableTimes() {
+  const durationValue = document.getElementById('durationSelect').value;
+  const duration = parseInt(durationValue) || 1;
+  const buttons = document.querySelectorAll('.time-slot-btn');
+  const slotsNeeded = duration * 2; 
+
+  // 當時數改變，清空已選時間
+  document.getElementById('startTimeSelect').value = "";
+
+  buttons.forEach(btn => {
+    const index = parseInt(btn.getAttribute('data-index'));
+    let canBook = true;
+
+    // 檢查從此索引開始是否有足夠的連續「可預約」時段
+    for (let i = index; i < index + slotsNeeded; i++) {
+      if (i >= currentStatusData.length || currentStatusData[i].status !== "可預約") {
+        canBook = false;
+        break;
+      }
+    }
+
+    // 根據檢查結果切換按鈕顯示狀態
+    btn.style.display = canBook ? "inline-block" : "none";
+  });
+}
+
+      // 4. 送出預約
+      function submitRoomData() {
+        const btn = document.getElementById('roomBtn');
+        const output = document.getElementById('roomOutput');
+        
+        // 取得基礎資料
+        const room = document.getElementById('roomSelect').value;
+        const date = document.getElementById('roomDate').value;
+        const startTime = document.getElementById('startTimeSelect').value; 
+        const durationValue = document.getElementById('durationSelect').value;
+        const duration = parseFloat(durationValue);
+
+        // --- 1. 基礎必選檢查 (由上而下) ---
+        if (!room) {
+          output.style.color = "red";
+          output.innerText = "⚠️ 請選擇教室";
+          document.getElementById('roomSelect').focus();
+          return;
+        }
+        if (!date) {
+          output.style.color = "red";
+          output.innerText = "⚠️ 請選擇預約日期";
+          document.getElementById('roomDate').focus();
+          return;
+        }
+        if (!durationValue) {
+          output.style.color = "red";
+          output.innerText = "⚠️ 請選擇預約時數";
+          document.getElementById('durationSelect').focus();
+          return;
+        }
+        if (!startTime) {
+          output.style.color = "red";
+          output.innerText = "⚠️ 請選擇開始時間";
+          document.getElementById('startTimeSelect').focus();
+          return;
+        }
+
+        // --- 計算結束時間邏輯 ---
+        const [startH, startM] = startTime.split(':').map(Number);
+        const totalMinutes = startH * 60 + startM + (duration * 60);
+        const endH = Math.floor(totalMinutes / 60);
+        const endM = totalMinutes % 60;
+        const formattedEndTime = endH + ":" + (endM === 0 ? "00" : (endM < 10 ? "0" + endM : endM));
+        const timeRangeString = startTime + "-" + formattedEndTime;
+
+        // 取得聯絡人資料
+        const nameInput = document.getElementById('rName');
+        const phoneInput = document.getElementById('rPhone');
+        const lineInput = document.getElementById('rLine');
+        const emailInput = document.getElementById('rEmail');
+        const bankInput = document.getElementById('rBank');
+
+        // --- 2. 個別欄位細節檢查 ---
+        if (!nameInput.value.trim()) {
+          output.style.color = "red";
+          output.innerText = "⚠️ 請填寫「姓名」";
+          nameInput.focus();
+          return;
+        }
+        if (!phoneInput.value.trim()) {
+          output.style.color = "red";
+          output.innerText = "⚠️ 請填寫「電話」";
+          phoneInput.focus();
+          return;
+        }
+        if (!lineInput.value.trim()) {
+          output.style.color = "red";
+          output.innerText = "⚠️ 請填寫「LINE ID」";
+          lineInput.focus();
+          return;
+        }
+        if (!emailInput.value.trim()) {
+          output.style.color = "red";
+          output.innerText = "⚠️ 請填寫「電子郵件」";
+          emailInput.focus();
+          return;
+        }else {
+          const emailRule = /^[^\s@]+@[^\s@]+$/;
+          if (!emailRule.test(emailInput.value.trim())) {
+              output.style.color = "red";
+              output.innerText = "⚠️ 電子郵件格式錯誤（須包含 @ ）";
+              emailInput.focus();
+              return;
+          }
+        }
+        if (!bankInput.value.trim()) {
+          output.style.color = "red";
+          output.innerText = "⚠️ 請填寫「匯款末 5 碼」";
+          bankInput.focus();
+          return;
+        } else if (bankInput.value.trim().length !== 5) {
+          output.style.color = "red";
+          output.innerText = "⚠️ 匯款帳號末 5 碼必須為 5 位數字";
+          bankInput.focus();
+          return;
+        }
+
+        // --- 3. 準備提交資料 ---
+        const data = {
+          room: room,
+          date: date,
+          name: nameInput.value.trim(),
+          phone: phoneInput.value.trim(),
+          lineId: lineInput.value.trim(),
+          email: emailInput.value.trim(),
+          bankId: bankInput.value.trim(),
+          timeRange: timeRangeString
+        };
+
+        
+const originalBtnText = "送出教室預約";
+  btn.disabled = true;
+  btn.innerText = "正在提交預約...";
+  btn.style.backgroundColor = "#E87A90"; // 變灰色
+  btn.style.cursor = "not-allowed";
+
+
+        callGasApi("submitRoomBooking", [data])
+    .then(function(res) {
+        btn.innerText = originalBtnText;
+        btn.disabled = false;
+        btn.style.backgroundColor = "#E87A90"; 
+        btn.style.cursor = "pointer";
+
+        output.style.color = "green";
+        output.innerHTML = "✅ " + res + "<br>資料已清空，可繼續下一次預約。";
+        output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        const durationSelect = document.getElementById('durationSelect');
+        const selectedText = durationSelect.options[durationSelect.selectedIndex].text;
+        const priceMatch = selectedText.match(/\((\d+)元\)/);
+        const finalPrice = priceMatch ? priceMatch[1] : "0";
+
+        // 2. 注入共用的 paymentInfo
+        document.getElementById('displayFinalAmount').innerText = finalPrice;
+        const content = document.getElementById('paymentInfo').innerHTML;
+        document.getElementById('modalInjectionPoint').innerHTML = content;
+        
+        // 3. 彈出
+        document.getElementById('paymentModalOverlay').classList.add('active');
+
+        setTimeout(function() {
+            // 清空欄位
+            nameInput.value = "";
+            phoneInput.value = "";
+            lineInput.value = "";
+            emailInput.value = "";
+            bankInput.value = "";
+            
+            fetchRoomStatus(); // 重新整理表格
+            btn.disabled = false;
+            output.innerText = "";
+        }, 3000);
+        
+    })
+    .catch(function(err) {
+        output.style.color = "red";
+        // 加入 err.message || err 的防呆機制，確保字串或錯誤物件都能正確顯示
+        const errorMsg = err.message || err;
+        output.innerText = "❌ 提交失敗：" + errorMsg;
+        btn.disabled = false;
+    });
+      }
+
+function closePaymentModal() {
+  const injectionHtml = document.getElementById('modalInjectionPoint').innerHTML;
+  if (injectionHtml.includes('位學員資料') || injectionHtml.includes('緊急聯絡人')) {
+    return; // 直接中斷，不關閉視窗
+  }
+  
+  const modal = document.getElementById('paymentModalOverlay');
+  modal.classList.remove('active');
+  // 延遲清空內容防止閃爍
+  setTimeout(() => { document.getElementById('modalInjectionPoint').innerHTML = ""; }, 300);
+}
+      function updatePriceList() {
+        const room = document.getElementById('roomSelect').value;
+        const durationSelect = document.getElementById('durationSelect');
+        const price = roomPriceMap[room] || 0;
+        
+        // 清空現有選項
+        durationSelect.innerHTML = "";
+
+        // 動態產生 1-6 小時的選項
+        for (let i = 1; i <= 12; i++) {
+          const opt = document.createElement('option');
+          opt.value = i;
+          // 顯示格式：1 小時 (1000元)
+          opt.text = i + " 小時 (" + (price * i) + "元)";
+          durationSelect.appendChild(opt);
+        }
+        syncToCustomDurationDropdown();
+        // 更新價格後，也要同步更新「可預約開始時間」選單
+        updateAvailableTimes();
+      }
+
+    // 分頁切換功能
+    function openTab(evt, tabName) {
+  const targetBtn = evt.currentTarget;
+  const parent = targetBtn.parentElement;
+  const ghost = document.getElementById('ghost-tab');
+  const currentActiveBtn = parent.querySelector(".tab-btn.active");
+
+  // 防呆：如果點擊的是同一個按鈕，或者找不到當前激活按鈕，就直接切換不跑動畫
+  if (!currentActiveBtn || currentActiveBtn === targetBtn) {
+    executeTabSwitch(targetBtn, parent, tabName);
+    return;
+  }
+
+  if (ghost && parent) {
+    // 計算相對位置
+    const pRect = parent.getBoundingClientRect();
+    const cRect = currentActiveBtn.getBoundingClientRect();
+    const tRect = targetBtn.getBoundingClientRect();
+
+    const startX = cRect.left - pRect.left;
+    const startY = cRect.top - pRect.top;
+    const endX = tRect.left - pRect.left;
+    const endY = tRect.top - pRect.top;
+
+    // 同步內容與尺寸
+    ghost.style.width = cRect.width + "px";
+    ghost.style.height = cRect.height + "px";
+    
+    // 注入變數 (SY 和 EY 已經在 CSS 內處理了 -3px 補償)
+    ghost.style.setProperty('--sx', startX + "px");
+    ghost.style.setProperty('--sy', startY + "px");
+    ghost.style.setProperty('--ex', endX + "px");
+    ghost.style.setProperty('--ey', endY + "px");
+
+    // 啟動表演
+    currentActiveBtn.classList.remove('active');
+    
+    ghost.classList.remove('ghost-moving');
+    void ghost.offsetWidth; // 觸發重繪
+    ghost.classList.add('ghost-moving');
+
+    setTimeout(() => {
+      ghost.classList.remove('ghost-moving');
+      currentActiveBtn.style.opacity = "1"; // 恢復透明度
+      
+      // 動畫跑完後，呼叫實質切換的函式
+      executeTabSwitch(targetBtn, parent, tabName);
+    }, 350);
+  } else {
+    // 找不到幽靈按鈕時的保底機制
+    executeTabSwitch(targetBtn, parent, tabName);
+  }
+}
+
+/**
+ * 輔助完成實質的主分頁面板切換與淡入動畫
+ */
+function executeTabSwitch(targetBtn, parent, tabName) {
+  const btns = parent.querySelectorAll(".tab-btn");
+  for (let i = 0; i < btns.length; i++) {
+    btns[i].classList.remove("active");
+  }
+  targetBtn.classList.add("active");
+
+  const tabContent = document.getElementsByClassName("tab-content");
+  for (let i = 0; i < tabContent.length; i++) {
+    tabContent[i].classList.remove("active");
+    tabContent[i].classList.remove("fade-in-section");
+  }
+  
+  const targetContent = document.getElementById(tabName);
+  if (targetContent) {
+    targetContent.classList.add("active");
+    void targetContent.offsetWidth; 
+    targetContent.classList.add("fade-in-section");
+  }
+}
+
+
+
+function handleRoomQuery() {
+  const phone = document.getElementById('queryRoomPhone').value;
+  const btn = document.getElementById('roomqueryBtn'); // 查詢按鈕
+  const resultDiv = document.getElementById('queryRoomResult'); // 下方顯示結果的地方
+  
+  if (!phone) {
+    resultDiv.innerText = "請輸入電話號碼";
+    resultDiv.style.color = "red";
+    return;
+  }
+
+  // 1. 查詢開始：按鈕禁用，顯示查詢中狀態
+  btn.innerHTML = '<div class="loader"></div>';
+  btn.disabled = true;
+  btn.style.backgroundColor = "#E87A90";
+  btn.style.cursor = "not-allowed";
+  
+  resultDiv.style.color = "#2c3e50";
+
+  callGasApi("queryRoomReservation", [phone])
+    .then(function(res) {
+      // 2. 查詢完畢：恢復按鈕狀態 
+      btn.innerText = "查詢預約";
+      btn.disabled = false;
+      btn.style.backgroundColor = "#E87A90";
+      btn.style.cursor = "pointer";
+
+      // 3. 處理查詢結果
+      if (res === "查無教室預約紀錄。" || !res) {
+        resultDiv.innerText = res;
+        resultDiv.style.color = "red";
+      } else {
+        // --- 核心修改：建構具備 10px 圓角容器的表格 ---
+        const rows = res.split("\n");
+        
+        // 1. 確保外層 resultDiv 沒有預設 padding
+        resultDiv.style.padding = "0";
+        
+        // 2. 使用完全緊湊的字串，中間不留任何換行，並加入 display: block
+        let tableHtml = '<div style="border-radius:10px; overflow:hidden; border:1px solid #ddd; margin-top:10px; display:flex; flex-direction:column; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">';
+        tableHtml += '<table style="width:100%; border-collapse:collapse; background-color:white; font-size:16px; border:none; margin:0; padding:0; display:table;">';
+        tableHtml += '<thead style="margin:0; padding:0;">';
+        tableHtml += '<tr style="background-color:#F4A7B9; margin:0;">';
+        tableHtml += '<th style="border-right:1px solid rgba(0,0,0,0.05); padding:12px 5px; text-align:center; color:#2c3e50; line-height:1; vertical-align:middle;">教室</th>';
+        tableHtml += '<th style="border-right:1px solid rgba(0,0,0,0.05); padding:12px 5px; text-align:center; color:#2c3e50; line-height:1; vertical-align:middle;">日期</th>';
+        tableHtml += '<th style="padding:12px 5px; text-align:center; color:#2c3e50; line-height:1; vertical-align:middle;">時間</th>';
+        tableHtml += '</tr></thead><tbody>';
+
+        rows.forEach((rowStr, index) => {
+          const parts = rowStr.split('｜');
+          if (parts.length === 3) {
+            const room = parts[0].replace('教室: ', '').trim();
+            const date = parts[1].replace('日期: ', '').trim();
+            const time = parts[2].replace('時間: ', '').trim();
+            const rowStyle = (index === rows.length - 1) ? '' : 'border-bottom: 1px solid #eee;';
+
+            tableHtml += `<tr style="${rowStyle}"><td style="border-right:1px solid #eee; padding:10px 5px; text-align:center;">${room}</td><td style="border-right:1px solid #eee; padding:10px 5px; text-align:center;">${date}</td><td style="padding:10px 5px; text-align:center;">${time}</td></tr>`;
+          }
+        });
+
+        tableHtml += `</tbody></table></div>`;
+        
+        resultDiv.style.color = "#2c3e50";
+        resultDiv.innerHTML = "\n" + tableHtml;
+      }
+    })
+    .catch(function(err) {
+      btn.innerText = "查詢我的預約";
+      btn.disabled = false;
+      btn.style.backgroundColor = "#E87A90";
+      
+      // 可以將錯誤訊息印在 Console 方便除錯
+      console.error("查詢預約失敗:", err.message || err);
+      resultDiv.innerText = "❌ 系統錯誤，請稍後再試。";
+      resultDiv.style.color = "red";
+    });
+}
+
+function updateNotice() {
+  const selectElement = document.getElementById('participantCount');
+  const noticeElement = document.getElementById('multi-notice');
+  
+  // 取得當前選中的值
+  const count = selectElement.value;
+
+  // 判斷：如果人數大於 1，則顯示提示訊息
+  if (count > 1) {
+    noticeElement.style.display = 'block';
+  } else {
+    noticeElement.style.display = 'none';
+  }
+  updateSelectedDisplay();
+}
+
+function updateSelectedDisplay() {
+    const selectedList = document.getElementById('selected-list');
+    const checkedBoxes = document.querySelectorAll('input[name="items"]:checked');
+    const pCount = parseInt(document.getElementById('participantCount').value) || 1; // 取得人數
+    
+    // 1. 如果沒有勾選任何課程
+    if (checkedBoxes.length === 0) {
+        selectedList.innerHTML = '<span style="color: #999; font-weight: bold;">尚未選擇課程</span>';
+        canSubmitByQuota = false; // 重置名額狀態
+        return;
+    }
+
+    // --- 新增：早鳥判定邏輯 ---
+    const today = new Date();
+    // 確保截止日期格式正確並將時間設為當天最後一秒 (23:59:59) 以利判斷
+    const ebDeadline = earlyBirdDate ? new Date(earlyBirdDate) : null;
+    if (ebDeadline) ebDeadline.setHours(23, 59, 59, 999);
+    
+    const isEarlyBird = ebDeadline && today <= ebDeadline;
+    const currentEBDiscount = isEarlyBird ? earlyBirdDiscount : 1;
+    // ----------------------
+
+    // 2. 開始前端計算邏輯
+    let totalPrice = 0;
+    let listHtml = '<ul style="margin: 0; padding-left: 20px; line-height: 1.6;">';
+    let hasFullItem = false;
+    const selectedItemsCount = checkedBoxes.length;
+
+    checkedBoxes.forEach(box => {
+        const itemName = box.value;
+        // 從全域變數 allCourseData 找出對應的課程物件
+        const course = allCourseData.find(c => c.name === itemName);
+
+        if (course) {
+            // 解析堂數 (B欄日期以逗號分隔)
+            const dateArray = course.dates.split(",").filter(s => s.trim() !== "");
+            const count = dateArray.length;
+            
+            // 修改：先乘上早鳥折扣，再計算小計
+            const subTotal = Math.round(count * course.pricePerClass * currentEBDiscount);
+            totalPrice += (subTotal * pCount);
+            
+            // 名額判斷 
+            let statusLabel = "";
+            if (course.remaining <= 0) {
+                statusLabel = ` <b style="color: red;">(已額滿 請取消勾選)</b>`;
+                hasFullItem = true;
+            } else {
+                statusLabel = ` (剩餘名額 ${course.remaining})`;
+            }
+
+            // 若有早鳥優惠，在項目後方顯示提示字樣
+            const ebTag = (isEarlyBird && currentEBDiscount !== 1) ? ` <span style="color: #E87A90; font-size: 0.9em;">(早鳥價)</span>` : "";
+
+            listHtml += `<li><span style="font-size: 1.15em; font-weight: bold;">${itemName}</span><br><span style="font-size: 1em; color: #666;">(${count}堂, ${subTotal}元)${ebTag} ${statusLabel}</span></li>`;
+        }
+    });
+
+    listHtml += '</ul>';
+
+    // 3. 更新全域提交狀態
+    canSubmitByQuota = !hasFullItem;
+
+    // 4. 計算折扣 (兩堂以上額外折扣)
+    let finalDisplayHtml = listHtml;
+    finalDisplayHtml += `<div style="margin-top: 10px; padding-top: 5px; border-top: 2px solid #F4A7B9; font-weight: bold; color: #d05a6e;">`;
+    finalDisplayHtml += `共計 ${selectedItemsCount} 門課，總金額：${totalPrice} 元`;
+
+    let finalPrice = totalPrice;
+    if (!isEarlyBird && selectedItemsCount >= 2 && globalDiscountRate !== 1) {
+        const discountPrice = Math.round(totalPrice * globalDiscountRate);
+        const displayDiscount = (globalDiscountRate * 100) % 10 === 0 ? 
+                            (globalDiscountRate * 10) : 
+                            (globalDiscountRate * 100);
+        finalDisplayHtml += `<br><span style="color: #E87A90;">✨ 兩堂以上 ${displayDiscount} 折優惠✨</span>`;
+        finalPrice = discountPrice;
+    } else if (isEarlyBird && selectedItemsCount >= 2) {
+        finalDisplayHtml += `<br><span style="color: #666; font-size: 0.85em;">(已套用早鳥優惠)</span>`;
+    }
+    
+    finalDisplayHtml += `</div>`;
+    
+    selectedList.classList.remove('result-card-anim');
+    selectedList.innerHTML = finalDisplayHtml;
+    
+    // 2. 強制瀏覽器重繪 (Reflow)，確保能重新偵測到動畫
+    void selectedList.offsetWidth; 
+    
+    // 3. 重新加上動畫類別，觸發往上淡出特效
+    selectedList.classList.add('result-card-anim');
+
+    const amountSpan = document.getElementById('displayFinalAmount');
+    if (amountSpan) {
+      amountSpan.innerText = finalPrice;
+    }
+}
+
+        
+function validateCoursePhone(inputEl) {
+    const submitBtn = document.getElementById('submitBtn');
+    let value = inputEl.value.trim();
+    
+    // 1. 強制過濾非數字
+    value = value.replace(/[^0-9]/g, '');
+    inputEl.value = value;
+    
+    // 2. 驗證條件：長度為10 且 以09開頭
+    const isValid = (value.length === 10 && value.startsWith('09'));
+    
+    if (isValid) {
+        // --- 格式正確：變綠框、啟動按鈕 ---
+        inputEl.classList.add('field-success');
+        inputEl.classList.remove('field-error');
+        
+        canSubmitByPhone = true;
+        //submitBtn.style.backgroundColor = "#E87A90"; // 變成原本報名按鈕的綠色
+        submitBtn.style.cursor = "pointer";
+    } else {
+        // --- 格式不全或錯誤：取消綠框、禁用按鈕 ---
+        inputEl.classList.remove('field-success');
+        
+        // 如果剛好滿10碼但不是09開頭，可以給個紅框警告
+        if (value.length === 10) {
+            inputEl.classList.add('field-error');
+        } else {
+            inputEl.classList.remove('field-error');
+        }
+        
+        canSubmitByPhone = false;
+        //submitBtn.style.backgroundColor = "#cccccc"; // 變回灰色
+        submitBtn.style.cursor = "not-allowed";
+    }
+}
+
+function validateSinglePhone(inputEl) {
+    const submitBtn = document.getElementById('submitBtnS');
+    let value = inputEl.value.trim();
+    
+    // 1. 強制過濾非數字
+    value = value.replace(/[^0-9]/g, '');
+    inputEl.value = value;
+    
+    // 2. 驗證條件：長度為10 且 以09開頭
+    const isValid = (value.length === 10 && value.startsWith('09'));
+    
+    if (isValid) {
+        // --- 格式正確：變綠框、啟動按鈕 ---
+        inputEl.classList.add('field-success');
+        inputEl.classList.remove('field-error');  
+        
+    } else {
+        // --- 格式不全或錯誤：取消綠框、禁用按鈕 ---
+        inputEl.classList.remove('field-success');
+        
+        // 如果剛好滿10碼但不是09開頭，可以給個紅框警告
+        if (value.length === 10) {
+            inputEl.classList.add('field-error');
+        } else {
+            inputEl.classList.remove('field-error');
+        }  
+        
+    }
+}
+
+function validateRoomPhone(inputEl) {
+    const roomBtn = document.getElementById('roomBtn');
+    let value = inputEl.value.trim().replace(/[^0-9]/g, ''); // 過濾非數字
+    inputEl.value = value;
+
+    // 驗證條件：10碼 且 09 開頭
+    if (value.length === 10 && value.startsWith('09')) {
+        // --- 格式正確：變綠框、開啟紫色按鈕 ---
+        inputEl.classList.add('field-success');
+        inputEl.classList.remove('field-error');
+        
+        //roomBtn.disabled = false;
+        //roomBtn.style.background = "#E87A90"; // 恢復你原本的紫色
+        roomBtn.style.cursor = "pointer";
+    } else {
+        // --- 格式錯誤或長度不足：禁用按鈕 ---
+        inputEl.classList.remove('field-success');
+        
+        // 如果剛好滿10碼但非09開頭，顯示錯誤顏色
+        if (value.length === 10) {
+            inputEl.classList.add('field-error');
+        } else {
+            inputEl.classList.remove('field-error');
+        }
+        
+        //roomBtn.disabled = true;
+        //roomBtn.style.background = "#cccccc"; // 變回灰色
+        roomBtn.style.cursor = "not-allowed";
+    }
+}
+
+document.getElementById('teacherSearchInput').addEventListener('change', function() {
+  // 1. 取得選取的老師名稱
+  const teacherName = document.getElementById('teacherSearchInput').value.trim();
+  const resultDiv = document.getElementById('teacherQueryResult');
+  
+  // 2. 檢查是否選取老師
+  if (!teacherName) {
+    resultDiv.innerHTML = "<div class='result-card-anim' style='color: red; text-align:center;'>請選擇老師再進行查詢</div>";
+    return;
+  }
+
+  // 3. 安全合併「現有課程」與「過去課程」資料
+  // 確保如果陣列尚未載入(undefined)時，會以空陣列 [] 代替，避免程式報錯
+  const currentData = allCourseData || [];
+  const pastData = allCourseDataPast || [];
+  const combinedData = [...currentData, ...pastData];
+
+  // 檢查合併後的資料狀態
+  if (combinedData.length === 0) {
+    resultDiv.innerHTML = "<div class='result-card-anim' style='color: orange; text-align:center;'>資料載入中，請稍候再試...</div>";
+    return;
+  }
+
+  // 4. 過濾出該老師的所有課程 (排除含有「★」的項目)
+  const filteredCourses = combinedData.filter(c => 
+    c.name && c.name.includes(teacherName) && !c.name.includes('★')
+  );
+
+  // 5. 渲染結果
+  if (filteredCourses.length === 0) {
+    resultDiv.innerHTML = `<div class="result-card-anim" style="text-align:center; padding: 20px; color: #999;">此老師目前無公開排課紀錄</div>`;
+  } else {
+    // 依據星期與時間排序，讓清單更整齊
+    const dayOrder = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];
+    filteredCourses.sort((a, b) => {
+      const dayA = dayOrder.findIndex(d => a.name.includes(d));
+      const dayB = dayOrder.findIndex(d => b.name.includes(d));
+      if (dayA !== dayB) return dayA - dayB;
+      const timeA = a.name.match(/\d{2}:\d{2}/);
+      const timeB = b.name.match(/\d{2}:\d{2}/);
+      return (timeA && timeB) ? timeA[0].localeCompare(timeB[0]) : 0;
+    });
+
+    let html = ``;
+    
+    filteredCourses.forEach(course => {
+      // --- 1. 解析時間與名稱 (安全抓取，避免格式錯誤) ---
+      const rawCourseName = course.name || "";
+      const namePartsFull = rawCourseName.split(" ");
+
+      // 課程名稱與老師 (例如: "Zumba-Grace")
+      const nameTeacherPart = namePartsFull[0] || ""; 
+      const subParts = nameTeacherPart.split("-");
+      const cKey = (subParts[0] || "").trim().replace(/'/g, "\\'");
+      const tKey = (subParts[1] || "").trim().replace(/'/g, "\\'");
+
+      // 星期與時間段
+      const weekText = (namePartsFull[1] || "").trim();
+      const fullTimeStr = namePartsFull[2] || "";
+      const tParts = fullTimeStr.split("-");
+      const startTime = tParts[0] || "--:--";
+      const endTime = tParts[1] || "--:--";
+
+      // --- 2. 計算價格與堂數 (若有需要) ---
+      // 這裡確保 dates 有值才進行 split，避免 past data 結構不同造成錯誤
+      const rawDates = course.dates || "";
+      const dateArray = rawDates.split(",").filter(s => s.trim() !== "");
+      const totalClasses = dateArray.length;
+      const totalPrice = totalClasses * (course.pricePerClass || 0);
+
+      // --- 3. 組裝定版 HTML (套用 result-card-anim 動畫) ---
+      html += `
+    <div class="course-card result-card-anim" onclick="openCombinedDrawer('${cKey}', '${tKey}', this)" style="cursor: pointer; margin-top: 10px;">
+        <div class="card-inner">
+            <div class="card-front" style="display: flex; align-items: center; padding: 15px; border-left: 6px solid #F4A7B9;">
+                
+                <div style="width: 70px; flex-shrink: 0; margin-right: 15px; text-align: center;">
+                    <div class="time-tag" style="
+                        background: #F4A7B9; 
+                        display: flex; 
+                        flex-direction: column; 
+                        align-items: center; 
+                        justify-content: center; 
+                        width: 70px; 
+                        height: 70px; 
+                        margin: 0 auto; 
+                        border-radius: 12px; 
+                        color: white; 
+                        box-sizing: border-box;
+                        box-shadow: 0 4px 8px rgba(232, 122, 144, 0.3);">
+                        <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${startTime}</span>
+                        <div class="time-line" style="width: 2px; height: 10px; background: rgba(255,255,255,0.7); margin: 3px 0;"></div>
+                        <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${endTime}</span>
+                    </div>
+
+                    <span style="
+                        font-size: 0.95em; 
+                        font-weight: bold; 
+                        color: #d14d72; 
+                        margin: 8px auto 0 auto; 
+                        display: block; 
+                        width: 100%;
+                        text-align: center;">
+                        ${weekText}
+                    </span>
+                </div>
+
+                <div style="flex: 1; text-align: left; min-width: 0;">
+                    <div class="card-title" style="margin-bottom: 4px; font-weight: bold; color: #d14d72; font-size: 1.1em;">
+                        📌 ${cKey}
+                    </div>
+                    <small style="color: #f089a1; display: block; margin-top: 6px;">點擊查看課程與老師簡介 ➔</small>
+                </div>
+            </div>
+
+            <div class="card-back">
+                <div style="font-weight: bold;">查看詳細介紹...</div>
+            </div>
+        </div>
+    </div>`;
+    });
+
+    resultDiv.innerHTML = html;
+  }
+});
+
+function validateNumber(obj) {
+  obj.value = obj.value.replace(/\D/g, '');
+}
+
+function injectCommonRules() {
+  const containers = document.querySelectorAll('.rules-container');
+  containers.forEach(container => {
+    container.innerHTML = COMMON_INFO_BTNS;
+  });
+}
+
+// 確保在頁面載入後執行
+window.addEventListener('load', () => {
+  const openingNotice = document.getElementById('opening-notice');
+  if (0) {
+    const today = new Date();
+    // 設定截止日期為 2026 年 5 月 24 日 的凌晨 00:00:00
+    // (JavaScript 的月份是從 0 開始算，所以 4 代表 5 月)
+    const targetDate = new Date(2026, 4, 24); 
+
+    if (today < targetDate) {
+      openingNotice.innerText = "WEI DONG";
+    } else {
+      openingNotice.innerText = "WEI DONG";
+    }
+  }
+  injectCommonRules();
+
+  // 尋找所有的文字、電話、信箱輸入框
+  const textInputs = document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]');
+
+  textInputs.forEach(input => {
+      input.addEventListener('input', function() {
+          // 1. 先移除舊的 class，確保連續打字時動畫能重新觸發
+          this.classList.remove('typing-pulse-effect');
+          
+          // 2. 強制瀏覽器重繪 (Reflow) 
+          void this.offsetWidth; 
+          
+          // 3. 加上動畫 class
+          this.classList.add('typing-pulse-effect');
+      });
+  });
+               
+   
+});
+
+function closeOverlay() {
+    if (textTimer) {
+        clearInterval(textTimer);
+    }
+    const overlay = document.getElementById('video-overlay');
+    if (overlay) {
+        overlay.classList.add('exit-animation'); // 直接套用 CSS 動畫
+
+        const aiWidget = document.getElementById('ai-chat-widget');
+        if (aiWidget) {
+            aiWidget.classList.add('show');
+        }
+      //document.getElementById('qrcode-widget').classList.add('show');
+        
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 800);        
+    }
+}
+// 打開 QRCode 視窗
+function openQRCodeModal() {
+  document.getElementById('qrcodeModalOverlay').classList.add('active');
+}
+
+// 關閉 QRCode 視窗並還原狀態
+function closeQRCodeModal() {
+  document.getElementById('qrcodeModalOverlay').classList.remove('active');
+  // 延遲清空內容，避免淡出動畫時發生閃爍
+  setTimeout(() => {
+    document.getElementById('qrPhoneNumber').value = "";
+    document.getElementById('qrErrorMsg').style.display = "none";
+    document.getElementById('qrcodeDisplay').style.display = "none";
+    document.getElementById('qrcodeImg').src = "";
+  }, 300); 
+}
+
+// 產生 QRCode
+function generateQRCode() {
+  const phone = document.getElementById('qrPhoneNumber').value.trim();
+  const errorMsg = document.getElementById('qrErrorMsg');
+  
+  // 簡單的防呆檢查：是否為 09 開頭且剛好 10 碼
+  if (phone.length !== 10 || !phone.startsWith('09')) {
+    errorMsg.style.display = 'block';
+    errorMsg.innerHTML = "⚠️ 請輸入正確的手機號碼 (09開頭，共10碼)";
+    return;
+  }
+  
+  errorMsg.style.display = 'none';
+  
+  // 使用免費穩定的 API 產生 QRCode (將手機號碼編碼作為 QRCode 內容)
+  const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(phone);
+  
+  const img = document.getElementById('qrcodeImg');
+  img.src = qrUrl;
+  document.getElementById('qrcodeDisplay').style.display = 'block';
+}
+function initSingleCourseDropdown() {
+  const inputEl = document.getElementById('singleCourseSelect');
+  if (!inputEl) return;
+
+  // 檢查是否有拿到前期的課表資料
+  if (!allCourseDataPast || allCourseDataPast.length === 0) {
+    inputEl.placeholder = "❌ 暫無本月單堂課程資料";
+    inputEl.disabled = true;
+    return;
+  }
+
+  // 復原初始狀態
+  inputEl.placeholder = "🔍 點擊此處開啟課表選擇課程";
+  inputEl.disabled = false;
+  inputEl.value = ""; // 確保重設時欄位清空
+}
+
+function loadSingleDates() {
+  const courseName = document.getElementById('singleCourseSelect').value;
+  const container = document.getElementById('dateRadioGroup');
+  const priceSpan = document.getElementById('sTotalPrice');
+  if (!courseName) {
+    container.innerHTML = '<p>請先選擇課程...</p>';
+    priceSpan.innerText = "0";
+    return;
+  }
+
+  const course = allCourseDataPast.find(c => c.name === courseName); // 🔍 改從前期資料搜尋
+  if (!course) return;
+  var extraFee = 0;
+  priceSpan.innerText = course.pricePerClass + extraFee;
+
+  // 💡 [修改] 直接在前端使用 globalSingleBookedMap 計算名額，免去後端 API 呼叫，瞬間載入！
+  container.innerHTML = ""; 
+  
+  // 1. 本地端秒算各日期剩餘名額
+  const dateStatus = {};
+  const dateArray = course.dates.split(/[,，\s]+/).filter(d => d.trim().length > 0);
+  dateArray.forEach(d => {
+    const dateStr = d.trim();
+    const booked = (globalSingleBookedMap[course.name] && globalSingleBookedMap[course.name][dateStr]) ? globalSingleBookedMap[course.name][dateStr] : 0;
+    dateStatus[dateStr] = course.remaining - booked;
+  });
+
+  // 2. 進行日期排序
+  const sortedDates = Object.keys(dateStatus).sort(function(a, b) {
+    const partsA = a.split(/[\/\-]/);
+    const partsB = b.split(/[\/\-]/);
+    const monthA = parseInt(partsA[0], 10);
+    const dayA = parseInt(partsA[1], 10);
+    const monthB = parseInt(partsB[0], 10);
+    const dayB = parseInt(partsB[1], 10);
+
+    if (monthA !== monthB) return monthA - monthB;
+    return dayA - dayB;
+  });
+
+  // 💡 [新增] 建立今天零點零分 (00:00:00) 的時間物件作為比較基準
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let hasAvailableDate = false; // 紀錄是否有產生任何有效的日期選項
+
+  // 3. 渲染每一天的選項
+  sortedDates.forEach(date => {
+    // 解析格式 (支援 "5/23" 或 "05-23" 或 "2026/05/23")
+    const dateParts = date.split(/[\/\-]/);
+    let targetYear = today.getFullYear();
+    let targetMonth, targetDay;
+
+    if (dateParts.length === 3) {
+      targetYear = parseInt(dateParts[0], 10);
+      targetMonth = parseInt(dateParts[1], 10) - 1;
+      targetDay = parseInt(dateParts[2], 10);
+    } else if (dateParts.length === 2) {
+      targetMonth = parseInt(dateParts[0], 10) - 1;
+      targetDay = parseInt(dateParts[1], 10);
+    } else {
+      return; // 格式不符則跳過
+    }
+
+    // 建立該課程日期的物件，同樣設為 00:00:00 進行公平比對
+    const itemDate = new Date(targetYear, targetMonth, targetDay, 0, 0, 0, 0);
+
+    // 💡 [核心防呆] 如果課程日期小於或等於今天，直接跳過不產生選項
+    if (itemDate <= today) {
+      return;
+    }
+
+    // 通過時間檢查，代表是未來的課程，開始渲染選項
+    hasAvailableDate = true;
+    const remaining = dateStatus[date];
+    const label = document.createElement('label');
+    label.className = 'checkbox-item';
+
+    const isFull = remaining <= 0;
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'singleDate';
+    radio.value = date;
+    radio.disabled = isFull;
+
+    const span = document.createElement('span');
+    span.innerHTML = isFull ? `${date} <b style="color:red;">(已額滿)</b>` : `${date} (剩餘 ${remaining})`;
+    if (isFull) label.style.color = "#ccc";
+
+    label.appendChild(radio);
+    label.appendChild(span);
+    container.appendChild(label);
+  });
+
+  // 💡 [加強體驗] 如果該歷史課程的所有日期都已經過去了，顯示提示字樣
+  if (!hasAvailableDate) {
+    container.innerHTML = '<p style="color: #999; font-size: 0.9em;">☕ 此課程當前已無可報名的未來日期</p>';
+  }
+}
+
+function submitSingleForm() {
+  const output = document.getElementById('singleOutput');
+  const selectedDate = document.querySelector('input[name="singleDate"]:checked');
+  const btn = document.querySelector('button[onclick="submitSingleForm()"]');
+  
+  const data = {
+    courseName: document.getElementById('singleCourseSelect').value,
+    selectedDate: selectedDate ? selectedDate.value : "",
+    name: document.getElementById('sName').value.trim(),
+    phone: document.getElementById('sPhone').value.trim(),
+    lineId: document.getElementById('sLine').value.trim(),
+    email: document.getElementById('sEmail').value.trim(),
+    bankId: document.getElementById('sBank').value.trim()
+  };
+
+  if (!data.courseName || !data.selectedDate || !data.name || !data.phone || !data.bankId) {
+    output.style.color = "red";
+    output.innerText = "⚠️ 請填寫完整報名資訊並選擇日期";
+    return;
+  }
+
+  const isPhoneValid = (data.phone.length === 10 && data.phone.startsWith('09'));
+  if (!isPhoneValid) {
+    output.style.color = "red";
+    output.innerText = "⚠️ 電話格式不正確，必須為 09 開頭的 10 位數字";
+    document.getElementById('sPhone').focus();
+    return;
+  }
+
+  const agreement = document.getElementById('agreementCheckbox_S');
+  if (!agreement.checked) {
+    output.style.color = "red";
+    output.innerText = "⚠️ 請先勾選：「本人已詳細閱讀相關資訊」後再提交。";
+    output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // 驗證過關後，先不直接送出後端，而是呼叫彈窗（最後一個參數帶 true 代表單堂課程）
+  askEmergencyContactSingle(data, btn, output, true);
+}
+
+/**
+ * 執行最終的單堂資料提交（帶入緊急聯絡人資訊）
+ */
+function executeSingleCourseSubmit(data, emergencyInfo, btn, output) {
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "提交中...";
+  }
+  output.style.color = "#34495e";
+  output.innerText = "正在處理單堂報名資料...";
+
+  callGasApi("processSingleForm", [data, emergencyInfo])
+    .then(function(res) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "提交單堂報名";
+      }
+
+      output.style.color = "green";
+      output.innerText = "✅ " + res;
+      
+      // 顯示匯款資訊並卷動
+      const totalPrice = document.getElementById('sTotalPrice').innerText;
+      document.getElementById('displayFinalAmount').innerText = totalPrice;
+
+      // 抓取 paymentInfo 的內容並注入到 Modal 
+      const paymentInfoHtml = document.getElementById('paymentInfo').innerHTML;
+      const injectionPoint = document.getElementById('modalInjectionPoint');
+      
+      injectionPoint.innerHTML = `
+        <div style="display:block !important; border:none; background:none; margin:0;">
+          ${paymentInfoHtml}
+        </div>
+      `;
+
+      // 顯示中央彈出視窗
+      document.getElementById('paymentModalOverlay').classList.add('active');
+      
+      // 清空單堂表單基礎欄位
+      document.getElementById('sName').value = "";
+      document.getElementById('sPhone').value = "";
+      document.getElementById('sBank').value = "";
+      document.getElementById('sLine').value = "";
+      document.getElementById('sEmail').value = "";
+      document.getElementById('agreementCheckbox_S').checked = false;
+      
+      loadSingleDates(); // 刷新名額狀態
+    })
+    .catch(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "提交單堂報名";
+      }
+      output.style.color = "red";
+      // 增加防呆：確保字串或錯誤物件都能正確顯示
+      const errorMsg = err.message || err;
+      output.innerText = "❌ 提交失敗：" + errorMsg;
+    });
+}
+
+function openSubTab(evt, tabName) {
+  const targetBtn = evt.currentTarget;
+  const parentNode = targetBtn.parentElement;
+  const ghost = document.getElementById('child-ghost-tab');
+  const currentActiveBtn = parentNode.querySelector(".tab-btn.active");
+
+  // 防呆：如果點擊的是同一個按鈕，或者找不到當前激活按鈕，就直接切換不跑動畫
+  if (!currentActiveBtn || currentActiveBtn === targetBtn) {
+    executeSubTabSwitch(targetBtn, parentNode, tabName);
+    return;
+  }
+
+  if (ghost && parentNode) {
+    // 1. 計算相對父容器的起點與終點座標
+    const pRect = parentNode.getBoundingClientRect();
+    const cRect = currentActiveBtn.getBoundingClientRect();
+    const tRect = targetBtn.getBoundingClientRect();
+
+    const startX = cRect.left - pRect.left;
+    const startY = cRect.top - pRect.top;
+    const endX = tRect.left - pRect.left;
+    const endY = tRect.top - pRect.top;
+
+    // 2. 同步幽靈卡片的尺寸
+    ghost.style.width = cRect.width + "px";
+    ghost.style.height = cRect.height + "px";
+    
+    // 3. 注入 CSS 衝刺變數
+    ghost.style.setProperty('--sx', startX + "px");
+    ghost.style.setProperty('--sy', startY + "px");
+    ghost.style.setProperty('--ex', endX + "px");
+    ghost.style.setProperty('--ey', endY + "px");
+
+    // 4. 表演真假卡片切換
+    currentActiveBtn.classList.remove('active');
+    
+    ghost.classList.remove('ghost-moving');
+    void ghost.offsetWidth; // 強制重繪
+    ghost.classList.add('ghost-moving');
+
+    // 5. 動畫結束後復原狀態並完成切換
+    setTimeout(() => {
+      ghost.classList.remove('ghost-moving');
+      currentActiveBtn.style.opacity = "1";
+      executeSubTabSwitch(targetBtn, parentNode, tabName);
+    }, 350); // 與 CSS 動畫時間保持一致
+  } else {
+    executeSubTabSwitch(targetBtn, parentNode, tabName);
+  }
+}
+
+/**
+ * 輔助完成實質的分頁面板切換與樣式標記
+ */
+function executeSubTabSwitch(targetBtn, parentNode, tabName) {
+  // 切換按鈕樣式
+  const btns = parentNode.querySelectorAll(".tab-btn");
+  for (let i = 0; i < btns.length; i++) {
+    btns[i].classList.remove("active");
+  }
+  targetBtn.classList.add("active");
+
+  // 切換下方內容區區塊
+  const contents = document.getElementsByClassName("sub-tab-content");
+  for (let i = 0; i < contents.length; i++) {
+    contents[i].classList.remove("active");
+    contents[i].style.display = "none";
+    // ✨ 新增：順便移除淡入 class，確保下次切換回來時能重新觸發動畫
+    contents[i].classList.remove("fade-in-section");
+  }
+
+  const targetContent = document.getElementById(tabName);
+  if (targetContent) {
+    targetContent.classList.add("active");
+    targetContent.style.display = "block";
+    
+    // ✨ 魔法兩行：強制瀏覽器重繪 (Reflow)，並掛上淡入動畫
+    void targetContent.offsetWidth; 
+    targetContent.classList.add("fade-in-section");
+  }
+}
+
+function toggleDrawer(contentId, title) {
+  // === 【步驟 A】抓取觸發點擊的原始按鈕本人 ===
+  // 透過 event.currentTarget 可以精準抓到目前被點擊的 info-card-btn
+  const originalBtn = event ? event.currentTarget : null;
+  
+  if (originalBtn && originalBtn.classList.contains('info-card-btn')) {
+    // 1. 抓取原始按鈕當下的幾何尺寸，以及相對於網頁頂部的絕對座標
+    const rect = originalBtn.getBoundingClientRect();
+    const absX = rect.left + window.scrollX;
+    const absY = rect.top + window.scrollY;
+
+    // 2. 動態創建一個一模一樣的替身小卡
+    const ghost = document.createElement('div');
+    ghost.className = 'fly-card-ghost';
+    
+    // 3. 把原始按鈕內部的文字、小字、箭頭等 HTML 完美複製進去
+    ghost.innerHTML = originalBtn.innerHTML;
+    
+    // 4. 強制讓替身小卡的尺寸與出生位置跟原始按鈕完全重合
+    ghost.style.width = rect.width + 'px';
+    ghost.style.height = rect.height + 'px';
+    ghost.style.left = absX + 'px';
+    ghost.style.top = absY + 'px';
+
+    // 5. 將替身小卡塞進網頁中，它會立刻開始執行 CSS 的往右放大淡出動畫
+    document.body.appendChild(ghost);
+
+    // 6. 動畫播完後（0.6 秒），自動把這個功成身退的替身從小卡中拔除銷毀
+    setTimeout(() => {
+      ghost.remove();
+    }, 600);
+  }
+
+  // === 【步驟 B】核心防呆延時：當小卡飛到一半時，你原本的抽屜邏輯才完美接棒 ===
+  setTimeout(() => {
+    const drawer = document.getElementById('sideDrawer');
+    const overlay = document.getElementById('drawerOverlay');
+    const body = document.getElementById('drawerBody');
+    const titleEl = document.getElementById('drawerTitle');
+    
+    // 1. 注入標題與內容
+    titleEl.innerText = title;
+    // 將隱藏區塊的 HTML 複製到抽屜的 Body 中
+    body.innerHTML = document.getElementById(contentId).innerHTML;
+    
+    body.scrollTop = 0;
+    
+    // 2. 針對不同功能執行初始化 
+    // 由於使用 innerHTML 注入，必須在注入後才執行選單初始化 
+    setTimeout(() => {
+      if (contentId === 'course-content') {
+        // 初始化課程簡介下拉選單 
+        initCourseIntroDropdown();
+      } else if (contentId === 'teacher-content') {
+        // 初始化師資介紹下拉選單 
+        initTeacherDropdown();
+      } else if (contentId === 'room-content') {
+        // 修改處：改為呼叫列表初始化函式 
+        initVenueList();
+      }
+    }, 50);
+
+    // 3. 顯示抽屜與遮罩
+    overlay.style.display = 'block';
+    setTimeout(() => {
+      drawer.classList.add('open');
+    }, 10);
+    
+  }, 250); // 延遲 250 毫秒開啟，讓小卡先飛一會兒，視覺體驗最流暢！
+}
+
+function closeDrawer() {
+  const drawer = document.getElementById('sideDrawer');
+  const overlay = document.getElementById('drawerOverlay');
+  
+  drawer.classList.remove('open');
+  
+  // 核心：關閉抽屜時將小卡翻回來
+  if (currentFlippedCourseCard) {
+      currentFlippedCourseCard.classList.remove('card-flipped');
+      currentFlippedCourseCard = null;
+  }
+
+  setTimeout(() => {
+    overlay.style.display = 'none';
+  }, 300);
+}
+
+function copyOnlyAccountNumber(e) {
+  // 1. 檢查廣域變數是否有資料
+  if (!globalAccountNumber) {
+    console.error("帳號資訊尚未載入");
+    return;
+  }
+
+  // 2. 執行複製邏輯
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(globalAccountNumber).then(function() {
+      // 3. 成功反饋
+      // 使用 currentTarget 確保點擊到按鈕內部的文字或圖示時，依然能正確抓到按鈕本人
+      const btn = e.currentTarget || e.target;
+      const originalText = btn.innerText;
+      
+      btn.innerText = "帳號已複製！";
+      // 建議使用原本 LINE 按鈕的綠色漸層
+      btn.style.background = "linear-gradient(135deg, #A8D8B9 0%, #77C392 100%)";
+      
+      setTimeout(() => {
+        btn.innerText = originalText;
+        btn.style.background = "linear-gradient(135deg, #E87A90 0%, #C88595 100%)";
+      }, 1500);
+    }).catch(function(err) {
+      console.error('複製失敗: ', err);
+    });
+  } else {
+    // 兼容性方案
+    alert("您的瀏覽器不支援一鍵複製，帳號為：\n" + globalAccountNumber);
+  }
+}
+
+function initCourseIntroDropdown() {
+    const select = document.getElementById('courseIntroSelect');
+    if (!globalSettings.courseIntros || !allCourseData) return;
+
+    select.innerHTML = '<option value="">-- 請選擇課程 --</option>';
+    
+    // 取得所有簡介中的課程名稱並排序
+    Object.keys(globalSettings.courseIntros).sort().forEach(name => {
+        const option = document.createElement('option');
+        
+        // 檢查該簡介課程是否出現在目前的報名清單 (allCourseData) 中
+        // 使用 some 配合 includes 進行模糊比對（避免名稱後方有老師名或時間導致比對失敗）
+        const isOpening = allCourseData.some(course => course.name.includes(name));
+        
+        // 如果沒有在報名清單中，加上 (未開課) 標籤
+        const displayName = isOpening ? name : name + "";
+        
+        option.value = name; // value 保持原名，方便後續對應資料庫
+        option.text = displayName;
+        select.appendChild(option);
+    });
+    syncToCustomDropdown();
+}
+
+/**
+ * 讀取並顯示簡介
+ */
+function loadCourseIntro() {
+    // 取得選中的名稱
+    let selectedName = document.getElementById('courseIntroSelect').value;
+    const bodyEl = document.getElementById('introBody');
+    const titleEl = document.getElementById('introTitle');
+    const displayArea = document.getElementById('introDisplayArea');
+
+    displayArea.style.display = 'none';
+    if (!selectedName) {return;}
+
+    // 防呆處理：如果 value 意外包含了 (未開課)，將其移除以便對應 globalSettings
+    const cleanName = selectedName.replace(/\s\(未開課\)$/, "");
+
+    if (titleEl) {
+        titleEl.innerText = "🌸 " + cleanName + " 課程介紹";
+    }
+
+    // 使用清除標籤後的名稱來抓取簡介內容
+    const desc = globalSettings.courseIntros[cleanName] || "簡介尚在更新中";
+
+    if (desc.includes('http')) {
+        bodyEl.innerHTML = `<img src="${desc}" referrerpolicy="no-referrer" style="width:100%; border-radius:12px;">`;
+    } else {
+        bodyEl.innerText = desc;
+    }
+    requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                displayArea.style.display = 'block';
+            });
+        });
+}
+let allTeacherData = [];
+/**
+ * 初始化師資選單
+ */
+function initTeacherDropdown() {
+    const select = document.getElementById('teacherSelect');
+    if (!globalSettings.teachers) return;
+
+    select.innerHTML = '<option value="">-- 請選擇老師 --</option>';
+    globalSettings.teachers.forEach(teacher => {
+        const option = document.createElement('option');
+        option.value = teacher.name;
+        option.text = teacher.name;
+        select.appendChild(option);
+    });
+    syncToCustomTeacherDropdown();
+}
+
+/**
+ * 顯示選中的老師圖片與名字
+ */
+function displayTeacherIntro() {
+    const selectedName = document.getElementById('teacherSelect').value;
+    const imgEl = document.getElementById('teacherImg');
+    const titleEl = document.getElementById('teacherNameTitle');
+    const introEl = document.getElementById('teacherIntroText');
+    const displayArea = document.getElementById('teacherDisplayArea');
+    const cardContainer = document.querySelector('.teacher-card-container');
+
+    displayArea.style.display = 'none';
+    if (cardContainer) cardContainer.classList.remove('flipped');
+    if (!selectedName) return;
+    
+    const teacher = globalSettings.teachers.find(t => t.name === selectedName);
+    if (teacher) {
+        titleEl.innerText = teacher.name + " 老師";
+        imgEl.src = teacher.url;
+        imgEl.setAttribute('referrerpolicy', 'no-referrer');
+        if (introEl) {
+            introEl.innerHTML = teacher.intro; 
+        }
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                displayArea.style.display = 'block';
+            });
+        });
+    }
+}
+
+
+
+// 新增一個變數紀錄當前翻轉的小卡
+let currentFlippedCourseCard = null;
+
+function openCombinedDrawer(courseName, teacherName, cardEl) {
+    // 1. 處理卡片翻轉視覺
+    if (cardEl) {
+        // 若已有卡片翻轉（保險機制），先恢復它
+        if (currentFlippedCourseCard) currentFlippedCourseCard.classList.remove('card-flipped');
+        
+        currentFlippedCourseCard = cardEl;
+        currentFlippedCourseCard.classList.add('card-flipped');
+    }
+
+    // 2. 延遲執行原本的抽屜邏輯 (等待翻轉動畫進行)
+    setTimeout(() => {
+        const drawer = document.getElementById('sideDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        const body = document.getElementById('drawerBody');
+        const titleEl = document.getElementById('drawerTitle');
+
+        titleEl.innerText = "詳細資訊";
+        
+        // --- 1. 課程簡介區塊 (保留您原本的邏輯) ---
+        const introKeys = Object.keys(globalSettings.courseIntros || {});
+        const matchedCourseKey = introKeys.find(key => courseName.includes(key) || key.includes(courseName));
+        const courseDesc = matchedCourseKey ? globalSettings.courseIntros[matchedCourseKey] : "課程簡介尚在更新中";
+        
+        let courseHtml = `<h4 style="color: #d14d72; border-bottom: 2px solid #F4A7B9; padding-bottom: 5px;">🌸 ${matchedCourseKey || courseName} 課程介紹</h4>`;
+        if (courseDesc.includes('http')) {
+            courseHtml += `<img src="${courseDesc}" referrerpolicy="no-referrer" style="width:100%; border-radius:12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
+        } else {
+            courseHtml += `<p style="line-height: 1.8; color: #555; margin-bottom: 20px; white-space: pre-wrap;">${courseDesc}</p>`;
+        }
+
+        // --- 2. 老師簡介區塊 (保留您原本的邏輯) ---
+        const matchedTeachers = globalSettings.teachers.filter(t => teacherName.includes(t.name));
+        let teacherHtml = "";
+        if (matchedTeachers.length > 0) {
+            matchedTeachers.forEach(teacher => {
+                teacherHtml += `
+                    <h4 style="color: #d14d72; border-bottom: 2px solid #F4A7B9; padding-bottom: 5px; margin-top: 25px;">👤 ${teacher.name} 老師簡介</h4>
+                    <div class="teacher-card-container" onclick="this.classList.toggle('flipped')" style="margin: 10px auto 25px;">
+                        <span style="color: #bababa; font-size: 0.85em; display: block; margin-bottom: 8px;">💡 點擊照片可翻看資歷</span>
+                        <div class="teacher-card-inner">
+                            <div class="teacher-card-front">
+                                <img src="${teacher.url}" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            </div>
+                            <div class="teacher-card-back" style="background: #FFF5F7; border: 2px solid #F4A7B9; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; align-items: flex-start; box-sizing: border-box;">
+                                <div style="color: #d14d72; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #F4A7B9; width: 100%; padding-bottom: 5px;">資歷與專長</div>
+                                <div style="font-size: 1rem; line-height: 1.6; text-align: left; color: #555; white-space: pre-wrap; overflow-y: auto; width: 100%; flex: 1;">${teacher.intro || "老師介紹更新中..."}</div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        } else {
+            teacherHtml = `
+                <h4 style="color: #d14d72; border-bottom: 2px solid #F4A7B9; padding-bottom: 5px; margin-top: 25px;">👤 師資介紹</h4>
+                <p style="color: #999; font-style: italic;">${teacherName} 老師簡介尚在更新中</p>`;
+        }
+
+        body.innerHTML = courseHtml + teacherHtml;
+        overlay.style.display = 'block';
+        setTimeout(() => { drawer.classList.add('open'); }, 10);
+    }, 400); // 等待 0.4 秒翻轉動畫進行
+}
+
+/**
+ * 初始化教室簡介列表
+ */
+function initVenueList() {
+  const introArray = globalSettings.venueIntrosArray || [];
+  let html = "";
+
+  if (introArray.length === 0) {
+    html = '<p style="text-align:center; color:#999;">目前尚無教室資訊</p>';
+  } else {
+    introArray.forEach(item => {
+      html += `
+        <div style="margin-bottom: 35px;">
+          <h4 style="color: #d14d72; border-bottom: 2px solid #F4A7B9; padding-bottom: 8px; margin-bottom: 15px; font-size: 1.2em;">
+            ${item.name}
+          </h4>`;
+      
+      // --- 修正點：防呆判斷，確有圖片連結才渲染 img 標籤 ---
+      if (item.pic && item.pic.trim() !== "") {
+        html += `
+          <div style="margin-bottom: 15px;">
+            <img src="${item.pic}" 
+                 referrerpolicy="no-referrer" 
+                 style="width:100%; display:block; border-radius:15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); object-fit: cover;"
+                 onerror="this.style.display='none';"> 
+          </div>`;
+      }
+      
+      html += `<p style="line-height: 1.8; color: #444; white-space: pre-wrap; font-size: 0.95em;">${item.desc}</p>`;
+      html += `</div>`;
+    });
+  }
+
+  document.getElementById('drawerBody').innerHTML = html;
+}
+
+
+
+// 在你的 <script> 標籤內加入這一行即可
+document.addEventListener("touchstart", function() {}, true);
+
+/**
+ * 點擊放大輸入框並填入課表內容
+ */
+
+function openExpandedCourse() {
+  const container = document.getElementById('expandInputContainer');
+  const contentBox = document.getElementById('expandCourseContent');
+  const sourceTable = document.getElementById('schedule-content-past');
+  
+  if (!container || !contentBox || !sourceTable) return;
+
+  // ✨ 關鍵修復 1：將彈窗移到 body 最外層，徹底擺脫所有父層級的限制！
+  document.body.appendChild(container);
+  
+  contentBox.innerHTML = sourceTable.innerHTML;
+  container.classList.add('expanded');
+  document.body.style.overflow = 'hidden'; 
+  
+  setTimeout(function() {
+    container.style.animation = "expandFlipIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards";
+    setTimeout(function() {
+      container.style.animation = "none";
+      container.style.transform = "translate(-50%, -50%) perspective(1000px) rotateX(0deg) scale(1)";
+    }, 400);
+  }, 20);
+}
+
+function closeExpandedCourse(event) {
+  if (event) event.stopPropagation(); 
+  
+  const container = document.getElementById('expandInputContainer');
+  if (container) {
+    container.style.transform = "";
+    container.style.animation = "expandFlipOut 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards";
+    setTimeout(function() {
+      container.classList.remove('expanded');
+      container.style.animation = "";
+      document.body.style.overflow = ''; 
+
+      // ✨ 關鍵修復 2：動畫結束後，把它放回原本的包裝層裡面
+      document.getElementById('singleCourseWrapper').appendChild(container);
+    }, 350);
+  }
+}
+
+/**
+ * ✨ 全新仿造函數：點擊放大輸入框並填入期課課表內容
+ * （與原功能 100% 獨立，純粹處理複製 HTML 與 3D 動播，無添加任何無關功能）
+ */
+function openQueryCourse() {
+  const container = document.getElementById('queryInputContainer');
+  const contentBox = document.getElementById('queryCourseContent');
+  const sourceTable = document.getElementById('schedule-content'); 
+  const inputEl = document.getElementById('itemQueryName');
+  if (!container || !contentBox || !sourceTable) return;
+  
+  // ✨ 關鍵修復 3：移到 body 最外層
+  document.body.appendChild(container);
+  
+  contentBox.innerHTML = sourceTable.innerHTML;
+  container.classList.add('expanded');
+  document.body.style.overflow = 'hidden';
+  
+  if (inputEl) {
+    inputEl.style.display = 'none';
+  }
+
+  setTimeout(function() {
+    container.style.animation = "expandFlipIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards";
+    setTimeout(function() {
+      container.style.animation = "none";
+      container.style.transform = "translate(-50%, -50%) perspective(1000px) rotateX(0deg) scale(1)";
+    }, 400);
+  }, 20);
+}
+
+function closeQueryCourse(event) {
+  if (event) event.stopPropagation(); 
+  const inputEl = document.getElementById('itemQueryName');
+  const container = document.getElementById('queryInputContainer');
+  
+  if (container) {
+    container.style.transform = "";
+    container.style.animation = "expandFlipOut 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards";
+    setTimeout(function() {
+      container.classList.remove('expanded');
+      container.style.animation = "";
+      document.body.style.overflow = ''; 
+
+      // ✨ 關鍵修復 4：放回原本的查詢包裝層裡面
+      document.getElementById('queryCourseWrapper').appendChild(container);
+
+      if (inputEl) {
+        inputEl.style.display = 'block';
+      }
+    }, 350);
+  }
+}
+// 1. 控制自製下拉選單的開關切換
+function toggleCustomDropdown(containerId) {
+  const container = document.getElementById(containerId);
+  const menu = container.querySelector('.wd-dropdown-menu');
+  
+  // 偵測是否為手機版（或者是當下半部沒內容、高度過矮時）
+  const isShortLayout = document.body.clientHeight < 600 || !document.getElementById('introDisplayArea');
+  
+  if (isShortLayout) {
+    // 💡 方案 A：如果版面太矮，直接套用你原本最厲害的 expanded 滿版防蓋機制！
+    container.classList.toggle('expanded');
+    if (container.classList.contains('expanded')) {
+      document.body.style.overflow = 'hidden'; // 防止底層捲動
+    } else {
+      document.body.style.overflow = '';
+    }
+  } else {
+    // 💡 方案 B：版面高度夠大時，維持原本優雅的就地向下展開
+    container.classList.toggle('open');
+  }
+}
+
+// 2. 當後端撈完資料填入真實 select 後，呼叫此函式將選項複製一份到美化選單中
+function syncToCustomDropdown() {
+  const realSelect = document.getElementById('courseIntroSelect');
+  const customMenu = document.getElementById('customCourseIntroMenu');
+  const triggerText = document.querySelector('#customCourseIntroDropdown .selected-text');
+  
+  if (!realSelect || !customMenu) return;
+  
+  // 清空舊有的自製清單，並重設標題
+  customMenu.innerHTML = "";
+  triggerText.innerText = "-- 請選擇課程 --";
+  
+  // 撈取真實 select 裡面的所有 options
+  Array.from(realSelect.options).forEach(opt => {
+    const li = document.createElement('li');
+    li.className = 'wd-dropdown-item';
+    li.innerText = opt.text;
+    
+    // 如果該課程在原始後端邏輯中被設定為禁用（例如未開課）
+    if (opt.disabled) {
+      li.classList.add('disabled');
+    } else {
+      // 綁定點擊事件
+      li.onclick = function() {
+        // A. 更新觸發框的顯示文字
+        triggerText.innerText = opt.text;
+        // B. 同步選取真實的 select 值
+        realSelect.value = opt.value;
+        // C. 觸發真實選單原本綁定的 onChange 網頁更新動作！
+        realSelect.dispatchEvent(new Event('change'));
+        // D. 收起選單
+        document.getElementById('customCourseIntroDropdown').classList.remove('open');
+      };
+    }
+    customMenu.appendChild(li);
+  });
+}
+
+// 新增：當後端撈完資料填入真實 teacherSelect 後，同步複製到美化選單中
+function syncToCustomTeacherDropdown() {
+  const realSelect = document.getElementById('teacherSelect');
+  const customMenu = document.getElementById('customTeacherMenu');
+  const triggerText = document.querySelector('#customTeacherDropdown .selected-text');
+  
+  if (!realSelect || !customMenu) return;
+  
+  // 清空舊有的自製清單，並重設標題
+  customMenu.innerHTML = "";
+  triggerText.innerText = "-- 請選擇老師 --";
+  
+  // 撈取真實 select 裡面的所有 options
+  Array.from(realSelect.options).forEach(opt => {
+    const li = document.createElement('li');
+    li.className = 'wd-dropdown-item';
+    li.innerText = opt.text;
+    
+    // 如果該選項在原始邏輯中被設定為禁用
+    if (opt.disabled) {
+      li.classList.add('disabled');
+    } else {
+      // 綁定點擊事件
+      li.onclick = function() {
+        // A. 更新觸發框的顯示文字
+        triggerText.innerText = opt.text;
+        // B. 同步選取真實的 select 值
+        realSelect.value = opt.value;
+        // C. 觸發真實選單原本綁定的 onChange（即 displayTeacherIntro）
+        realSelect.dispatchEvent(new Event('change'));
+        // D. 收起選單
+        document.getElementById('customTeacherDropdown').classList.remove('open');
+      };
+    }
+    customMenu.appendChild(li);
+  });
+}
+
+// 新增：當後端或初始化將資料填入真實 roomSelect 後，同步複製到美化選單中
+function syncToCustomRoomDropdown() {
+  const realSelect = document.getElementById('roomSelect');
+  const customMenu = document.getElementById('customRoomMenu');
+  const triggerText = document.querySelector('#customRoomDropdown .selected-text');
+  
+  if (!realSelect || !customMenu) return;
+  
+  // 清空舊有的自製清單
+  customMenu.innerHTML = "";
+  
+  // 根據真實 select 的當前選取值，初始化觸發框的文字
+  const selectedOpt = realSelect.options[realSelect.selectedIndex];
+  triggerText.innerText = selectedOpt ? selectedOpt.text : "載入中...";
+  
+  // 撈取真實 select 裡面的所有 options
+  Array.from(realSelect.options).forEach(opt => {
+    const li = document.createElement('li');
+    li.className = 'wd-dropdown-item';
+    li.innerText = opt.text;
+    
+    if (opt.disabled) {
+      li.classList.add('disabled');
+    } else {
+      // 綁定點擊事件
+      li.onclick = function() {
+        // A. 更新觸發框的顯示文字
+        triggerText.innerText = opt.text;
+        // B. 同步選取真實的 select 值
+        realSelect.value = opt.value;
+        // C. 觸發真實選單原本綁定的 onChange（即 checkDateTrigger）
+        realSelect.dispatchEvent(new Event('change'));
+        // D. 收起選單
+        document.getElementById('customRoomDropdown').classList.remove('open');
+      };
+    }
+    customMenu.appendChild(li);
+  });
+}
+
+// 新增：當後端或前面步驟將時數填入真實 durationSelect 後，同步複製到美化選單中
+function syncToCustomDurationDropdown() {
+  const realSelect = document.getElementById('durationSelect');
+  const customMenu = document.getElementById('customDurationMenu');
+  const triggerText = document.querySelector('#customDurationDropdown .selected-text');
+  
+  if (!realSelect || !customMenu) return;
+  
+  // 清空舊有的自製清單
+  customMenu.innerHTML = "";
+  
+  // 根據真實 select 的當前選取值，初始化觸發框的文字
+  const selectedOpt = realSelect.options[realSelect.selectedIndex];
+  triggerText.innerText = selectedOpt ? selectedOpt.text : "-- 請先選擇教室 --";
+  
+  // 撈取真實 select 裡面的所有 options
+  Array.from(realSelect.options).forEach(opt => {
+    const li = document.createElement('li');
+    li.className = 'wd-dropdown-item';
+    li.innerText = opt.text;
+    
+    if (opt.disabled) {
+      li.classList.add('disabled');
+    } else {
+      // 綁定點擊事件
+      li.onclick = function() {
+        // A. 更新觸發框的顯示文字
+        triggerText.innerText = opt.text;
+        // B. 同步選取真實的 select 值
+        realSelect.value = opt.value;
+        // C. 觸發真實選單原本綁定的 onChange（即 updateAvailableTimes）
+        realSelect.dispatchEvent(new Event('change'));
+        // D. 收起選單
+        document.getElementById('customDurationDropdown').classList.remove('open');
+      };
+    }
+    customMenu.appendChild(li);
+  });
+}
+
+/**
+ * ✨ 全新獨立函數：當後端撈完資料填入真實 teacherSearchInput 後，同步複製到美化查詢選單中
+ */
+function syncToCustomTeacherSearchDropdown() {
+  const realSelect = document.getElementById('teacherSearchInput');
+  const customMenu = document.getElementById('customTeacherSearchMenu');
+  const triggerText = document.querySelector('#customTeacherSearchDropdown .selected-text');
+  
+  if (!realSelect || !customMenu || !triggerText) return;
+  
+  // A. 清空舊有的自製清單
+  customMenu.innerHTML = "";
+  
+  // B. 根據真實 select 的當前選取值，初始化觸發框的文字
+  const selectedOpt = realSelect.options[realSelect.selectedIndex];
+  triggerText.innerText = selectedOpt && selectedOpt.value !== "" ? selectedOpt.text : "-- 請選擇老師 --";
+  
+  // C. 撈取真實 select 裡面的所有 options 進行複製
+  Array.from(realSelect.options).forEach(opt => {
+    // 跳過預設空白或提示用的選項
+    if (opt.value === "") return;
+    
+    const li = document.createElement('li');
+    li.className = 'wd-dropdown-item';
+    li.innerText = opt.text;
+    
+    if (opt.disabled) {
+      li.classList.add('disabled');
+    } else {
+      // 綁定點擊選項事件
+      li.onclick = function() {
+        // 1. 更新美化觸發框的顯示文字
+        triggerText.innerText = opt.text;
+        // 2. 同步選取真實的 select 值
+        realSelect.value = opt.value;
+        // 3. 觸發真實選單可能綁定的連動事件（如果有）
+        realSelect.dispatchEvent(new Event('change'));
+        // 4. 收起美化選單
+        document.getElementById('customTeacherSearchDropdown').classList.remove('open');
+        realSelect.dispatchEvent(new Event('change'));
+      };
+    }
+    customMenu.appendChild(li);
+  });
+}
+
+/**
+ * 自動判斷裝置並開啟內建地圖 App
+ */
+
+function openDeviceMap(event) {
+  // 阻止預設行為
+  if (event) event.preventDefault();
+
+  // 1. 請在這裡輸入您教室的「完整地址」或「Google 地圖地標名稱」
+  var address = "新竹市東大路二段685號"; // 填入您的實際地址
+  
+  // 編碼成網頁安全字元
+  var encodedAddress = encodeURIComponent(address);
+  
+  // 2. 判斷是否為 iOS 裝置 (iPhone / iPad / iPod)
+  var isAppleDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                      
+  // 3. 判斷是否為行動裝置 (Android 或 iOS)
+  var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  if (isAppleDevice && isMobile) {
+    // 蘋果手機/平板：使用 maps:// 強制喚起 Apple Maps App
+    window.top.location.href = "https://maps.apple.com/?q=" + encodedAddress;
+  } else if (isMobile) {
+    // 安卓手機：使用 geo: 語法喚起 Google Maps App
+    window.location.href = "https://www.google.com/maps/search/?api=1&query=" + encodedAddress;
+  } else {
+    // 💻 電腦桌機版 (Windows / Mac)：
+    // 必須使用 window.open 並加上 '_blank'，強制在瀏覽器「新分頁」打開 Google 地圖
+    // 這樣可以完全跳出 GAS 的 iframe 框架限制，徹底解決「拒絕連線」的問題！
+    window.open("https://www.google.com/maps/search/?api=1&query=" + encodedAddress, "_blank");
+  }
+}
+
+// 💡 優化：切換 AI 視窗，並在關閉時徹底清空對話與記憶
+function toggleAIChat() {
+  var chatBox = document.getElementById('ai-chat-box');
+  var msgContainer = document.getElementById('ai-messages');
+  if (!chatBox) return;
+  
+  // 切換 active 類別（控制先前做好的淡入淡出動畫）
+  chatBox.classList.toggle('active');
+  
+  // 🎯 核心功能：檢查點擊後，視窗究竟是「打開」還是「關閉」
+  if (!chatBox.classList.contains('active')) {
+    // ───────── 【當視窗被關閉時執行徹底清空】 ─────────
+    console.log("🧹 AI 視窗已關閉，正在啟動記憶與畫面清空程序...");
+    
+    // 1. 清空前端畫面上的所有對話泡泡，並回復初始歡迎詞
+    if (msgContainer) {
+      msgContainer.innerHTML = `
+        <div style="margin-bottom: 8px; color: #888;">
+          <span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #eee;">
+            哈囉！我是您的小助理，有任何課程或預約問題都可以問我唷！
+          </span>
+        </div>
+      `;
+    }
+    
+    // 2. 徹底洗牌全域歷史紀錄陣列，讓 AI 大腦完全忘記剛才的上下文
+    if (typeof aiChatHistory !== 'undefined') {
+      aiChatHistory = []; 
+    }
+  }
+}
+function fetchTomorrowWeather() {
+  //console.log("=== 🔍 天氣功能啟動（中文結構觀測 LOG 版） ===");
+  
+  // 1. 計算明天日期
+  var today = new Date();
+  var tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  var year = tomorrow.getFullYear();
+  var month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+  var date = String(tomorrow.getDate()).padStart(2, '0');
+  var tomorrowString = year + "-" + month + "-" + date;
+  
+  var daysOfWeek = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+  var tomorrowDayName = daysOfWeek[tomorrow.getDay()];
+
+  //console.log("➔ 📅 [追蹤 1] 目標比對的明天日期字串是:", tomorrowString);
+
+  // 預設安全墊底值
+  aiTomorrowWeatherText = "【教室所在地：新竹市北區 官方即時氣象預報】\n" +
+                         "明日日期與時間：" + tomorrowString + " (" + tomorrowDayName + ")\n" +
+                         "明日天氣狀態：多雲到晴，降雨機率約 20% \n" +
+                         "溫馨提示：非常適合出門運動舞蹈唷！";
+
+  var apiUrl = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-055?Authorization=rdec-key-123-45678-011121314&format=JSON&elementName=PoP12h,Wx";
+
+  fetch(apiUrl)
+    .then(function(response) { 
+      return response.json(); 
+    })
+    .then(function(data) {
+      try {
+        var locationsArray = data.records.Locations[0].Location;
+        var northDistrictData = locationsArray.find(function(item) { 
+          return item.LocationName === "北區"; 
+        });
+        
+        if (!northDistrictData) {
+          console.error("❌ 錯誤：找不到北區");
+          return;
+        }
+        
+        var weatherElements = northDistrictData.WeatherElement;
+
+        // 💡 依據上一張截圖的重大發現，改用中文「天氣現象」與「12小時降雨機率」進行精準對齊
+        var wxElement = weatherElements.find(function(e) { return e.ElementName === "天氣現象"; });
+        var popElement = weatherElements.find(function(e) { return e.ElementName === "12小時降雨機率"; });
+
+        if (!wxElement || !popElement) {
+          console.error("❌ 錯誤：雖然改用中文名稱，但在陣列中依然對不到『天氣現象』或『12小時降雨機率』！");
+          return;
+        }
+
+        // 嘗試用明天日期去篩選
+        var tomorrowWxObj = wxElement.Time.find(function(t) { return t.StartTime.includes(tomorrowString); });
+        var tomorrowPopObj = popElement.Time.find(function(t) { return t.StartTime.includes(tomorrowString); });
+
+
+        // 安全順位替代
+        if (!tomorrowWxObj) { console.warn("⚠️ 提示：未精準對到明天日期，改拿 Wx 第一筆"); tomorrowWxObj = wxElement.Time[0]; }
+        if (!tomorrowPopObj) { console.warn("⚠️ 提示：未精準對到明天日期，改拿 PoP 第一筆"); tomorrowPopObj = popElement.Time[0]; }
+
+        var finalWx = "多雲到晴";
+        var finalPop = "20";
+
+        // 動態提取最內層第一個屬性的值，並把物件所有 Key 印出來看
+        if (tomorrowWxObj && tomorrowWxObj.ElementValue && tomorrowWxObj.ElementValue[0]) {
+          var evObj = tomorrowWxObj.ElementValue[0];
+          var firstKey = Object.keys(evObj)[0];
+          if (firstKey) finalWx = evObj[firstKey];
+        }
+
+        if (tomorrowPopObj && tomorrowPopObj.ElementValue && tomorrowPopObj.ElementValue[0]) {
+          var evObj = tomorrowPopObj.ElementValue[0];
+          var firstKey = Object.keys(evObj)[0];
+          if (firstKey) finalPop = evObj[firstKey];
+        }
+
+        // 成功組裝
+        aiTomorrowWeatherText = "【教室所在地：新竹市北區 官方即時氣象預報】\n" +
+                               "明日日期與時間：" + tomorrowString + " (" + tomorrowDayName + ")\n" +
+                               "明日天氣狀態：" + finalWx + "\n" +
+                               "明日降雨機率：" + finalPop + "% \n" +
+                               "（資料來源：中央氣象署即時同步）";
+                               
+        //console.log("✅ [觀測成功] 拼裝出的常識大禮包文字為:\n", aiTomorrowWeatherText);
+      } catch (innerErr) {
+        console.error("❌ 觀測版內部執行崩潰，原因為:", innerErr);
+      }
+    })
+    .catch(function(error) {
+      console.error("❌ 網絡層級 fetch 核心崩潰:", error);
+    });
+}
+
+// 💡 網頁初始化載入時，自動執行一次抓天氣
+window.addEventListener('DOMContentLoaded', function() {
+  fetchTomorrowWeather();
+});
+
+function sendAIMessage() {
+  aiStime = performance.now();
+  console.log(`進AI呼叫。`);
+  var inputEl = document.getElementById('ai-input');
+  var msgContainer = document.getElementById('ai-messages');
+  var userText = inputEl.value.trim();
+  
+  if (!userText) return;
+  
+  // 1. 渲染使用者的話
+  msgContainer.innerHTML += `<div style="margin-bottom: 8px; text-align: right;"><span style="background: #E87A90; color: white; padding: 6px 10px; border-radius: 16px 16px 2px 16px; display: inline-block; max-width: 80%; text-align: left;">${userText}</span></div>`;
+  inputEl.value = "";
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+  
+  var cleanInput = userText.replace(/[\s\s,，.。!！?？]/g, "");
+
+
+  if (cleanInput.includes("糖香料")) {
+    // 秒回小女警經典台詞
+    appendAIResponse("以及一切美好的事物！");
+    return; // 💡 關鍵：直接中斷 function，完全不送去後端大腦，省 Token 又秒讀秒回！
+  }
+  if (cleanInput.includes("一天又平安的過去了")) {
+    // 秒回小女警經典台詞
+    appendAIResponse("感謝飛天小女警的努力！");
+    return; // 💡 關鍵：直接中斷 function，完全不送去後端大腦，省 Token 又秒讀秒回！
+  }
+  var phoneMatch = userText.match(/09\d{8}/);
+  aiChatHistory.push({ role: "user", content: userText });
+  // 2. 顯示思考中動畫
+  var loadingId = "ai-loading-" + Date.now();
+  if (!phoneMatch) msgContainer.innerHTML += `<div id="${loadingId}" style="margin-bottom: 8px; color: #888;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #eee;">思考中... ⏳</span></div>`;
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+
+  // 3. 檢查是否有 10 碼電話
+  
+  
+  if (phoneMatch) {
+    var userPhone = phoneMatch[0];
+    
+    var isAskingReservation = userText.includes("預約") || userText.includes("場地") || userText.includes("教室") || userText.includes("空間") || userText.includes("租借");
+    
+    if (isAskingReservation) {
+      // ───────── 方案 A：【學員查特定電話的「場地空間預約」紀錄】 ─────────
+      console.log("🎯 偵測到關鍵字，準備呼叫：queryRoomReservation");
+      appendAIResponse("請直接到教室預約 > 教室預約查詢，輸入電話查詢");
+      return;
+      
+      // ───────── 方案 A：【場地空間預約分流 - 精準字串對接完全體】 ─────────
+callGasApi("queryRoomReservation", [userPhone])
+  .then(function(res) {
+    var loadingEl = document.getElementById(loadingId);
+    if(loadingEl) loadingEl.remove();
+    
+    try {
+      var aiContext = "";
+      
+      // 💡 修正：後端傳回的是純字串，直接判定是否為空、或包含「查無」字眼
+      if (!res || typeof res !== "string" || res.trim() === "" || res.includes("查無")) {
+        aiContext = `【系統通知：這支電話目前在試算表中『完全查無場地預約紀錄』。請溫柔告知學員目前系統中還沒有這支手機的空間租借或預約登記唷！】`;
+      } else {
+        // 💡 後端已經幫忙組好漂亮的條列字串了，直接整包塞給 AI，並強迫它遵照格式吐出
+        aiContext = `【系統通知：這支電話『已成功查到場地空間預約紀錄』！以下為後端資料庫撈出的真實預約明細：
+
+${res}
+
+請立刻執行核心守則，將上方每一筆預約的教室、日期與時間用溫柔且漂亮的排版呈現給學員，千萬不要漏掉任何一筆！】`;
+      }
+      
+      askGeminiSmartHub(userText, aiContext); 
+    } catch(e) {
+      if (typeof appendAIResponse === "function") {
+          appendAIResponse("處理預約資料時發生錯誤，請稍後再試。");
+      }
+      console.error("預約解析錯誤:", e);
+    }
+  })
+  .catch(function(err) {
+    // 💡 防呆：發生網路或系統錯誤時，也要記得把 loading 動畫拿掉
+    var loadingEl = document.getElementById(loadingId);
+    if(loadingEl) loadingEl.remove();
+    
+    if (typeof appendAIResponse === "function") {
+        appendAIResponse("❌ 查詢預約資料失敗，連線發生異常，請稍後再試。");
+    }
+    console.error("API 查詢錯誤:", err.message || err);
+  });
+      
+    } else {
+      // ───────── 方案 B：【學員查特定電話的「課程報名」紀錄】 ─────────
+      console.log("🎯 預設意圖，準備呼叫：queryRegistration");
+appendAIResponse("請直接到課程報名 > 報名與繳費查詢，輸入電話查詢");
+      return;
+
+
+      callGasApi("queryRegistration", [userPhone])
+  .then(function(res) {
+    var loadingEl = document.getElementById(loadingId);
+    if(loadingEl) loadingEl.remove();
+    
+    try {
+      var aiContext = "";
+      
+      // 💡 判斷是否查無紀錄 (防呆空陣列、空物件、或是特定字串)
+      if (!res || JSON.stringify(res) === "{}" || JSON.stringify(res) === "[]" || res === "查無紀錄。") {
+        aiContext = `【系統通知：這支電話目前在試算表中『完全查無報名紀錄』。請立刻執行核心守則第 2 條的查無紀錄罐頭回覆！】`;
+      } 
+      // 💡 判斷如果是「多筆資料」（陣列）
+      else if (Array.isArray(res)) {
+        // 將多筆 JSON 資料在前端先精煉成乾淨的文字清單
+        var recordList = res.map(function(item, index) {
+          return `紀錄 ${index + 1}：
+      - 課程名稱：${item.course || item.課程名稱 || "未提供"}
+      - 上課日期/時間：${item.date || item.上課日期 || "未提供"}
+      - 繳費對帳狀態：${item.status || item.對帳狀態 || item.狀態 || "確認中"}`;
+        }).join("\n\n");
+
+        aiContext = `【系統通知：這支電話『已成功查到多筆課程報名紀錄』！
+      請務必將以下所有紀錄【完整、逐筆】溫柔條列展示給顧客，不要漏掉任何一筆：
+
+      ${recordList}
+
+      請立刻根據上述精煉後的資料進行親切的回覆！】`;
+        console.log(`手機查詢！！！${recordList}`);
+      } 
+      // 💡 預防萬一：如果是單一物件舊格式
+      else {
+        aiContext = `【系統通知：這支電話『已成功查到課程報名紀錄』！以下為真實資料：\n${JSON.stringify(res)}\n請立刻執行核心守則第 2 條，將裡面的課程名稱、上課日期與對帳狀態溫柔條列出來！】`;
+      }
+      
+      askGeminiSmartHub(userText, aiContext); 
+    } catch(e) {
+      if (typeof appendAIResponse === "function") {
+        appendAIResponse("處理報名資料時發生錯誤，請稍後再試。");
+      }
+      console.error(e);
+    }
+  })
+  .catch(function(err) {
+    // 💡 防呆：發生網路或系統錯誤時，也要記得把 loading 動畫拿掉
+    var loadingEl = document.getElementById(loadingId);
+    if(loadingEl) loadingEl.remove();
+    
+    if (typeof appendAIResponse === "function") {
+        appendAIResponse("❌ 查詢報名紀錄失敗，連線發生異常，請稍後再試。");
+    }
+    console.error("API 查詢錯誤:", err.message || err);
+  });
+      
+      
+    }    
+    
+  } else {
+    // ───────── 【智慧大腦模式】 ─────────
+    // 💡 修正：加入 try-catch 保護，防止 DOM 或全域變數未載入完成時程式崩潰卡死
+    try {
+      var pageClone = document.body.cloneNode(true);
+  
+      // 1. 暴力刪除對 AI 理解「資料結構」毫無幫助的標籤
+      var uselessTags = pageClone.querySelectorAll('script, style, svg, iframe, video, #ai-chat-widget, .loader');
+      uselessTags.forEach(function(el) { el.remove(); });
+
+      // 2. 拔除所有「皮肉 (排版與樣式)」，只留下「骨架 (資料與結構)」
+      var allElements = pageClone.getElementsByTagName('*');
+      for (var i = 0; i < allElements.length; i++) {
+        var el = allElements[i];
+        el.removeAttribute('class'); // 刪除 class
+        el.removeAttribute('style'); // 刪除 style
+        el.removeAttribute('onclick'); // 刪除 onclick
+        el.removeAttribute('oninput'); // 刪除 oninput
+        // 💡 刻意保留：id, name, type, placeholder, value 等「說明書」必備屬性
+      }
+
+      // 3. 壓縮空白換行，進一步縮減體積
+      var cleanHtmlStructure = pageClone.innerHTML.replace(/\s+/g, ' ').trim();
+      console.log("📦 目前清理後的 HTML 字元長度為: " + cleanHtmlStructure.length);
+
+      var teachersDataText = "暫無師資資料";
+      if (typeof globalSettings !== 'undefined' && globalSettings.teachers) {
+        teachersDataText = JSON.stringify(globalSettings.teachers);
+      }
+
+     var brainContext = "【💡 現實世界明天天氣預報資訊】:\n" + aiTomorrowWeatherText +
+                          "\n\n【💡 微動身活場館生活常見問題 FAQ】:\n" + JSON.stringify(aiStoreConfig) +
+                          "\n\n【微動身活期課課表與名額(未來，如果顧客強調期課課程以這筆資料為主，沒有就說課表還沒出來) name:課程名稱,dates:課程日期如果要計算剩餘課堂數要用天數來計算,room:上課教室,pricePerClass:期課每堂價格,maxCapacity:最大人數,remaining:剩餘人數名額】：\n" + JSON.stringify(allCourseData) + 
+                          "\n\n【當顧客強調期課課程且schedule-body的內容是最新課表準備中，敬請期待！就照此回答】" +
+                          "\n\n【微動身活當月開課課表與名額(現在如果顧客只問課程，就以這筆資料為主) name:課程名稱,dates:課程日期如果要計算剩餘課堂數要用天數來計算,room:上課教室,pricePerClass:每堂價格,maxCapacity:最大人數,remaining:剩餘人數名額】：\n" + JSON.stringify(allCourseDataPast) + 
+                          "\n\n【回答當月開課課表與名額時，把名額多考慮這份單堂報名資料，只在當月課程考慮，期課課程不考慮】：\n" + JSON.stringify(globalSingleBookedMap) +
+                          "\n\n【各課程的詳細介紹特色】：\n" + JSON.stringify(globalSettings.courseIntros) +
+                          "\n\n【教室的預約狀況】：\n" + JSON.stringify(allRoomBookState) +
+                          "\n\n【官方全體師資團隊詳細簡介資料庫】:\n" + teachersDataText +
+                          "\n\n【目前網頁的 HTML 介面結構】:\n" + cleanHtmlStructure;
+
+      // 順利打包完成後才移除第一個 Loading
+      var loadingEl = document.getElementById(loadingId);
+      if(loadingEl) loadingEl.remove();
+
+      askGeminiSmartHub(userText, brainContext);
+    } catch(e) {
+      // 💡 例外安全處理：萬一打包出錯，立刻關閉 Loading 條並提示使用者
+      var loadingEl = document.getElementById(loadingId);
+      if(loadingEl) loadingEl.remove();
+      appendAIResponse("系統資料載入中，請稍候再試或重新整理網頁唷！");
+      console.error(e);
+    }
+  }
+}
+
+/**
+ * 全智慧中心：負責把常識與問題噴給後端，並就地精準渲染
+ */
+function askGeminiSmartHub(userQuery, dataContext) {
+  var msgContainer = document.getElementById('ai-messages');
+  var geminiLoadingId = "ai-loading-smart-" + Date.now();
+  
+  msgContainer.innerHTML += `<div id="${geminiLoadingId}" style="margin-bottom: 8px; color: #888;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #eee;">智慧小助手思考中... 🧠</span></div>`;
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+  var historyConversationText = aiChatHistory.map(function(chat) {
+    return (chat.role === "user" ? "【顧客】: " : "【秘書(你)】: ") + chat.content;
+  }).join("\n");
+
+
+  var finalPrompt = `你是「微動身活」共享舞蹈空間的智慧型全功能 AI 櫃檯秘書。請根據下方提供的【即時館場資料庫】和【顧客提問】進行回答。
+
+【即時館場資料庫內容】：
+${dataContext}
+
+【🚨 櫃檯秘書執行核心守則（最高權限）】：
+1. 隱私與權限：顧客已經在前端通過了安全驗證。身為 AI 櫃檯秘書，你【絕對擁有完整權限】閱讀並告知顧客上方資料庫內的內容！嚴禁回答「我沒有權限查詢」、「無法直接查詢環境」、「請撥打專線」等拒絕罐頭訊息。
+2. 報名與預約資料處理：基於個資關係，AI助手不提供報名與預約紀錄的查詢，請顧客直接用網站功能查詢。
+3. 語氣與排版：請維持一貫溫柔、親切助理口吻。善用換行與精簡的條列式排版，讓顧客一眼就能看懂答案。
+4. 答案盡量精簡，不要有多餘的贅詞或句子。
+5. 絕對核心守則：請務必將回答完整說完，確保每一個句子與段落都有完整的結尾標點符號，絕對不可話說一半中斷。
+
+【前情提對話歷史紀錄】：
+${historyConversationText}
+
+【顧客目前實際提問】：
+${userQuery}`;
+
+  callGasApi("askAIAssistant", [finalPrompt])
+  .then(function(aiResponse) {
+    // 💡 收到回應立刻解鎖
+    var geminiLoadingEl = document.getElementById(geminiLoadingId);
+    if(geminiLoadingEl) geminiLoadingEl.remove();
+    
+    var finalResponse = aiResponse || "小助手剛剛不小心發呆了，可以請您再說一次嗎？";
+    aiChatHistory.push({ role: "model", content: finalResponse });
+    appendAIResponse(finalResponse);
+  })
+  .catch(function(err) {
+    // 💡 呼叫後端（Gemini）失敗或斷線時立刻解鎖
+    var geminiLoadingEl = document.getElementById(geminiLoadingId);
+    if(geminiLoadingEl) geminiLoadingEl.remove();
+    
+    // 將錯誤印在 Console 方便除錯
+    console.error("❌ AI 請求失敗:", err.message || err);
+    appendAIResponse("小助手頭有點暈，請再跟我說一次。");
+  });
+}
+
+/**
+ * 智慧上下文傳送器（精準渲染版）
+ */
+function askGeminiWithContext(userQuery, dataContext, mode) {
+  var msgContainer = document.getElementById('ai-messages'); // 💡 確保函式內有重新抓取對話框
+  var geminiLoadingId = "ai-loading-gemini-" + Date.now();
+  
+  msgContainer.innerHTML += `<div id="${geminiLoadingId}" style="margin-bottom: 8px; color: #888;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #eee;">智慧助理分析中... 🧠</span></div>`;
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+
+  var systemRole = "請以「微動身活」親切櫃檯小助手的溫柔口吻回答顧客。如果資料庫顯示\"查無紀錄。\"或找不到內容，請委婉告知。";
+  if (mode === "顧問模式") {
+    systemRole = "你現在是「微動身活」的專業運動課程顧問。請根據上方提供的【課程詳細介紹】與【名額狀態】，分析顧客的需求（例如：新手、想燃脂、想舒緩放鬆等），用熱情、親切且專業的口吻推薦最適合他的 1~2 門課程，並說明原因與目前的剩餘名額，引導他報名。";
+  }
+
+  var finalPrompt = `【系統即時提供給你的館場資料內容】：\n${dataContext}\n\n【顧客目前實際提問】：\n${userQuery}\n\n${systemRole}`;
+
+  callGasApi("askAIAssistant", [finalPrompt])
+  .then(function(aiResponse) {
+    // 💡 收到回應，立刻解除第二次的轉圈圈
+    var geminiLoadingEl = document.getElementById(geminiLoadingId);
+    if(geminiLoadingEl) geminiLoadingEl.remove();
+    
+    // 直接就地渲染，百分之百不會被其他函式變數卡到！
+    msgContainer.innerHTML += `<div style="margin-bottom: 8px; color: #333;"><span style="background: white; padding: 6px 10px; border-radius: 10px; display: inline-block; border: 1px solid #f9d5dc; line-height: 1.5; text-align: left; max-width: 80%;">${aiResponse}</span></div>`;
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  })
+  .catch(function(err) {
+    // 💡 發生錯誤或斷線時，也要確實拿掉轉圈圈動畫
+    var geminiLoadingEl = document.getElementById(geminiLoadingId);
+    if(geminiLoadingEl) geminiLoadingEl.remove();
+    
+    // 可以在控制台印出錯誤，方便除錯
+    console.error("❌ AI 請求失敗:", err.message || err);
+    appendAIResponse("小助手思緒有點混亂，請稍後再試。");
+  });
+}
+
+/**
+ * 輔助：常規快速渲染（確保作用域安全）
+ */
+// 💡 升級版：支援格式加工的 AI 回應渲染器
+function appendAIResponse(text) {
+  var msgContainer = document.getElementById('ai-messages');
+  aiEtime = performance.now();
+  let costTime = ((aiEtime - aiStime)/1000).toFixed(3);
+  if (msgContainer) {
+    // 1. 自動將 AI 回傳的換行符號 \n 轉換成網頁的 <br> 標籤
+    var processedText = text.replace(/\n/g, '<br>');
+    
+    // 2. [選配] 自動將 AI 經常用來強調的 **文字** 轉換成 <strong>粗體</strong>
+    processedText = processedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // 3. 渲染出帶有呼吸感與立體陰影的對話泡泡
+    msgContainer.innerHTML += `
+      <div class="ai-bubble-wrapper" style="margin-bottom: 12px; color: #333; text-align: left; animation: fadeInUp 0.3s ease;">
+        <span style="
+          background: white; 
+          padding: 10px 14px; 
+          border-radius: 2px 16px 16px 16px; /* 💡 左上角特殊銳角，更有對話框質感 */
+          display: inline-block; 
+          border: 1px solid #f9d5dc; 
+          line-height: 1.6; 
+          max-width: 85%; 
+          box-shadow: 0 2px 8px rgba(232, 122, 144, 0.05);
+          font-size: 14px;
+        ">
+          ${processedText}
+        </span>
+      </div>
+    `;
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+  console.log(`AI呼叫完成！！！${costTime} 秒`);
+}
+
+  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzMsKpq2PiUuvvHF_lZhIRIA4KnRC553LFVFLcDPZqD1CArDjBtyjyZeu5kKeg31SM/exec";
+
+/**
+ * 取代 google.script.run 的統一 API 呼叫器
+ * 💡 這裡使用 text/plain 的原因是為了避開瀏覽器嚴格的 CORS Preflight (OPTIONS) 限制，GAS 解析一樣會成功。
+ */
+function callGasApi(action, params = []) {
+  return fetch(GAS_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({ action: action, params: params })
+  })
+  .then(response => response.json())
+  .then(res => {
+    if (res.status === "error") {
+      throw new Error(res.message);
+    }
+    return res.data;
+  });
+}
+
+// 開啟照片燈箱
+function openLightbox(url) {
+    const modal = document.getElementById('photoLightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    
+    lightboxImg.src = url; // 帶入點擊的照片網址
+    modal.classList.add('show'); // 顯示彈窗
+    document.body.style.overflow = 'hidden'; // 放大時鎖定網頁背景，防止底層畫面跟著滾動
+}
+
+// 關閉照片燈箱
+function closeLightbox() {
+    const modal = document.getElementById('photoLightbox');
+    modal.classList.remove('show'); // 隱藏彈窗
+    document.body.style.overflow = ''; // 恢復網頁背景滾動
+}
+
+document.addEventListener('click', function(event) {
+    // 如果點擊到的元素，身上有 'photo-card' 這個 class，就執行放大
+    if (event.target && event.target.classList.contains('photo-card')) {
+        event.stopPropagation();
+        openLightbox(event.target.src); // 直接抓圖片網址並打開燈箱
+    }
+});
+
+
+// 1. 監聽滾動事件，動態偵測「當前啟用 Tab」裡的 INFOBOX
+window.addEventListener('scroll', function() {
+  // 🔥 關鍵修改 1：找出當前正在顯示的 Tab 區塊
+  const activeTab = document.querySelector('.tab-content.active');
+  if (!activeTab) return;
+  
+  // 🔥 關鍵修改 2：只抓取該 Tab 裡面的 info-box (會自動對應 ifb-course 或 ifb-room)
+  const infoBox = activeTab.querySelector('.info-box'); 
+  const stickyNav = document.getElementById('stickyQuickNav');
+  const drawer = document.getElementById('quickMenuDrawer');
+  const btn = document.getElementById('quickMenuBtn');
+  
+  // 如果找不到 INFOBOX 或 Bar，或者是電腦版，就不執行
+  if (!infoBox || !stickyNav || window.innerWidth > 600) return;
+  
+  // 取得當前 INFOBOX 距離目前視窗頂部的位置
+  const rect = infoBox.getBoundingClientRect();
+  
+  // 當 INFOBOX 的上緣碰到或超過螢幕頂端時 (小於等於 0)
+  if (rect.top <= 0) {
+    stickyNav.classList.add('show');
+  } else {
+    // 隱藏 Bar 並收起所有選單
+    stickyNav.classList.remove('show');
+    if (drawer) drawer.classList.remove('show');
+    if (btn) btn.classList.remove('active');
+  }
+});
+
+// 2. 核心邏輯：切換快速選單抽屜
+function toggleQuickMenu() {
+  const drawer = document.getElementById('quickMenuDrawer');
+  const btn = document.getElementById('quickMenuBtn');
+  const list = document.getElementById('quickMenuList');
+  
+  if (!drawer || !btn || !list) return;
+  
+  const isOpening = !drawer.classList.contains('show');
+  
+  if (isOpening) {
+    list.innerHTML = '';
+    
+    // 🔥 關鍵修改 3：先鎖定「當前啟用」的 Tab
+    const activeTab = document.querySelector('.tab-content.active');
+    if (!activeTab) return;
+    
+    // 🔥 關鍵修改 4：只抓取該 Tab 裡面的 info-card-btn，過濾掉隱藏的
+    const cards = activeTab.querySelectorAll('.info-card-btn');
+    
+    cards.forEach(card => {
+      const span = card.querySelector('span');
+      if (!span) return;
+      
+      const li = document.createElement('li');
+      li.innerText = span.innerText;
+      
+      li.onclick = () => {
+        toggleQuickMenu();
+        setTimeout(() => {
+          card.click();
+          // 加上偏移，避免打開卡片時被上方的 Bar 蓋住
+          const y = card.getBoundingClientRect().top + window.scrollY - 70;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }, 320);
+      };
+      
+      list.appendChild(li);
+    });
+    
+    drawer.classList.add('show');
+    btn.classList.add('active');
+  } else {
+    drawer.classList.remove('show');
+    btn.classList.remove('active');
+  }
+}
