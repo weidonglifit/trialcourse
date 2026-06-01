@@ -3324,8 +3324,11 @@ if (subtitleTextEl) {
                 img.className = 'photo-card';
                 img.setAttribute('referrerpolicy', 'no-referrer');
                 
-                // 👈 改成點擊時觸發打開燈箱函式
-                img.onclick = () => openLightbox(url); 
+                // 💡 改用 addEventListener 來綁定點擊事件
+                img.addEventListener('click', function(event) {
+                    event.stopPropagation(); // 防止點擊事件影響到後面的元素
+                    openLightbox(url);
+                });
                 
                 picBody.appendChild(img);
             });
