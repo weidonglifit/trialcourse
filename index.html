@@ -59,7 +59,7 @@
     }
     h1 { color: #2c3e50; text-align: center; margin-bottom: 10px; }
     h2 { color: #2c3e50; text-align: center; margin-bottom: 10px; }
-    .info-box { background-color: #FFD1DC; padding: 15px; padding-bottom: 5px; margin-bottom: 25px; font-size: 0.95em; border-radius: 15px; }
+    .info-box { border: 1px solid #f089a1; box-shadow: 0 4px 15px rgba(232, 122, 144, 0.15); padding: 15px; padding-bottom: 5px; margin-bottom: 25px; font-size: 0.95em; border-radius: 15px; }
     .field { margin-bottom: 20px; }
     label { display: block; font-weight: bold; font-size: 1.1em; margin-bottom: 8px; border-left: 4px solid #D05A6E; padding-left: 7px;}
       .pink-highlight {
@@ -519,7 +519,7 @@
 
 /* 核心文字樣式：置中、大字、加粗、以及設定反光漸層底色 */
 .news-board-text {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: bold;
   text-align: center;
   width: 100%;
@@ -1259,7 +1259,7 @@
   display: contents; /* 讓容器不影響佈局，讓子元素（按鈕）直接排進 Grid */
 }
   .info-card-btn {
-    background: #ffffff;
+    background: #FFFFFF;
     border: 1px solid #f089a1;
     border-radius: 15px;
     padding: 9px;
@@ -1275,14 +1275,6 @@
     
     /* 讓回彈動作平滑 */
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-}
-
-.info-card-btn:hover {
-    border-color: #F4A7B9;
-    background: #f8fbff;
-    /* 懸停時可以再往上一點點，或維持原狀 */
-    transform: translateY(-8px); 
-    box-shadow: 0 8px 16px rgba(240, 137, 161, 0.3);
 }
 
 .info-card-btn:active {
@@ -2258,6 +2250,21 @@
   display: block; 
 }
 
+.fade-in-section {
+  animation: tabFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes tabFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px); /* 從下方 10px 處開始 */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);    /* 滑順回歸原位 */
+  }
+}
+
 /* 查詢系統專屬的幽靈按鈕外觀：完美複製 Active 狀態 */
 #query-ghost-tab {
   display: none;
@@ -2402,6 +2409,115 @@
 .photo-modal-close:hover {
     color: #F4A7B9; /* 懸停時變成教室的粉色系 */
 }
+
+
+
+/* --- 手機版專屬浮動列與下拉選單 --- */
+@media (max-width: 600px) {
+  .sticky-quick-nav {
+    position: fixed;
+    top: -80px; /* 預設藏在畫面最上方之外 */
+    left: 0;
+    width: 100%;
+    height: 55px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* 支援 Safari 毛玻璃 */
+    box-shadow: 0 2px 15px rgba(232, 122, 144, 0.15);
+    z-index: 900; /* 🌟 設到極高，確保絕對顯示在最上層 */
+    display: flex;
+    justify-content: space-between; /* 標題靠左，按鈕靠右 */
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+    transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* 當 JS 加上 show 類別時，往下滑入畫面 */
+  .sticky-quick-nav.show {
+    top: 0; 
+  }
+  
+  .hamburger-btn {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto !important; 
+    height: auto !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+
+  /* --- 漢堡三條線轉 X 的動畫 --- */
+  .hamburger-svg line {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  
+  .hamburger-svg .line-top { transform-origin: 12px 6px; }
+  .hamburger-svg .line-mid { transform-origin: 12px 12px; }
+  .hamburger-svg .line-bot { transform-origin: 12px 18px; }
+  .hamburger-btn.active .line-top { transform: translateY(6px) rotate(45deg); }
+  .hamburger-btn.active .line-mid { opacity: 0; }
+  .hamburger-btn.active .line-bot { transform: translateY(-6px) rotate(-45deg); }
+  
+  /* --- 快速選單下拉抽屜 --- */
+  .quick-menu-drawer {
+    position: fixed;
+    top: -150%; /* 預設完全藏在上面 */
+    left: 0;
+    width: 100%;
+    background: #FFFFFF;
+    box-shadow: 0 10px 20px rgba(232, 122, 144, 0.12);
+    z-index: 899; /* 確保在 Bar 之下 */
+    transition: top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0 0 20px 20px; 
+  }
+  
+  .quick-menu-drawer.show {
+    top: 55px; /* 降到 Bar 的正下方 */
+  }
+  
+  .quick-menu-list {
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+    max-height: 65vh;
+    overflow-y: auto;
+  }
+  .quick-menu-list li {
+    padding: 16px 24px;
+    border-bottom: 1px solid #FEEAEE;
+    color: #d14d72;
+    font-size: 1.25em;
+    position: relative;
+    cursor: pointer;
+  }
+  .quick-menu-list li:last-child {
+    border-bottom: none;
+  }
+  .quick-menu-list li:active {
+    background: #FEEAEE;
+  }
+  .quick-menu-list li::after {
+    content: "›";
+    position: absolute;
+    right: 24px;
+    font-size: 1.4em;
+    color: #E87A90;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+/* 桌面版隱藏 */
+@media (min-width: 601px) {
+  .sticky-quick-nav, .quick-menu-drawer { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -2460,7 +2576,7 @@
         <div id="news-board-content" class="news-board-text">最新消息載入中...</div>
       </div>
   <div id="courseTab" class="tab-content active">
-    <div class="info-box">
+    <div class="info-box" id="ifb-course">
       <div class="drawer-trigger-list">
         <div class="info-card-btn" onclick="toggleDrawer('notice-content', '報名注意事項')">
           <span style="font-size: 1.5em;">報名須知</span>
@@ -2779,7 +2895,7 @@
     <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
       <div class="field" style="flex: 1; margin-bottom: 0;">
           <span class="pink-highlight">老師課程查詢</span>
-        <div class="wd-dropdown-container" id="customTeacherSearchDropdown">
+        <div class="wd-dropdown-container" id="customTeacherSearchDropdown" style="margin-bottom: 0;">
           <div class="wd-dropdown-trigger" onclick="toggleCustomDropdown('customTeacherSearchDropdown')" 
               style="border-radius: 30px; height: 48px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
             <span class="selected-text">正在載入老師名單...</span>
@@ -2800,7 +2916,7 @@
 
  
       <div id="roomTab" class="tab-content">
-      <div class="info-box">
+      <div class="info-box" id="ifb-room">
        
       <!-- 租借費用入口卡片 -->
       <div class="drawer-trigger-list">
@@ -2969,10 +3085,13 @@
     <div style="background: linear-gradient(135deg, #F4A7B9 0%, #E87A90 100%); color: white; padding: 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
   
       <div style="display: flex; align-items: center; gap: 8px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
-          <path d="M12 13l1-2.5 2.5-1-2.5-1L12 6l-1 2.5-2.5 1 2.5 1z"></path>
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+  
+  <path d="M 11 5.5 Q 11 11.5, 17 11.5 Q 11 11.5, 11 17.5 Q 11 11.5, 5 11.5 Q 11 11.5, 11 5.5 Z" fill="white" stroke="none" />
+  
+  <path d="M 17 4.75 Q 17 7, 19.25 7 Q 17 7, 17 9.25 Q 17 7, 14.75 7 Q 17 7, 17 4.75 Z" fill="white" stroke="none" />
+</svg>
         <span>微動身活 AI 小助手</span>
       </div>
     
@@ -3134,8 +3253,11 @@ if (subtitleTextEl) {
       if (newsLines.length > 0) {
         let currentLineIndex = 0;
         
-        // 初始化顯示第一行
-        newsBoardEl.innerText = newsLines[currentLineIndex];
+        // ✨ 新增的 NEWS 標籤：粉底(使用一點漸層增加質感)、白字、左右半圓(border-radius)
+        const newsBadge = `<span style="background: linear-gradient(135deg, #FFD1DC 0%, #E87A90 100%); color: white; padding: 2px 7px; border-radius: 50px; font-size: 0.55em; font-weight: bold; margin-right: 5px; display: inline-block; vertical-align: middle; box-shadow: 0 2px 5px rgba(232, 122, 144, 0.2);">NEW</span>`;
+        
+        // 初始化顯示第一行 (注意：改成 innerHTML，並用 span 包住文字以對齊)
+        newsBoardEl.innerHTML = newsBadge + `<span style="vertical-align: middle;">${newsLines[currentLineIndex]}</span>`;
         
         // 2. 建立每 10 秒切換一行的核心計時器
         setInterval(function() {
@@ -3147,7 +3269,8 @@ if (subtitleTextEl) {
             currentLineIndex = (currentLineIndex + 1) % newsLines.length;
             
             // C. 改變文字內容，並將文字瞬間移到下方 (.enter 狀態)
-            newsBoardEl.innerText = newsLines[currentLineIndex];
+            // 注意：這裡也改成 innerHTML，讓每次動畫切換時都帶著 NEWS 標籤
+            newsBoardEl.innerHTML = newsBadge + `<span style="vertical-align: middle;">${newsLines[currentLineIndex]}</span>`;
             newsBoardEl.classList.remove('exit');
             newsBoardEl.classList.add('enter');
             
@@ -3158,7 +3281,7 @@ if (subtitleTextEl) {
             newsBoardEl.classList.remove('enter');
           }, 600); // 600ms 剛好對應 CSS 退場動畫完成的時間
           
-        }, 10000); // 10000ms 代表每 10 秒鐘換下一行
+        }, 5000); // 10000ms 代表每 10 秒鐘換下一行
         
       } else {
         newsBoardEl.parentNode.style.display = 'none';
@@ -3513,12 +3636,18 @@ function executeQueryTabSwitch(targetBtn, parentNode, tabName) {
   for (let i = 0; i < contents.length; i++) {
     contents[i].classList.remove("active");
     contents[i].style.display = "none";
+    // ✨ 順便移除淡入 class，確保下次切換回來時能重新觸發動畫
+    contents[i].classList.remove("fade-in-section");
   }
 
   const targetContent = document.getElementById(tabName);
   if (targetContent) { 
     targetContent.classList.add("active"); 
     targetContent.style.display = "block"; 
+    
+    // ✨ 魔法兩行：強制瀏覽器重繪 (Reflow)，並掛上淡入動畫
+    void targetContent.offsetWidth; 
+    targetContent.classList.add("fade-in-section");
   } 
 }
 
@@ -4886,56 +5015,81 @@ function closePaymentModal() {
       }
 
     // 分頁切換功能
-    // 修改後的分頁切換功能
-function openTab(evt, tabName) {
+    function openTab(evt, tabName) {
   const targetBtn = evt.currentTarget;
   const parent = targetBtn.parentElement;
   const ghost = document.getElementById('ghost-tab');
   const currentActiveBtn = parent.querySelector(".tab-btn.active");
 
-  if (!currentActiveBtn || currentActiveBtn === targetBtn) return;
+  // 防呆：如果點擊的是同一個按鈕，或者找不到當前激活按鈕，就直接切換不跑動畫
+  if (!currentActiveBtn || currentActiveBtn === targetBtn) {
+    executeTabSwitch(targetBtn, parent, tabName);
+    return;
+  }
 
-  // 計算相對位置
-  const pRect = parent.getBoundingClientRect();
-  const cRect = currentActiveBtn.getBoundingClientRect();
-  const tRect = targetBtn.getBoundingClientRect();
+  if (ghost && parent) {
+    // 計算相對位置
+    const pRect = parent.getBoundingClientRect();
+    const cRect = currentActiveBtn.getBoundingClientRect();
+    const tRect = targetBtn.getBoundingClientRect();
 
-  const startX = cRect.left - pRect.left;
-  const startY = cRect.top - pRect.top;
-  const endX = tRect.left - pRect.left;
-  const endY = tRect.top - pRect.top;
+    const startX = cRect.left - pRect.left;
+    const startY = cRect.top - pRect.top;
+    const endX = tRect.left - pRect.left;
+    const endY = tRect.top - pRect.top;
 
-  // 同步內容與尺寸
-  //ghost.innerText = currentActiveBtn.innerText;
-  ghost.style.width = cRect.width + "px";
-  ghost.style.height = cRect.height + "px";
-  
-  // 注入變數 (SY 和 EY 已經在 CSS 內處理了 -3px 補償)
-  ghost.style.setProperty('--sx', startX + "px");
-  ghost.style.setProperty('--sy', startY + "px");
-  ghost.style.setProperty('--ex', endX + "px");
-  ghost.style.setProperty('--ey', endY + "px");
+    // 同步內容與尺寸
+    ghost.style.width = cRect.width + "px";
+    ghost.style.height = cRect.height + "px";
+    
+    // 注入變數 (SY 和 EY 已經在 CSS 內處理了 -3px 補償)
+    ghost.style.setProperty('--sx', startX + "px");
+    ghost.style.setProperty('--sy', startY + "px");
+    ghost.style.setProperty('--ex', endX + "px");
+    ghost.style.setProperty('--ey', endY + "px");
 
-  // 啟動表演
-  currentActiveBtn.classList.remove('active');
-  //currentActiveBtn.style.opacity = "0"; // 暫時隱藏真按鈕，防止視覺疊影
-  
-  ghost.classList.remove('ghost-moving');
-  void ghost.offsetWidth; // 觸發重繪
-  ghost.classList.add('ghost-moving');
-
-  setTimeout(() => {
+    // 啟動表演
+    currentActiveBtn.classList.remove('active');
+    
     ghost.classList.remove('ghost-moving');
-    currentActiveBtn.style.opacity = "1"; // 恢復透明度
-    targetBtn.classList.add('active');
+    void ghost.offsetWidth; // 觸發重繪
+    ghost.classList.add('ghost-moving');
 
-    // 切換頁面內容內容 (延用原本邏輯)
-    const tabContent = document.getElementsByClassName("tab-content");
-    for (let i = 0; i < tabContent.length; i++) {
-      tabContent[i].classList.remove("active");
-    }
-    document.getElementById(tabName).classList.add("active");
-  }, 350);
+    setTimeout(() => {
+      ghost.classList.remove('ghost-moving');
+      currentActiveBtn.style.opacity = "1"; // 恢復透明度
+      
+      // 動畫跑完後，呼叫實質切換的函式
+      executeTabSwitch(targetBtn, parent, tabName);
+    }, 350);
+  } else {
+    // 找不到幽靈按鈕時的保底機制
+    executeTabSwitch(targetBtn, parent, tabName);
+  }
+}
+
+/**
+ * 輔助完成實質的主分頁面板切換與淡入動畫
+ */
+function executeTabSwitch(targetBtn, parent, tabName) {
+  const btns = parent.querySelectorAll(".tab-btn");
+  for (let i = 0; i < btns.length; i++) {
+    btns[i].classList.remove("active");
+  }
+  targetBtn.classList.add("active");
+
+  const tabContent = document.getElementsByClassName("tab-content");
+  for (let i = 0; i < tabContent.length; i++) {
+    tabContent[i].classList.remove("active");
+    tabContent[i].classList.remove("fade-in-section");
+  }
+  
+  const targetContent = document.getElementById(tabName);
+  if (targetContent) {
+    targetContent.classList.add("active");
+    void targetContent.offsetWidth; 
+    targetContent.classList.add("fade-in-section");
+  }
 }
 
 
@@ -5744,12 +5898,18 @@ function executeSubTabSwitch(targetBtn, parentNode, tabName) {
   for (let i = 0; i < contents.length; i++) {
     contents[i].classList.remove("active");
     contents[i].style.display = "none";
+    // ✨ 新增：順便移除淡入 class，確保下次切換回來時能重新觸發動畫
+    contents[i].classList.remove("fade-in-section");
   }
 
   const targetContent = document.getElementById(tabName);
   if (targetContent) {
     targetContent.classList.add("active");
     targetContent.style.display = "block";
+    
+    // ✨ 魔法兩行：強制瀏覽器重繪 (Reflow)，並掛上淡入動畫
+    void targetContent.offsetWidth; 
+    targetContent.classList.add("fade-in-section");
   }
 }
 
@@ -6973,6 +7133,84 @@ document.addEventListener('click', function(event) {
         openLightbox(event.target.src); // 直接抓圖片網址並打開燈箱
     }
 });
+
+
+// 1. 監聽滾動事件，動態偵測「當前啟用 Tab」裡的 INFOBOX
+window.addEventListener('scroll', function() {
+  // 🔥 關鍵修改 1：找出當前正在顯示的 Tab 區塊
+  const activeTab = document.querySelector('.tab-content.active');
+  if (!activeTab) return;
+  
+  // 🔥 關鍵修改 2：只抓取該 Tab 裡面的 info-box (會自動對應 ifb-course 或 ifb-room)
+  const infoBox = activeTab.querySelector('.info-box'); 
+  const stickyNav = document.getElementById('stickyQuickNav');
+  const drawer = document.getElementById('quickMenuDrawer');
+  const btn = document.getElementById('quickMenuBtn');
+  
+  // 如果找不到 INFOBOX 或 Bar，或者是電腦版，就不執行
+  if (!infoBox || !stickyNav || window.innerWidth > 600) return;
+  
+  // 取得當前 INFOBOX 距離目前視窗頂部的位置
+  const rect = infoBox.getBoundingClientRect();
+  
+  // 當 INFOBOX 的上緣碰到或超過螢幕頂端時 (小於等於 0)
+  if (rect.top <= 0) {
+    stickyNav.classList.add('show');
+  } else {
+    // 隱藏 Bar 並收起所有選單
+    stickyNav.classList.remove('show');
+    if (drawer) drawer.classList.remove('show');
+    if (btn) btn.classList.remove('active');
+  }
+});
+
+// 2. 核心邏輯：切換快速選單抽屜
+function toggleQuickMenu() {
+  const drawer = document.getElementById('quickMenuDrawer');
+  const btn = document.getElementById('quickMenuBtn');
+  const list = document.getElementById('quickMenuList');
+  
+  if (!drawer || !btn || !list) return;
+  
+  const isOpening = !drawer.classList.contains('show');
+  
+  if (isOpening) {
+    list.innerHTML = '';
+    
+    // 🔥 關鍵修改 3：先鎖定「當前啟用」的 Tab
+    const activeTab = document.querySelector('.tab-content.active');
+    if (!activeTab) return;
+    
+    // 🔥 關鍵修改 4：只抓取該 Tab 裡面的 info-card-btn，過濾掉隱藏的
+    const cards = activeTab.querySelectorAll('.info-card-btn');
+    
+    cards.forEach(card => {
+      const span = card.querySelector('span');
+      if (!span) return;
+      
+      const li = document.createElement('li');
+      li.innerText = span.innerText;
+      
+      li.onclick = () => {
+        toggleQuickMenu();
+        setTimeout(() => {
+          card.click();
+          // 加上偏移，避免打開卡片時被上方的 Bar 蓋住
+          const y = card.getBoundingClientRect().top + window.scrollY - 70;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }, 320);
+      };
+      
+      list.appendChild(li);
+    });
+    
+    drawer.classList.add('show');
+    btn.classList.add('active');
+  } else {
+    drawer.classList.remove('show');
+    btn.classList.remove('active');
+  }
+}
 </script>
 
 
@@ -7251,10 +7489,11 @@ document.addEventListener('click', function(event) {
     </div>
     
   <div style="text-align: center; margin: 30px 0;">
-        <a href="https://line.me/ti/p/@843qpnet" target="_blank" class="btn-universal" 
-          style="background: linear-gradient(135deg, #B5C4D0 0%, #94A6B7 100%);">
-          <span class="btn-icon">💬</span> 
-          點我加 LINE
+        <a href="https://line.me/ti/p/@843qpnet" target="_blank" class="social-btn-custom">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+            <path fill="#E87A90" d="M375 260.8L375 342.1C375 344.2 373.4 345.8 371.3 345.8L358.3 345.8C357 345.8 355.9 345.1 355.3 344.3L318 294L318 342.2C318 344.3 316.4 345.9 314.3 345.9L301.3 345.9C299.2 345.9 297.6 344.3 297.6 342.2L297.6 260.9C297.6 258.8 299.2 257.2 301.3 257.2L314.2 257.2C315.3 257.2 316.6 257.8 317.2 258.8L354.5 309.1L354.5 260.9C354.5 258.8 356.1 257.2 358.2 257.2L371.2 257.2C373.3 257.1 375 258.8 375 260.7L375 260.8zM281.3 257.1L268.3 257.1C266.2 257.1 264.6 258.7 264.6 260.8L264.6 342.1C264.6 344.2 266.2 345.8 268.3 345.8L281.3 345.8C283.4 345.8 285 344.2 285 342.1L285 260.8C285 258.9 283.4 257.1 281.3 257.1zM249.9 325.2L214.3 325.2L214.3 260.8C214.3 258.7 212.7 257.1 210.6 257.1L197.6 257.1C195.5 257.1 193.9 258.7 193.9 260.8L193.9 342.1C193.9 343.1 194.2 343.9 194.9 344.6C195.6 345.2 196.4 345.6 197.4 345.6L249.6 345.6C251.7 345.6 253.3 344 253.3 341.9L253.3 328.9C253.3 327 251.7 325.2 249.8 325.2L249.9 325.2zM443.6 257.1L391.3 257.1C389.4 257.1 387.6 258.7 387.6 260.8L387.6 342.1C387.6 344 389.2 345.8 391.3 345.8L443.5 345.8C445.6 345.8 447.2 344.2 447.2 342.1L447.2 329C447.2 326.9 445.6 325.3 443.5 325.3L408 325.3L408 311.7L443.5 311.7C445.6 311.7 447.2 310.1 447.2 308L447.2 294.9C447.2 292.8 445.6 291.2 443.5 291.2L408 291.2L408 277.5L443.5 277.5C445.6 277.5 447.2 275.9 447.2 273.8L447.2 260.8C447.1 258.9 445.5 257.1 443.5 257.1L443.6 257.1zM576 157.4L576 483.4C575.9 534.6 533.9 576.1 482.6 576L156.6 576C105.4 575.9 63.9 533.8 64 482.6L64 156.6C64.1 105.4 106.2 63.9 157.4 64L483.4 64C534.6 64.1 576.1 106.1 576 157.4zM505.6 297.5C505.6 214.1 421.9 146.2 319.2 146.2C216.5 146.2 132.8 214.1 132.8 297.5C132.8 372.2 199.1 434.9 288.7 446.8C310.5 451.5 308 459.5 303.1 488.9C302.3 493.6 299.3 507.3 319.2 499C339.1 490.7 426.5 435.8 465.7 390.8C492.7 361.1 505.6 331 505.6 297.7L505.6 297.5z"/>
+          </svg>
+          LINE
         </a>
   </div>
 
@@ -7273,7 +7512,7 @@ document.addEventListener('click', function(event) {
 </div>
 
 <div id="pic-content" style="display:none;">
-    <h4 style="color: #d14d72; border-bottom: 2px solid #F4A7B9; padding-bottom: 8px; margin-bottom: 15px; margin-top: 0;">📸 活動照片</h4>
+    <h4 style="color: #d14d72; border-bottom: 2px solid #F4A7B9; padding-bottom: 8px; margin-bottom: 15px; margin-top: 0;">精彩的瞬間</h4>
     <div id="pic-body" class="photo-gallery">
         <p style="color: #999; text-align: center; width: 100%;">照片載入中...</p>
     </div>
@@ -7307,5 +7546,31 @@ document.addEventListener('click', function(event) {
     <span class="photo-modal-close" onclick="closeLightbox()">&times;</span>
     <img class="photo-modal-content" id="lightboxImg" onclick="event.stopPropagation()">
 </div>
+
+<div id="stickyQuickNav" class="sticky-quick-nav">
+  <span class="nav-title" style="display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 1.35em; color: #E87A90;">
+    <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="16" cy="16" r="14" stroke="#E87A90" stroke-width="1.5" fill="none" />
+      <g transform="translate(4, 4) rotate(-45 12 12)">
+        <circle cx="16.5" cy="7.5" r="3" fill="#E87A90" />
+        <path d="M 3 13 Q 7.5 9, 12 13 T 21 13" stroke="#E87A90" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+      </g>
+    </svg>
+    快速導覽
+  </span>
+  
+  <button id="quickMenuBtn" class="hamburger-btn" onclick="toggleQuickMenu()">
+    <svg class="hamburger-svg" viewBox="0 0 24 24" width="28" height="28" stroke="#E87A90" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line class="line-top" x1="3" y1="6" x2="21" y2="6"></line>
+      <line class="line-mid" x1="3" y1="12" x2="21" y2="12"></line>
+      <line class="line-bot" x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+</div>
+
+<div id="quickMenuDrawer" class="quick-menu-drawer">
+  <ul id="quickMenuList" class="quick-menu-list"></ul>
+</div>
+
 </body>
 </html>
