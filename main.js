@@ -377,7 +377,23 @@ function renderCurrentCoursesUI(courses) {
 
   // 渲染大課表手風琴 (整期)
   if (scheduleBody) {
+    let termText = "";
+    const titleEl = document.getElementById('all-course-title');
+    if (titleEl && titleEl.innerText) {
+      // 擷取括號內的內容，例如 "(7/8月課程)" 會抓出 "7/8月課程"
+      const match = titleEl.innerText.match(/\((.*?)\)/);
+      if (match) {
+        termText = match[1]; 
+      }
+    }
     let accordionHtml = '<div class="accordion-container">';
+    if (termText) {
+      accordionHtml += `
+        <div style="text-align: center; padding: 10px 0 15px 0; color: #d14d72; font-weight: bold; font-size: 1.25em; letter-spacing: 2px;">
+          ${termText}
+        </div>
+      `;
+    }
     days.forEach((day, index) => {
       const dayCourses = courses.filter(c => c.name.includes(day) && !c.name.includes('★'));
       accordionHtml += `
