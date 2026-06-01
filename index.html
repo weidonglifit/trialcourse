@@ -2345,9 +2345,59 @@
     cursor: pointer;
 }
 
-.photo-card:hover {
-    transform: translateY(-3px) scale(1.03); /* 滑鼠懸停時微幅浮起放大 */
-    box-shadow: 0 6px 12px rgba(232, 122, 144, 0.3);
+/* 📸 照片放大燈箱 (Lightbox) 樣式 */
+.photo-modal {
+    display: none; /* 預設隱藏 */
+    position: fixed;
+    z-index: 9999; /* 確保疊在最上層，包含抽屜之上 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* 半透明黑底 */
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* 啟動時的類別 */
+.photo-modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+/* 放大後的圖片樣式 */
+.photo-modal-content {
+    max-width: 90%;
+    max-height: 85%;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9); /* 預設稍微縮小 */
+    transition: transform 0.3s ease;
+}
+
+/* 彈窗出現時圖片放大回 100% 的動畫效果 */
+.photo-modal.show .photo-modal-content {
+    transform: scale(1);
+}
+
+/* 右上角關閉按鈕 */
+.photo-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    color: #fff;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+    user-select: none;
+}
+
+.photo-modal-close:hover {
+    color: #F4A7B9; /* 懸停時變成教室的粉色系 */
 }
 </style>
 </head>
@@ -3267,15 +3317,15 @@ if (subtitleTextEl) {
     const picBody = document.getElementById('pic-body');
     if (picBody) {
         if (initData.photos && initData.photos.length > 0) {
-            picBody.innerHTML = ''; // 清空「載入中」文字
+            picBody.innerHTML = ''; 
             initData.photos.forEach(url => {
                 const img = document.createElement('img');
                 img.src = url;
                 img.className = 'photo-card';
-                img.setAttribute('referrerpolicy', 'no-referrer'); // 解決 Google Drive 圖片跨域被擋問題
+                img.setAttribute('referrerpolicy', 'no-referrer');
                 
-                // 點擊卡片可另開新分頁看大圖
-                img.onclick = () => window.open(url, '_blank');
+                // 👈 改成點擊時觸發打開燈箱函式
+                img.onclick = () => openLightbox(url); 
                 
                 picBody.appendChild(img);
             });
@@ -3283,6 +3333,7 @@ if (subtitleTextEl) {
             picBody.innerHTML = '<p style="color: #999; text-align: center; width: 100%;">目前沒有活動照片</p>';
         }
     }
+
     const endTime = performance.now();
     // 3. 計算差值並換算成秒數 (保留三位小數)
     const durationSeconds = ((endTime - startTime) / 1000).toFixed(3);
@@ -6897,6 +6948,23 @@ function callGasApi(action, params = []) {
     return res.data;
   });
 }
+
+// 開啟照片燈箱
+function openLightbox(url) {
+    const modal = document.getElementById('photoLightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    
+    lightboxImg.src = url; // 帶入點擊的照片網址
+    modal.classList.add('show'); // 顯示彈窗
+    document.body.style.overflow = 'hidden'; // 放大時鎖定網頁背景，防止底層畫面跟著滾動
+}
+
+// 關閉照片燈箱
+function closeLightbox() {
+    const modal = document.getElementById('photoLightbox');
+    modal.classList.remove('show'); // 隱藏彈窗
+    document.body.style.overflow = ''; // 恢復網頁背景滾動
+}
 </script>
 
 
@@ -7225,6 +7293,11 @@ function callGasApi(action, params = []) {
     <div id="modalInjectionPoint">
       </div>
   </div>
+</div>
+
+<div id="photoLightbox" class="photo-modal" onclick="closeLightbox()">
+    <span class="photo-modal-close" onclick="closeLightbox()">&times;</span>
+    <img class="photo-modal-content" id="lightboxImg" onclick="event.stopPropagation()">
 </div>
 
 </body>
