@@ -6962,6 +6962,14 @@ function closeLightbox() {
     modal.classList.remove('show'); // 隱藏彈窗
     document.body.style.overflow = ''; // 恢復網頁背景滾動
 }
+
+document.addEventListener('click', function(event) {
+    // 如果點擊到的元素，身上有 'photo-card' 這個 class，就執行放大
+    if (event.target && event.target.classList.contains('photo-card')) {
+        event.stopPropagation();
+        openLightbox(event.target.src); // 直接抓圖片網址並打開燈箱
+    }
+});
 </script>
 
 
