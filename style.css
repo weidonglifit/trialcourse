@@ -1,4 +1,4 @@
-<style>
+
     body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f4f7f6; margin: 0; padding: 7px; color: #333; }
     
     .container { 
@@ -830,9 +830,7 @@
     display: block;
 }
 
-  </style>
-  <!--教室預約表風格-->
-  <style>
+  
  /* 核心改良：圓角包裹容器 */
 /* 1. 核心容器：強制圓角與裁切 */
 .room-table-wrapper {
@@ -895,9 +893,7 @@
 }
 .lunch-break { background-color: #fff9c4; color: #8d6e63; font-style: italic; } 
 .course-cell:last-child { border-bottom: none; }
-  </style>
-  <!--課表風格-->
-  <style>
+  
     
 
     #schedule-body tr:first-child td {
@@ -913,9 +909,7 @@
       vertical-align: middle !important; /* 文字垂直置中 */
     }
 
-  </style>
-  <!--摺疊標籤風格-->
-  <style>
+  
     
 /* 修改原本的樣式 */
 #teacherDisplayArea {
@@ -1035,9 +1029,7 @@
     z-index: 1;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
-  </style>
-  <!--老師課表風格-->
-  <style>
+  
     
     /* 讓 B 表格（老師課表）與 A 表格視覺統一 */
 .teacher-table {
@@ -1151,9 +1143,7 @@
   flex: var(--flex-grow, 1);
   min-width: 0; /* 防止內容撐開導致破版 */
 }
-  </style>
-
-<style>
+  
   .sub-tab-content { display: none; }
   .sub-tab-content.active { display: block; }
   
@@ -1208,9 +1198,7 @@
     /* 4. 下滑到最終目標位置 */
     bottom: 30px; 
 }
-</style>
 
-<style>
   /* 1. 卡片式標題佈局 */
   .drawer-trigger-list {
     display: grid;
@@ -1952,8 +1940,6 @@
   background: #F4A7B9;
   border-radius: 10px;
 }
-</style>
-<style>
 .btn-send-paperplane {
   display: inline-flex;
   align-items: center;
