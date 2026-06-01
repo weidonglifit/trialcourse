@@ -2327,6 +2327,28 @@
   box-shadow: 0 1px 4px rgba(208, 90, 110, 0.2); 
 }
 
+/* 活動照片抽屜網格與正方形小卡樣式 */
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.photo-card {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* 關鍵：強制比例 1:1 變成正方形 */
+    object-fit: cover;   /* 確保圖片不變形，填滿整個正方形 */
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.photo-card:hover {
+    transform: translateY(-3px) scale(1.03); /* 滑鼠懸停時微幅浮起放大 */
+    box-shadow: 0 6px 12px rgba(232, 122, 144, 0.3);
+}
 </style>
 </head>
 <body>
@@ -2427,6 +2449,10 @@
         </div>
         <div class="info-card-btn" onclick="toggleDrawer('schedule-content-past', '本月課程課表')">
           <span style="font-size: 1.5em;">本月課表</span>
+          <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
+        </div>
+        <div class="info-card-btn" onclick="toggleDrawer('pic-content', '活動照片')">
+          <span style="font-size: 1.5em;">活動照片</span>
           <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
         </div>
       </div>
@@ -3235,6 +3261,27 @@ if (subtitleTextEl) {
           openSubTab({ currentTarget: btnSingleClass }, 'singleCourseSection');
         }
       }
+    }
+
+    // 💡 渲染「活動照片」到抽屜中
+    const picBody = document.getElementById('pic-body');
+    if (picBody) {
+        if (initData.photos && initData.photos.length > 0) {
+            picBody.innerHTML = ''; // 清空「載入中」文字
+            initData.photos.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = 'photo-card';
+                img.setAttribute('referrerpolicy', 'no-referrer'); // 解決 Google Drive 圖片跨域被擋問題
+                
+                // 點擊卡片可另開新分頁看大圖
+                img.onclick = () => window.open(url, '_blank');
+                
+                picBody.appendChild(img);
+            });
+        } else {
+            picBody.innerHTML = '<p style="color: #999; text-align: center; width: 100%;">目前沒有活動照片</p>';
+        }
     }
     const endTime = performance.now();
     // 3. 計算差值並換算成秒數 (保留三位小數)
@@ -7147,6 +7194,13 @@ function callGasApi(action, params = []) {
 
 <div id="schedule-content-past" style="display:none;">
   <div id="schedule-body-past"></div>
+</div>
+
+<div id="pic-content" style="display:none;">
+    <h4 style="color: #d14d72; border-bottom: 2px solid #F4A7B9; padding-bottom: 8px; margin-bottom: 15px; margin-top: 0;">📸 活動照片</h4>
+    <div id="pic-body" class="photo-gallery">
+        <p style="color: #999; text-align: center; width: 100%;">照片載入中...</p>
+    </div>
 </div>
 
 <div id="paymentInfo" style="display: none; margin-top: 15px; padding: 15px; border: 2px dashed #E87A90; border-radius: 10px; background-color: #fff5f7; color: #333; text-align: center;">
