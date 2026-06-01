@@ -3052,11 +3052,6 @@
 <footer style="text-align: center; padding: 30px 20px 10px 20px; font-size: 16px; color: #666; clear: both; width: 100%; box-sizing: border-box; margin-top: 40px; border-top: 1px solid #eee;">
         <p style="margin: 0;">&copy; 2026 微動身活 共享舞蹈空間.<br>All Rights Reserved.<br>地址：新竹市東大路二段685號</p>
 </footer>
-
-<div id="photoLightbox" class="photo-modal" onclick="closeLightbox()">
-    <span class="photo-modal-close" onclick="closeLightbox()">&times;</span>
-    <img class="photo-modal-content" id="lightboxImg" onclick="event.stopPropagation()">
-</div>
 </div>
 
 
@@ -3322,19 +3317,13 @@ if (subtitleTextEl) {
     const picBody = document.getElementById('pic-body');
     if (picBody) {
         if (initData.photos && initData.photos.length > 0) {
-            picBody.innerHTML = ''; 
+            picBody.innerHTML = '';
             initData.photos.forEach(url => {
                 const img = document.createElement('img');
                 img.src = url;
                 img.className = 'photo-card';
                 img.setAttribute('referrerpolicy', 'no-referrer');
-                
-                // 💡 改用 addEventListener 來綁定點擊事件
-                img.addEventListener('click', function(event) {
-                    event.stopPropagation(); // 防止點擊事件影響到後面的元素
-                    openLightbox(url);
-                });
-                
+                img.setAttribute('onclick', `event.stopPropagation(); openLightbox('${url}')`);
                 picBody.appendChild(img);
             });
         } else {
@@ -7301,6 +7290,11 @@ function closeLightbox() {
     <div id="modalInjectionPoint">
       </div>
   </div>
+</div>
+
+<div id="photoLightbox" class="photo-modal" onclick="closeLightbox()">
+    <span class="photo-modal-close" onclick="closeLightbox()">&times;</span>
+    <img class="photo-modal-content" id="lightboxImg" onclick="event.stopPropagation()">
 </div>
 </body>
 </html>
