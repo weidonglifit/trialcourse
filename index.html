@@ -2249,6 +2249,37 @@
 .typing-pulse-effect {
     animation: typePulse 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
+/* 查詢系統專屬的分頁顯示邏輯，避免與報名系統衝突 */
+.query-tab-content { 
+  display: none; 
+}
+.query-tab-content.active { 
+  display: block; 
+}
+
+/* 查詢系統專屬的幽靈按鈕外觀：完美複製 Active 狀態 */
+#query-ghost-tab {
+  display: none;
+  position: absolute;
+  margin: 0 !important;
+  z-index: 100;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  
+  /* 視覺外觀完全同步子分頁 Active 樣式 */
+  border-radius: 25px;
+  font-weight: bold !important;
+  font-size: 20px !important;
+  color: white !important;
+  background: #D05A6E !important; /* 漂亮的深粉色 */
+  box-shadow: 0 4px 12px rgba(208, 90, 110, 0.4);
+  opacity: 1;
+  will-change: transform, opacity;
+}
 </style>
 </head>
 <body>
@@ -2584,14 +2615,14 @@
     <hr>
     <div id="querySystemContainer" style="margin-top: 30px;">
   <div class="tabs child-tabs" style="margin-top: 20px;">
-    <div id="query-ghost-tab" class="tab-btn ghost-active" style="display:none; position:absolute; z-index:10; pointer-events:none;"></div>
+    <div id="query-ghost-tab" style="display:none;"></div>
     
     <button class="tab-btn sub-tab active" onclick="openQueryTab(event, 'queryRegistrationSection')" style="font-size: 15px;">繳費查詢</button>
     <button class="tab-btn sub-tab" onclick="openQueryTab(event, 'queryCourseDateSection')" style="font-size: 15px;">課程日期</button>
     <button class="tab-btn sub-tab" onclick="openQueryTab(event, 'queryTeacherSection')" style="font-size: 15px;">老師查詢</button>
   </div>
 
-  <div id="queryRegistrationSection" class="sub-tab-content active query-section">
+  <div id="queryRegistrationSection" class="query-tab-content active query-section">
     <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
       <div class="field" style="flex: 1; margin-bottom: 0;">
           <span class="pink-highlight">請輸入報名電話</span>
@@ -2602,15 +2633,14 @@
             class="btn-universal" 
             id="queryBtn" 
             style="background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); width: 30%; height: 48px; margin: 0; 
-                  border-radius: 0 30px 30px 0; /* 銜接處設為直角 */
-                  border: 1px solid #E87A90; border-left: none;">
+                  border-radius: 0 30px 30px 0; border: 1px solid #E87A90; border-left: none;">
       查詢報名
       </button>
     </div>
     <div id="queryResult" class="result-msg" style="color: #34495e; background-color: #FFD1DC; border-radius: 20px;"></div>
   </div>
 
-  <div id="queryCourseDateSection" class="sub-tab-content query-section" style="display:none;">
+  <div id="queryCourseDateSection" class="query-tab-content query-section">
     <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
       <div class="field" id="queryCourseWrapper" style="flex: 1; margin-bottom: 0;">
           <span class="pink-highlight">請選擇課程名稱</span>
@@ -2632,7 +2662,7 @@
     <div id="itemQueryResult" class="result-msg" style="color: #34495e; background-color: #FFD1DC; border-radius: 20px;"></div>
   </div>
 
-  <div id="queryTeacherSection" class="sub-tab-content query-section" style="display:none;">
+  <div id="queryTeacherSection" class="query-tab-content query-section">
     <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
       <div class="field" style="flex: 1; margin-bottom: 0;">
           <span class="pink-highlight">老師課程查詢</span>
@@ -3272,14 +3302,12 @@ function renderTeacherDropdownUI(teachers) {
   const ghost = document.getElementById('query-ghost-tab'); 
   const currentActiveBtn = parentNode.querySelector(".tab-btn.active"); 
 
-  // 防呆：如果點擊的是同一個按鈕，或者找不到當前激活按鈕，就直接切換不跑動畫
   if (!currentActiveBtn || currentActiveBtn === targetBtn) { 
     executeQueryTabSwitch(targetBtn, parentNode, tabName); 
     return;
   } 
 
   if (ghost && parentNode) { 
-    // 1. 計算相對父容器的起點與終點座標 
     const pRect = parentNode.getBoundingClientRect(); 
     const cRect = currentActiveBtn.getBoundingClientRect();
     const tRect = targetBtn.getBoundingClientRect(); 
@@ -3288,59 +3316,51 @@ function renderTeacherDropdownUI(teachers) {
     const endX = tRect.left - pRect.left; 
     const endY = tRect.top - pRect.top; 
 
-    // 2. 同步幽靈卡片的尺寸 
+    // 同步幽靈按鈕內部的文字與尺寸，飛過去時才最自然
+    ghost.innerText = currentActiveBtn.innerText;
     ghost.style.width = cRect.width + "px";
     ghost.style.height = cRect.height + "px"; 
 
-    // 3. 注入 CSS 衝刺變數 
     ghost.style.setProperty('--sx', startX + "px"); 
     ghost.style.setProperty('--sy', startY + "px");
     ghost.style.setProperty('--ex', endX + "px"); 
     ghost.style.setProperty('--ey', endY + "px"); 
 
-    // 4. 表演真假卡片切換 
     currentActiveBtn.classList.remove('active'); 
     ghost.classList.remove('ghost-moving'); 
-    void ghost.offsetWidth; // 強制重繪 
+    void ghost.offsetWidth; 
     ghost.classList.add('ghost-moving');
     
-    // 5. 動畫結束後復原狀態並完成切換 
     setTimeout(() => { 
       ghost.classList.remove('ghost-moving'); 
       currentActiveBtn.style.opacity = "1"; 
       executeQueryTabSwitch(targetBtn, parentNode, tabName); 
-    }, 350); // 與 CSS 動畫時間保持一致
+    }, 350);
   } else { 
     executeQueryTabSwitch(targetBtn, parentNode, tabName);
   } 
 }
 
 function executeQueryTabSwitch(targetBtn, parentNode, tabName) { 
-  // 切換按鈕樣式 
   const btns = parentNode.querySelectorAll(".tab-btn");
   for (let i = 0; i < btns.length; i++) { 
     btns[i].classList.remove("active"); 
   } 
   targetBtn.classList.add("active"); 
 
-  // 切換下方內容區區塊
-  const sections = ['queryRegistrationSection', 'queryCourseDateSection', 'queryTeacherSection'];
-  for (let i = 0; i < sections.length; i++) {
-    const el = document.getElementById(sections[i]);
-    if(el) {
-      el.classList.remove("active");
-      el.style.display = "none";
-    }
+  // 精準只隱藏查詢系統旗下的分頁，不再干擾外部報名系統
+  const contents = document.getElementsByClassName("query-tab-content");
+  for (let i = 0; i < contents.length; i++) {
+    contents[i].classList.remove("active");
+    contents[i].style.display = "none";
   }
 
-  // 顯示指定的區塊
   const targetContent = document.getElementById(tabName);
   if (targetContent) { 
     targetContent.classList.add("active"); 
     targetContent.style.display = "block"; 
   } 
 }
-
 
  
 // 1. 處理報名提交 (含時間衝突防呆)
