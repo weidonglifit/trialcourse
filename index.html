@@ -3313,7 +3313,7 @@ if (subtitleTextEl) {
       }
     }
 
-    // 💡 渲染「活動照片」到抽屜中
+    // 💡 渲染「活動照片」到抽屜中 (乾淨無事件版)
     const picBody = document.getElementById('pic-body');
     if (picBody) {
         if (initData.photos && initData.photos.length > 0) {
@@ -3323,7 +3323,7 @@ if (subtitleTextEl) {
                 img.src = url;
                 img.className = 'photo-card';
                 img.setAttribute('referrerpolicy', 'no-referrer');
-                img.setAttribute('onclick', `event.stopPropagation(); openLightbox('${url}')`);
+                // 👉 這裡不寫任何 onclick 屬性了，確保語法 100% 安全不卡死！
                 picBody.appendChild(img);
             });
         } else {
