@@ -377,15 +377,7 @@ function renderCurrentCoursesUI(courses) {
 
   // 渲染大課表手風琴 (整期)
   if (scheduleBody) {
-    let termText = "";
-    const titleEl = document.getElementById('all-course-title');
-    if (titleEl && titleEl.innerText) {
-      // 擷取括號內的內容，例如 "(7/8月課程)" 會抓出 "7/8月課程"
-      const match = titleEl.innerText.match(/\((.*?)\)/);
-      if (match) {
-        termText = match[1]; 
-      }
-    }
+    let termText = globalSettings?.title?.[1] || "";
     let accordionHtml = '<div class="accordion-container">';
     if (termText) {
       accordionHtml += `
@@ -771,14 +763,7 @@ function collectNextParticipant(currentIdx, totalCount, list, baseData, btn, out
 function renderAccordionSchedule(courseSource, containerElement, type) {
   const days = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];
   const englishDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  let termText = "";
-  const titleEl = document.getElementById('single-course-title');
-  if (titleEl && titleEl.innerText) {
-    const match = titleEl.innerText.match(/[\(（](.*?)[\)）]/);
-    if (match) {
-      termText = match[1];
-    }
-  }
+  let termText = globalSettings?.title?.[2] || "";
   let accordionHtml = '<div class="accordion-container">';
   if (termText) {
     accordionHtml += `
@@ -2276,19 +2261,8 @@ document.getElementById('teacherSearchInput').addEventListener('change', functio
     return;
   }
 
-  let allCourseText = "期課課程";
-  const allTitleEl = document.getElementById('all-course-title');
-  if (allTitleEl && allTitleEl.innerText) {
-    const matchAll = allTitleEl.innerText.match(/[\(（](.*?)[\)）]/);
-    if (matchAll) allCourseText = matchAll[1];
-  }
-
-  let singleCourseText = "本月課程";
-  const singleTitleEl = document.getElementById('single-course-title');
-  if (singleTitleEl && singleTitleEl.innerText) {
-    const matchSingle = singleTitleEl.innerText.match(/[\(（](.*?)[\)）]/);
-    if (matchSingle) singleCourseText = matchSingle[1];
-  }
+  let allCourseText = globalSettings?.title?.[1] || "";
+  let singleCourseText = globalSettings?.title?.[2] || "";
 
   // 3. 安全合併「現有課程」與「過去課程」資料
   // 確保如果陣列尚未載入(undefined)時，會以空陣列 [] 代替，避免程式報錯
