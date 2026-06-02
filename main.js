@@ -2375,9 +2375,9 @@ document.getElementById('teacherSearchInput').addEventListener('change', functio
                 </div>
 
                 <div style="flex: 1; text-align: left; min-width: 0;">
-                    <div class="card-title" style="margin-bottom: 4px; font-weight: bold; color: #d14d72; font-size: 1.1em; display: flex; align-items: center; flex-wrap: wrap;">
+                    <div class="card-title" style="margin-bottom: 4px; font-weight: bold; color: #d14d72; font-size: 1.1em; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
                         ${tagHtml}
-                        <br><span>${cKey}</span>
+                        <span>${cKey}</span>
                     </div>
                     <small style="color: #f089a1; display: block; margin-top: 6px;">點擊查看課程與老師簡介 ➔</small>
                 </div>
