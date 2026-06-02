@@ -3033,3 +3033,18 @@ select {
   transform-origin: center; 
   animation: fireFlicker 0.8s infinite alternate ease-in-out; 
 }
+
+.walking-circle {
+  width: 24px;   /* 圖案本身的大小 */
+  height: 24px;  
+  animation: circleRun 2s linear infinite;
+}
+
+@keyframes circleRun {
+  from {
+    transform: rotate(0deg) translate(8px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translate(8px) rotate(-360deg);
+  }
+}
