@@ -3191,7 +3191,7 @@ function openQueryCourse() {
   container.classList.add('expanded');
   document.body.style.overflow = 'hidden';
 
-  if (0) {
+  if (inputEl) {
     inputEl.style.display = 'none';
   }
 
