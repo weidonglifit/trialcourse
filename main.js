@@ -1857,7 +1857,7 @@ function updatePriceList() {
   durationSelect.innerHTML = "";
 
   // 動態產生 1-6 小時的選項
-  for (let i = 1; i <= 12; i++) {
+  for (let i = 1; i <= 13; i++) {
     const opt = document.createElement('option');
     opt.value = i;
     // 顯示格式：1 小時 (1000元)
