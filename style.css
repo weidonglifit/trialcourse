@@ -3073,12 +3073,3 @@ select {
     transform: rotate(360deg);
   }
 }
-
-#roomstatusmsg {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 100%;
-  gap: 8px;
-}
