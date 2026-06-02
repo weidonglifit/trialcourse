@@ -2438,7 +2438,7 @@ function closeOverlay() {
     if (aiWidget) {
       aiWidget.classList.add('show');
     }
-    //document.getElementById('qrcode-widget').classList.add('show');
+    document.getElementById('qrcode-widget').classList.add('show');
 
     setTimeout(() => {
       overlay.style.display = 'none';
