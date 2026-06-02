@@ -3180,7 +3180,7 @@ function openQueryCourse() {
   const container = document.getElementById('queryInputContainer');
   const contentBox = document.getElementById('queryCourseContent');
   const sourceTable = document.getElementById('schedule-content');
-  const inputEl = document.getElementById('itemQueryName');
+  
   if (!container || !contentBox || !sourceTable) return;
 
   document.body.appendChild(container);
@@ -3190,10 +3190,6 @@ function openQueryCourse() {
   contentBox.innerHTML = sourceTable.innerHTML;
   container.classList.add('expanded');
   document.body.style.overflow = 'hidden';
-
-  if (inputEl) {
-    inputEl.style.display = 'none';
-  }
 
   setTimeout(function () {
     container.style.animation = "expandFlipIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards";
@@ -3208,7 +3204,6 @@ function closeQueryCourse(event) {
   if (event) event.stopPropagation();
   const overlay = document.getElementById('expandSharedOverlay');
   if (overlay) overlay.classList.remove('show');
-  const inputEl = document.getElementById('itemQueryName');
   const container = document.getElementById('queryInputContainer');
 
   if (container) {
@@ -3221,9 +3216,6 @@ function closeQueryCourse(event) {
 
       document.getElementById('queryCourseWrapper').appendChild(container);
 
-      if (inputEl) {
-        inputEl.style.display = 'block';
-      }
     }, 350);
   }
 }

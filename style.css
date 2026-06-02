@@ -2144,12 +2144,6 @@ select {
   display: block;
 }
 
-.expand-input-container.expanded #singleCourseSelect {
-  /* display: none; */
-  /* 放大後隱藏原本的 input 輸入框框 */
-}
-
-
 .loader {
   border: 4px solid #f3f3f3;
   /* 淺灰色外圈 */
