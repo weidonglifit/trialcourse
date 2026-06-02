@@ -49,7 +49,9 @@ window.addEventListener('load', function () {
   }
   callGasApi("getAppInitData")
     .then(function (initData) {
-
+      const mTime = performance.now();
+      const durationSeconds = ((mTime - startTime) / 1000).toFixed(3);
+      console.log(`🎉 載入成功！總共花費了 ${durationSeconds} 秒。`);
       // 1. 將後端抓回的資料直接塞入全域變數中，供各功能隨時撈取
       globalSettings = initData.settings;
       allCourseData = initData.currentCourses;
@@ -291,9 +293,9 @@ window.addEventListener('load', function () {
 
       const endTime = performance.now();
       // 3. 計算差值並換算成秒數 (保留三位小數)
-      const durationSeconds = ((endTime - startTime) / 1000).toFixed(3);
+      const durationSecondss = ((endTime - mTime) / 1000).toFixed(3);
       closeOverlay();
-      console.log(`🎉 載入並渲染成功！總共花費了 ${durationSeconds} 秒。`);
+      console.log(`🎉 渲染成功！總共花費了 ${durationSecondss} 秒。`);
     })
     .catch(function (error) {
       console.error("❌ 系統初始化失敗:", error);
