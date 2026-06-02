@@ -1129,6 +1129,49 @@
     <ul id="quickMenuList" class="quick-menu-list"></ul>
   </div>
 
+<template id="tmpl-checkbox-item">
+  <div class="course-anim-wrapper">
+    <label class="checkbox-item">
+      <input type="checkbox" name="items">
+      <span class="no-wrap-text">
+        <strong class="course-main-name" style="color: #d14d72; font-size: 1.05rem;"></strong> 
+        <span class="course-teacher" style="color: #7f8c8d; font-size: 0.9rem;"></span>
+        <br>
+        <span class="course-time-tag" style="background: #FFF5F7; color: #E87A90; padding: 2px 6px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #F4A7B9; text-align: center; display: block; width: 80px; margin-top: 1px;"></span>
+      </span>
+    </label>
+  </div>
+</template>
+
+<template id="tmpl-day-card">
+  <div class="day-card">
+    <div class="card-header">
+      <span class="day-title"></span>
+      <span class="arrow" style="transition: transform 0.3s;">▼</span>
+    </div>
+    <div class="card-body"></div>
+  </div>
+</template>
+
+<template id="tmpl-accordion-course-item">
+  <div class="accordion-course-item" style="cursor: pointer;" title="點擊直接加入預約">
+    <div class="time-tag">
+      <span class="time-start"></span>
+      <div class="time-line"></div>
+      <span class="time-end"></span>
+    </div>
+    <div class="course-info">
+      <b class="course-title"></b>
+      <span class="course-teacher-info"></span>
+      <br>
+      <span class="course-quota"></span>
+    </div>
+  </div>
+</template>
+
+
+
+
   <script src="./main.js"></script>
 </body>
 
