@@ -204,9 +204,16 @@
 
 
               <div id="multiReg" class="field" style="--flex-grow: 2; display: none;">
-                <label>報名人數</label>
-                <select id="participantCount" onchange="updateNotice()"
-                  style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
+                <span class="pink-highlight">報名人數</span>
+                <div class="wd-dropdown-container" id="customParticipantDropdown" style="margin-bottom: 0;">
+                  <div class="wd-dropdown-trigger" onclick="toggleCustomDropdown('customParticipantDropdown')"
+                    style="border-radius: 30px; height: 48px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #ccc;">
+                    <span class="selected-text">1 人</span> <span class="arrow">▼</span>
+                  </div>
+                  <ul class="wd-dropdown-menu" id="customParticipantMenu"></ul>
+                </div>
+
+                <select id="participantCount" onchange="updateNotice()" style="display: none;">
                   <option value="1" selected>1 人</option>
                   <option value="2">2 人</option>
                   <option value="3">3 人</option>
