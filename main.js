@@ -2276,6 +2276,20 @@ document.getElementById('teacherSearchInput').addEventListener('change', functio
     return;
   }
 
+  let allCourseText = "期課課程";
+  const allTitleEl = document.getElementById('all-course-title');
+  if (allTitleEl && allTitleEl.innerText) {
+    const matchAll = allTitleEl.innerText.match(/[\(（](.*?)[\)）]/);
+    if (matchAll) allCourseText = matchAll[1];
+  }
+
+  let singleCourseText = "本月課程";
+  const singleTitleEl = document.getElementById('single-course-title');
+  if (singleTitleEl && singleTitleEl.innerText) {
+    const matchSingle = singleTitleEl.innerText.match(/[\(（](.*?)[\)）]/);
+    if (matchSingle) singleCourseText = matchSingle[1];
+  }
+
   // 3. 安全合併「現有課程」與「過去課程」資料
   // 確保如果陣列尚未載入(undefined)時，會以空陣列 [] 代替，避免程式報錯
   const currentData = (allCourseData || []).map(c => ({ ...c, courseType: '期課課程' }));
@@ -2335,7 +2349,8 @@ document.getElementById('teacherSearchInput').addEventListener('change', functio
       const totalClasses = dateArray.length;
       const totalPrice = totalClasses * (course.pricePerClass || 0);
       const tagBgColor = course.courseType === '期課課程' ? '#d14d72' : '#f089a1';
-      const tagHtml = `<span style="background: ${tagBgColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75em; margin-right: 6px; white-space: nowrap;">${course.courseType}</span>`;
+      const displayTagText = (course.courseType === '期課課程') ? allCourseText : singleCourseText;
+      const tagHtml = `<span style="background: ${tagBgColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75em; margin-right: 6px; white-space: nowrap;">${displayTagText}</span>`;
 
       // --- 3. 組裝定版 HTML (套用 result-card-anim 動畫) ---
       html += `
