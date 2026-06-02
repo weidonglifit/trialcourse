@@ -2985,19 +2985,19 @@ select {
 
 @keyframes flyRightAndFade {
   0% {
-    transform: translate(0, 0) scale(1);
+    transform: translate(0, 0) scale(1.2);
     opacity: 1;
   }
   40% {
-    transform: translate(30px, -15px) scale(0.8); /* 往右 30px、往上 15px */
+    transform: translate(30px, -15px) scale(1); /* 往右 30px、往上 15px */
     opacity: 0;
   }
   41% {
-    transform: translate(-30px, 15px) scale(0.8); /* 偷偷躲到左下角準備重生 */
+    transform: translate(-30px, 15px) scale(1); /* 偷偷躲到左下角準備重生 */
     opacity: 0;
   }
   100% {
-    transform: translate(0, 0) scale(1);
+    transform: translate(0, 0) scale(1.2);
     opacity: 1;
   }
 }
