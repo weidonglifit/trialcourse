@@ -3048,3 +3048,28 @@ select {
     transform: rotate(360deg) translate(8px) rotate(-360deg);
   }
 }
+
+.hourglass-spin {
+  width: 20px;          /* 可以依據字體大小自行調整沙漏寬高 */
+  height: 20px;
+  transform-origin: center;
+  animation: flipStep 2.5s cubic-bezier(0.68, -0.6, 0.32, 1.6) infinite;
+}
+
+@keyframes flipStep {
+  0% {
+    transform: rotate(0deg);
+  }
+  15% {
+    transform: rotate(180deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  65% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
