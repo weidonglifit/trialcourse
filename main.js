@@ -196,7 +196,7 @@ window.addEventListener('load', function () {
         const priceDisplay = document.getElementById('room-price-display');
         if (priceDisplay) { priceDisplay.innerHTML = priceHtml; }
       }
-      buildCustomDropdown('roomSelect', 'customRoomDropdown', 'customRoomMenu', '載入中...');
+      buildCustomDropdown('roomSelect', 'customRoomDropdown', 'customRoomMenu', '--選擇教室--');
 
       // 7. 💡 渲染「當期整期課表表單與手風琴」
       if (initData.openTimestamp) {
