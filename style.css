@@ -2150,8 +2150,8 @@ select {
   border-top: 4px solid #E87A90;
   /* 品牌粉色內圈 */
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   animation: spin 1s linear infinite;
   display: inline-block;
   vertical-align: middle;
