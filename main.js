@@ -1220,14 +1220,14 @@ document.getElementById('queryBtn').addEventListener('click', function () {
       }
 
       btn.disabled = false;
-      btn.innerText = "立即查詢";
+      btn.innerText = "查詢";
     })
     .catch(function (err) {
       // 增加防呆：處理網路錯誤或伺服器錯誤，避免按鈕永久卡住
       const errorMsg = err.message || err;
       resultDiv.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">❌ 查詢失敗：${errorMsg}</div>`;
       btn.disabled = false;
-      btn.innerText = "立即查詢";
+      btn.innerText = "查詢";
     });
 });
 
@@ -1979,7 +1979,7 @@ function handleRoomQuery() {
   callGasApi("queryRoomReservation", [phone])
     .then(function (res) {
       // 2. 查詢完畢：恢復按鈕狀態 
-      btn.innerText = "查詢預約";
+      btn.innerText = "查詢";
       btn.disabled = false;
       btn.style.backgroundColor = "#E87A90";
       btn.style.cursor = "pointer";
