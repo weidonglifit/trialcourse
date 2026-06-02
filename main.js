@@ -565,7 +565,7 @@ document.getElementById('regForm').addEventListener('submit', function (e) {
   baseData["items"] = selectedItems;
 
   if (pCount > 1) {
-    baseData.email = baseData.email + "(" + baseData.name + ")";
+    baseData.lineId = baseData.lineId + "(" + baseData.name + ")";
   }
 
   let participants = [{ name: baseData.name, phone: baseData.phone }];
@@ -3639,6 +3639,11 @@ function sendAIMessage() {
   if (cleanInput.includes("謝謝你9527")) {
     appendAIResponse("不客氣！");
     document.getElementById('qrcode-widget').classList.toggle('show');
+    return;
+  }
+  if (cleanInput.includes("howdoyouturnthison")) {
+    appendAIResponse("Got it！");
+    document.getElementById("multiReg").style.display = "";
     return;
   }
   
