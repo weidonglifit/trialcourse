@@ -1944,6 +1944,15 @@ function executeTabSwitch(targetBtn, parent, tabName) {
     void targetContent.offsetWidth;
     targetContent.classList.add("fade-in-section");
   }
+
+  const jumpPrimaryBtn = document.getElementById('jumpPrimaryBtn');
+  if (jumpPrimaryBtn) {
+    if (tabName === 'courseTab') {
+      jumpPrimaryBtn.innerText = '報名';
+    } else if (tabName === 'roomTab') {
+      jumpPrimaryBtn.innerText = '預約';
+    }
+  }
 }
 
 
@@ -4065,3 +4074,26 @@ function toggleQuickMenu() {
   }
 }
 
+// 👇 新增：快速導覽 BAR 專用的快速跳躍邏輯
+function executeQuickJump(actionType) {
+  // 檢查目前是否為「課程報名」分頁
+  const isCourseTab = document.getElementById('courseTab').classList.contains('active');
+  let targetElementId = '';
+
+  if (isCourseTab) {
+    if (actionType === 'primary') targetElementId = 'courseEnrollmentSystem'; // 報名
+    if (actionType === 'query') targetElementId = 'querySystemContainer';     // 查詢
+  } else {
+    // 否則就是在「教室預約」分頁
+    if (actionType === 'primary') targetElementId = 'roomEnrollmentSystem';   // 預約
+    if (actionType === 'query') targetElementId = 'queryRoomContainer';       // 查詢
+  }
+
+  // 執行平滑捲動到該區塊
+  if (targetElementId) {
+    const targetElement = document.getElementById(targetElementId);
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+}
