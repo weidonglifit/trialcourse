@@ -307,156 +307,97 @@ function renderCurrentCoursesUI(courses) {
   const days = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];
   const englishDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  // 取得 HTML 模板
-  const tmplCheckbox = document.getElementById('tmpl-checkbox-item');
-  const tmplDayCard = document.getElementById('tmpl-day-card');
-  const tmplCourseItem = document.getElementById('tmpl-accordion-course-item');
-
-  // 初始化清空
   select.innerHTML = '<option value="">-- 請選擇課程 --</option>';
   checkboxContainer.innerHTML = '';
 
-  // 1. 渲染下拉選單 & 預約複選框 (使用 DocumentFragment 收集優化)
-  const checkboxFragment = document.createDocumentFragment();
-
   courses.forEach(function (courseObj) {
     const courseName = courseObj.name;
-    
-    // 下拉選單維持原樣 (原本的 createElement 已經很乾淨)
     const option = document.createElement('option');
-    option.value = courseName; 
-    option.text = courseName;
-    if (courseName.includes("★")) { 
-      option.disabled = true; 
-      option.style.fontWeight = "bold"; 
-    }
+    option.value = courseName; option.text = courseName;
+    if (courseName.includes("★")) { option.disabled = true; option.style.fontWeight = "bold"; }
     select.appendChild(option);
 
-    // 處理非星號課程的複選框
     if (!courseName.includes("★")) {
-      const clone = tmplCheckbox.content.cloneNode(true);
-      const wrapper = clone.querySelector('.course-anim-wrapper');
-      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'course-anim-wrapper';
       let courseDay = "";
       days.forEach(function (d) { if (courseName.includes(d)) courseDay = d; });
       wrapper.setAttribute('data-day', courseDay);
       wrapper.style.display = "none";
 
-      const input = clone.querySelector('input');
-      input.value = courseName;
+      const label = document.createElement('label');
+      label.className = 'checkbox-item';
+      const input = document.createElement('input');
+      input.type = 'checkbox'; input.name = 'items'; input.value = courseName;
       input.onchange = updateSelectedDisplay;
 
-      const spanWrapper = clone.querySelector('.no-wrap-text');
+      const span = document.createElement('span');
+      span.className = 'no-wrap-text';
 
       try {
         const parts = courseName.split(" ");
         if (parts.length >= 3) {
           const nameTeacher = parts[0].split("-");
-          clone.querySelector('.course-main-name').textContent = nameTeacher[0];
-          clone.querySelector('.course-teacher').textContent = `(${nameTeacher[1] || ""})`;
-          clone.querySelector('.course-time-tag').textContent = parts[2];
-        } else {
-          spanWrapper.textContent = courseName; // 發生例外或格式不符時的乾淨安全回退
-        }
-      } catch (err) {
-        spanWrapper.textContent = courseName;
-      }
+          span.innerHTML = `
+            <strong style="color: #d14d72; font-size: 1.05rem;">${nameTeacher[0]}</strong> 
+            <span style="color: #7f8c8d; font-size: 0.9rem;">(${nameTeacher[1] || ""})</span><br>
+            <span style="background: #FFF5F7; color: #E87A90; padding: 2px 6px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #F4A7B9; text-align: center; display: block; width: 80px; margin-top: 1px;">${parts[2]}</span>`;
+        } else { span.innerText = courseName; }
+      } catch (err) { span.innerText = courseName; }
 
-      checkboxFragment.appendChild(clone);
+      label.appendChild(input); label.appendChild(span);
+      wrapper.appendChild(label); checkboxContainer.appendChild(wrapper);
     }
   });
-  checkboxContainer.appendChild(checkboxFragment);
 
   // 預設切換至今天星期的分頁
   const currentDay = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"][new Date().getDay()];
   filterDay(currentDay, null);
 
-  // 2. 渲染大課表手風琴 (整期)
+  // 渲染大課表手風琴 (整期)
   if (scheduleBody) {
-    scheduleBody.innerHTML = ''; // 清空大課表舊資料
-
     let termText = globalSettings?.title?.[1] || "";
+    let accordionHtml = '<div class="accordion-container">';
     if (termText) {
-      const titleDiv = document.createElement('div');
-      titleDiv.style.cssText = "text-align: center; padding: 10px 0 15px 0; color: #d14d72; font-weight: bold; font-size: 1.25em; letter-spacing: 2px;";
-      titleDiv.textContent = termText;
-      scheduleBody.appendChild(titleDiv);
+      accordionHtml += `
+        <div style="text-align: center; padding: 10px 0 15px 0; color: #d14d72; font-weight: bold; font-size: 1.25em; letter-spacing: 2px;">
+          ${termText}
+        </div>
+      `;
     }
-
-    const accordionContainer = document.createElement('div');
-    accordionContainer.className = 'accordion-container';
-    
-    // 建立大課表的 Fragment
-    const accordionFragment = document.createDocumentFragment();
-
-    // 外層迴圈：跑 7 天
     days.forEach((day, index) => {
-      const dayCardClone = tmplDayCard.content.cloneNode(true);
-      
-      // 綁定手風琴展開事件
-      const header = dayCardClone.querySelector('.card-header');
-      header.onclick = function() { toggleAccordion(this); };
-      
-      // 填入星期標題 (包含英文字標籤)
-      dayCardClone.querySelector('.day-title').innerHTML = `${day} <small style="font-weight:normal; opacity:0.6; margin-left:5px;">${englishDays[index]}</small>`;
-
-      const cardBody = dayCardClone.querySelector('.card-body');
       const dayCourses = courses.filter(c => c.name.includes(day) && !c.name.includes('★'));
+      accordionHtml += `
+        <div class="day-card">
+          <div class="card-header" onclick="toggleAccordion(this)">
+            <span>${day} <small style="font-weight:normal; opacity:0.6; margin-left:5px;">${englishDays[index]}</small></span>
+            <span class="arrow" style="transition: transform 0.3s;">▼</span>
+          </div>
+          <div class="card-body">`;
 
-      // 內層迴圈：跑當天所有課程
       if (dayCourses.length > 0) {
-        // 時間排序
         dayCourses.sort((a, b) => {
-          const timeA = a.name.match(/\d{2}:\d{2}/); 
-          const timeB = b.name.match(/\d{2}:\d{2}/);
+          const timeA = a.name.match(/\d{2}:\d{2}/); const timeB = b.name.match(/\d{2}:\d{2}/);
           return (timeA && timeB) ? timeA[0].localeCompare(timeB[0]) : 0;
         });
-
         dayCourses.forEach(course => {
-          const itemClone = tmplCourseItem.content.cloneNode(true);
-          const itemDiv = itemClone.querySelector('.accordion-course-item');
-
-          // 🔥 【重大亮點優化】：直接利用箭頭函式傳遞完整的 course.name 字串物件！
-          // 再也不用寫 course.name.replace(/'/g, "\\'") 了，任憑課程名稱有任何單雙引號都不會出錯！
-          itemDiv.onclick = () => selectFromScheduleSingle(course.name);
-
-          const parts = course.name.split(" "); 
-          const nameTeacher = parts[0].split("-");
-          const timeRange = parts[2] || ""; 
+          const parts = course.name.split(" "); const nameTeacher = parts[0].split("-");
+          const timeRange = parts[2] || ""; const remaining = course.remaining; const max = course.maxCapacity;
           const times = timeRange.split("-");
-
-          // 填入時間與課程資訊
-          itemClone.querySelector('.time-start').textContent = times[0] || "";
-          itemClone.querySelector('.time-end').textContent = times[1] || "";
-          itemClone.querySelector('.course-title').textContent = nameTeacher[0];
-          itemClone.querySelector('.course-teacher-info').textContent = ` - ${nameTeacher[1] || ""}`;
-
-          // 處理名額防呆視覺
-          const quotaSpan = itemClone.querySelector('.course-quota');
-          if (course.remaining <= 0) {
-            quotaSpan.textContent = "(已額滿)";
-            quotaSpan.style.color = "red";
-            quotaSpan.style.fontWeight = "bold";
-          } else {
-            quotaSpan.textContent = `(尚餘名額 ${course.remaining}/${course.maxCapacity})`;
-            quotaSpan.style.color = "#4CAF50";
-          }
-
-          cardBody.appendChild(itemClone);
+          const quotaHtml = (remaining <= 0) ? `<br><span style="color:red; font-weight:bold;">(已額滿)</span>` : `<br><span style="color:#4CAF50;">(尚餘名額 ${remaining}/${max})</span>`;
+          accordionHtml += `
+            <div class="accordion-course-item" style="cursor: pointer;" title="點擊直接加入預約" onclick="selectFromScheduleSingle('${course.name.replace(/'/g, "\\'")}')">
+              <div class="time-tag"><span>${times[0] || ""}</span><div class="time-line"></div><span>${times[1] || ""}</span></div>
+              <div class="course-info"><b>${nameTeacher[0]}</b> - ${nameTeacher[1] || ""} ${quotaHtml}</div>
+            </div>`;
         });
       } else {
-        // 今日無排課的處理
-        const noCourseDiv = document.createElement('div');
-        noCourseDiv.style.cssText = "padding:15px; color:#ccc; text-align:center;";
-        noCourseDiv.textContent = "今日暫無排課";
-        cardBody.appendChild(noCourseDiv);
+        accordionHtml += `<div style="padding:15px; color:#ccc; text-align:center;">今日暫無排課</div>`;
       }
-
-      accordionFragment.appendChild(dayCardClone);
+      accordionHtml += `</div></div>`;
     });
-
-    accordionContainer.appendChild(accordionFragment);
-    scheduleBody.appendChild(accordionContainer);
+    accordionHtml += '</div>';
+    scheduleBody.innerHTML = accordionHtml;
   }
 }
 
