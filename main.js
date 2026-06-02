@@ -2438,7 +2438,7 @@ function closeOverlay() {
     if (aiWidget) {
       aiWidget.classList.add('show');
     }
-    document.getElementById('qrcode-widget').classList.add('show');
+    //document.getElementById('qrcode-widget').classList.add('show');
 
     setTimeout(() => {
       overlay.style.display = 'none';
@@ -3626,15 +3626,19 @@ function sendAIMessage() {
 
 
   if (cleanInput.includes("糖香料")) {
-    // 秒回小女警經典台詞
     appendAIResponse("以及一切美好的事物！");
-    return; // 💡 關鍵：直接中斷 function，完全不送去後端大腦，省 Token 又秒讀秒回！
+    return;
   }
   if (cleanInput.includes("一天又平安的過去了")) {
-    // 秒回小女警經典台詞
     appendAIResponse("感謝飛天小女警的努力！");
-    return; // 💡 關鍵：直接中斷 function，完全不送去後端大腦，省 Token 又秒讀秒回！
+    return;
   }
+  if (cleanInput.includes("謝謝你9527")) {
+    appendAIResponse("不客氣！");
+    document.getElementById('qrcode-widget').classList.toggle('show');
+    return;
+  }
+  
   var phoneMatch = userText.match(/09\d{8}/);
   aiChatHistory.push({ role: "user", content: userText });
   // 2. 顯示思考中動畫
