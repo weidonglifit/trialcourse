@@ -2145,7 +2145,7 @@ select {
 }
 
 .expand-input-container.expanded #singleCourseSelect {
-  /* display: none; */
+  display: none;
   /* 放大後隱藏原本的 input 輸入框框 */
 }
 
