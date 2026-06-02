@@ -3073,3 +3073,8 @@ select {
     transform: rotate(360deg);
   }
 }
+
+#roomstatusmsg {
+  text-align: center; /* 讓內部的 SVG 和 <span> 文字像段落一樣水平置中 */
+  width: 100%;
+}
