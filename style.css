@@ -2985,3 +2985,31 @@ select {
 .fly-out-svg {
   animation: flyRightAndFade 1.5s infinite ease-in-out;
 }
+
+@keyframes fireFlicker {
+  0% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  25% { 
+    opacity: 0.7; 
+    transform: scale(0.95); 
+  }
+  50% { 
+    opacity: 0.9; 
+    transform: scale(1.05); 
+  }
+  75% { 
+    opacity: 0.6; 
+    transform: scale(0.92); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+.flicker-svg {
+  transform-origin: center; 
+  animation: fireFlicker 0.8s infinite alternate ease-in-out; 
+}
