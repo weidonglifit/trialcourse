@@ -1344,7 +1344,7 @@ document.getElementById('itemQueryName').addEventListener('change', function () 
 
                   <div style="flex: 1; text-align: left; min-width: 0;">
                       <div class="card-title" style="margin-bottom: 4px; font-weight: bold; color: #d14d72; font-size: 1.1em;">
-                          📌 ${nameTeacherPart}
+                          ${nameTeacherPart}
                       </div>
                       <div class="card-detail" style="font-size: 0.9em; color: #555;">日期：${dateString}</div>
                       <div class="card-detail" style="color: #e74c3c; font-weight: bold; margin-top: 6px; font-size: 0.95em;">
@@ -2377,7 +2377,7 @@ document.getElementById('teacherSearchInput').addEventListener('change', functio
                 <div style="flex: 1; text-align: left; min-width: 0;">
                     <div class="card-title" style="margin-bottom: 4px; font-weight: bold; color: #d14d72; font-size: 1.1em; display: flex; align-items: center; flex-wrap: wrap;">
                         ${tagHtml}
-                        <span>📌 ${cKey}</span>
+                        <span>${cKey}</span>
                     </div>
                     <small style="color: #f089a1; display: block; margin-top: 6px;">點擊查看課程與老師簡介 ➔</small>
                 </div>
