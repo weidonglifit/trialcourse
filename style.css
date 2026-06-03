@@ -3179,3 +3179,10 @@ select {
   /* 直接重複利用你已經寫好的 breathText 呼吸動畫 */
   animation: breathText 0.5s infinite ease-in-out; 
 }
+
+#courseEnrollmentSystem, 
+#querySystemContainer, 
+#roomEnrollmentSystem, 
+#queryRoomContainer {
+  scroll-margin-top: 55px;
+}
