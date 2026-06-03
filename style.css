@@ -3078,3 +3078,61 @@ select {
   text-align: center; /* 讓內部的 SVG 和 <span> 文字像段落一樣水平置中 */
   width: 100%;
 }
+
+/* =========================================
+   SVG 10組漸次淡入動畫 (純 CSS 控制，不改原代碼)
+   ========================================= */
+
+.svg-intro-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 20px 0;
+}
+
+/* 控制整張圖在螢幕中間的大小 */
+#svg1 {
+  width: 180px;  /* 你可以根據需求微調這個數值 */
+  height: auto;
+}
+
+/* 定義淡入動畫 (注意：這裡不能用 transform，以免覆蓋 SVG 原本的 matrix 變形) */
+@keyframes partFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 讓所有路徑預設隱藏，並準備播放動畫 */
+#layer-MC0 path,
+#layer-MC1 path {
+  opacity: 0;
+  animation: partFadeIn 0.5s ease-in forwards;
+}
+
+/* --- LOGO 圖形部分 (切分為第 1~3 組) --- */
+
+/* 第 1 組：最底層路徑 (前 9 個) */
+#layer-MC0 path:nth-child(-n+9) { animation-delay: 0s; }
+/* 第 2 組：中層路徑 (第 10 到 18 個) */
+#layer-MC0 path:nth-child(n+10):nth-child(-n+18) { animation-delay: 0.2s; }
+/* 第 3 組：上層路徑 (第 19 個以後) */
+#layer-MC0 path:nth-child(n+19) { animation-delay: 0.4s; }
+
+
+/* --- 文字與細節部分 (切分為第 4~10 組) --- */
+
+/* 第 4 組 */
+#layer-MC1 path:nth-child(-n+10) { animation-delay: 0.6s; }
+/* 第 5 組 */
+#layer-MC1 path:nth-child(n+11):nth-child(-n+20) { animation-delay: 0.8s; }
+/* 第 6 組 */
+#layer-MC1 path:nth-child(n+21):nth-child(-n+30) { animation-delay: 1.0s; }
+/* 第 7 組 */
+#layer-MC1 path:nth-child(n+31):nth-child(-n+40) { animation-delay: 1.2s; }
+/* 第 8 組 */
+#layer-MC1 path:nth-child(n+41):nth-child(-n+50) { animation-delay: 1.4s; }
+/* 第 9 組 */
+#layer-MC1 path:nth-child(n+51):nth-child(-n+60) { animation-delay: 1.6s; }
+/* 第 10 組：最後收尾的路徑 */
+#layer-MC1 path:nth-child(n+61) { animation-delay: 1.8s; }
