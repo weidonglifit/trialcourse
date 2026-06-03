@@ -3154,7 +3154,7 @@ select {
 .bottom-loading-group {
   position: absolute;
   /* 與上方的 calc(7% + 75px) 形成完美的上下對稱 */
-  bottom: calc(7% + 75px); 
+  bottom: calc(7% + 65px); 
   left: 50%;
   transform: translateX(-50%);
   z-index: 10001; /* 確保在遮罩之上 */
