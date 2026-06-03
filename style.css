@@ -3077,11 +3077,15 @@ select {
    3. 定義雙重動畫：進場 + 永續呼吸
    ========================================= */
 @keyframes partFadeIn {
-  from { 
+  0% { 
     opacity: 0; 
+    scale: 2.5;
+  }
+  50% { 
+    opacity: 0.4; 
     scale: 1.5;
   }
-  to { 
+  100% { 
     opacity: 1; 
     scale: 1;
   }
