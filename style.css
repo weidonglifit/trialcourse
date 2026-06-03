@@ -3088,8 +3088,14 @@ select {
 }
 
 @keyframes partBreathe {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; } /* 隨機淡出到剩下 25% 亮度 */
+ 0%, 100% { 
+    opacity: 1; 
+    filter: blur(0px); 
+  }
+  50% { 
+    opacity: 0.35; 
+    filter: blur(1.5px); /* 呼吸時稍微散發微光 */
+  }
 }
 
 /* 4. 讓所有路徑預設隱藏，並綁定「兩個」動畫 */
