@@ -3078,3 +3078,30 @@ select {
   text-align: center; /* 讓內部的 SVG 和 <span> 文字像段落一樣水平置中 */
   width: 100%;
 }
+
+/* 設定 SVG 背景容器，使其滿版並置中內部圖案 */
+.intro-image-bg {
+    position: relative; /* 或依據原本佈局設定 absolute / fixed */
+    width: 100%;
+    height: 100vh;      /* 放大背景通常為全螢幕或特定高度 */
+    overflow: hidden;   /* 隱藏超出邊界的零散部件 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff; /* 可依據教室主色系調整背景底色 */
+}
+
+/* 控管內嵌 SVG 的自適應縮放 */
+.intro-image-bg svg {
+    width: 85%;         /* 放大背景的比例，可依視覺調整 */
+    max-width: 1200px;  /* 限制最大寬度防止過度變形 */
+    height: auto;
+    display: block;
+}
+
+/* 關鍵初始狀態：先將 SVG 內的所有群組(g)與獨立路徑(path)隱藏，並設定中心點 */
+#intro-svg-container svg g,
+#intro-svg-container svg path:not(g > path) {
+    opacity: 0;
+    transform-origin: center center; /* 確保縮放與旋轉都以各自的中心為軸心 */
+}
