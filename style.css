@@ -3094,12 +3094,12 @@ select {
 @keyframes partDropIn {
   from { 
     opacity: 0; 
-    /* 放大、往上偏、且隨機傾斜 15 度 */
-    transform: scale(2) translateY(-50px) rotate(30deg); 
+    /* 現在 Y 軸高度也是隨機的了！如果沒抓到變數，預設給它 -50px */
+    transform: scale(2) translateY(var(--random-y, -50px)) rotate(var(--random-rot, 0deg)); 
   }
   to { 
     opacity: 1; 
-    /* 完美歸位、轉正 */
+    /* 最終全部乖乖歸位 */
     transform: scale(1) translateY(0px) rotate(0deg); 
   }
 }
