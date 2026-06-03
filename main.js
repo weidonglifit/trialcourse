@@ -164,10 +164,10 @@ window.addEventListener('load', function () {
           if (countdownContainer && countdownContainer.style.display === 'none') {
             countdownContainer.style.display = 'block'; // 確保時間未到時可見
           }
-          if (dEl) dEl.innerText = String(days).padStart(2, '0');
-          if (hEl) hEl.innerText = String(hours).padStart(2, '0');
-          if (mEl) mEl.innerText = String(minutes).padStart(2, '0');
-          if (sEl) sEl.innerText = String(seconds).padStart(2, '0');
+          if (dEl) animateCountdownValue(dEl, String(days).padStart(2, '0'));
+          if (hEl) animateCountdownValue(hEl, String(hours).padStart(2, '0'));
+          if (mEl) animateCountdownValue(mEl, String(minutes).padStart(2, '0'));
+          if (sEl) animateCountdownValue(sEl, String(seconds).padStart(2, '0'));
         }
 
         updateCountdown();
@@ -301,6 +301,27 @@ window.addEventListener('load', function () {
       console.error("❌ 系統初始化失敗:", error);
     }); // 🔄 改為只呼叫這一個整合大禮包函式
 });
+
+function animateCountdownValue(el, newValue) {
+  // 如果數值沒變，就不執行任何動畫 (例如分鐘數、小時數沒有改變時)
+  if (el.innerText === newValue) return;
+
+  // 1. 加上 exit class 讓數字往上滑出
+  el.classList.add('exit');
+
+  // 2. 等待滑出動畫結束 (對應 CSS 的 0.25s = 250ms)
+  setTimeout(() => {
+    el.innerText = newValue; // 更新數值
+    el.classList.remove('exit');
+    el.classList.add('enter'); // 瞬間移到下方準備
+
+    // 強制瀏覽器重繪 (Reflow)，讓 CSS 變化生效
+    void el.offsetWidth;
+
+    // 3. 移除 enter class，觸發往上滑入的動畫
+    el.classList.remove('enter');
+  }, 250);
+}
 
 // 抽出：單獨處理當期整期課程的 UI 渲染器
 function renderCurrentCoursesUI(courses) {
