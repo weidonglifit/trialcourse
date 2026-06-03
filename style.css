@@ -3076,86 +3076,36 @@ select {
 /* =========================================
    3. 定義雙重動畫：進場 + 永續呼吸
    ========================================= */
-@keyframes partFadeIn {
-0% { 
-    opacity: 0; 
-    filter: blur(12px); /* 高度模糊，營造空間深處的錯覺 */
-  }
-  100% { 
-    opacity: 1; 
-    filter: blur(0px);  /* 清晰對焦拼合 */
-  }
-}
-
-@keyframes partBreathe {
- 0%, 100% { 
-    opacity: 1; 
-    filter: blur(0px); 
-  }
-  50% { 
-    opacity: 0.35; 
-    filter: blur(1.5px); /* 呼吸時稍微散發微光 */
-  }
-}
-
-/* 4. 讓所有路徑預設隱藏，並綁定「兩個」動畫 */
-#layer-MC0 path,
-#layer-MC1 path {
+.anim-wrapper {
   opacity: 0;
-  animation-name: partFadeIn, partBreathe;
+  
+  /* 讓縮放完美鎖定在碎片的正中心 */
+  transform-origin: center;
+  transform-box: fill-box; 
+  
+  /* 綁定雙重動畫 */
+  animation-name: partDropIn, partBreathe;
   animation-fill-mode: forwards, forwards;
-  animation-iteration-count: 1, infinite; /* 進場1次，呼吸無限次 */
-  animation-timing-function: ease-out, ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1), ease-in-out;
 }
 
-/* =========================================
-   5. 分組設定：進場延遲 與 呼吸錯位魔法
-   (animation-duration: 進場速度, 呼吸週期)
-   (animation-delay: 進場延遲, 呼吸開始的時間)
-   ========================================= */
-
-/* --- LOGO 圖形部分 (第 1~3 組) --- */
-#layer-MC0 path:nth-child(-n+9) { 
-  animation-duration: 1.5s, 4.3s; 
-  animation-delay: 0s, 4.8s; 
-}
-#layer-MC0 path:nth-child(n+10):nth-child(-n+18) { 
-  animation-duration: 1.5s, 5.7s; 
-  animation-delay: 0.2s, 5.1s; 
-}
-#layer-MC0 path:nth-child(n+19) { 
-  animation-duration: 1.5s, 3.8s; 
-  animation-delay: 0.4s, 4.5s; 
+/* 動畫 A：1.5倍降落拼合 */
+@keyframes partDropIn {
+  from { 
+    opacity: 0; 
+    transform: scale(1.5); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
 }
 
-/* --- 文字與細節部分 (第 4~10 組) --- */
-#layer-MC1 path:nth-child(-n+10) { 
-  animation-duration: 1.5s, 6.1s; 
-  animation-delay: 0.6s, 5.5s; 
-}
-#layer-MC1 path:nth-child(n+11):nth-child(-n+20) { 
-  animation-duration: 1.5s, 4.7s; 
-  animation-delay: 0.8s, 4.9s; 
-}
-#layer-MC1 path:nth-child(n+21):nth-child(-n+30) { 
-  animation-duration: 1.5s, 5.2s; 
-  animation-delay: 1.0s, 5.8s; 
-}
-#layer-MC1 path:nth-child(n+31):nth-child(-n+40) { 
-  animation-duration: 1.5s, 3.9s; 
-  animation-delay: 1.2s, 5.2s; 
-}
-#layer-MC1 path:nth-child(n+41):nth-child(-n+50) { 
-  animation-duration: 1.5s, 6.5s; 
-  animation-delay: 1.4s, 6.0s; 
-}
-#layer-MC1 path:nth-child(n+51):nth-child(-n+60) { 
-  animation-duration: 1.5s, 4.1s; 
-  animation-delay: 1.6s, 4.7s; 
-}
-#layer-MC1 path:nth-child(n+61) { 
-  animation-duration: 1.5s, 5.9s; 
-  animation-delay: 1.8s, 5.6s; 
+/* 動畫 B：微光呼吸 */
+@keyframes partBreathe {
+  0%, 100% { opacity: 1; filter: blur(0px); }
+  50% { opacity: 0.35; filter: blur(1.5px); }
 }
 
 /* =========================================

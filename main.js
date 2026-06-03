@@ -3485,11 +3485,55 @@ function fetchTomorrowWeather() {
 // 💡 網頁初始化載入時，自動執行一次抓天氣
 window.addEventListener('DOMContentLoaded', function () {
   fetchTomorrowWeather();
-  fetch('weidong0.svg') // 請換成你實際的 SVG 檔名或路徑
+  // 動態載入外部 SVG 並啟動保護衣包裝機
+fetch('weidong0.svg')
   .then(response => response.text())
   .then(svgData => {
-    // 將抓取到的 SVG 原始碼，直接塞進容器的 HTML 中
     document.getElementById('logo-container').innerHTML = svgData;
+    
+    // ==========================================
+    // ✨ SVG 碎片保護衣：自動化包裝腳本 ✨
+    // ==========================================
+    // 抓取所有的路徑
+    const layer0Paths = Array.from(document.querySelectorAll('#layer-MC0 path'));
+    const layer1Paths = Array.from(document.querySelectorAll('#layer-MC1 path'));
+    
+    // 按照我們之前的邏輯，切分成 10 組
+    const groups = [
+      layer0Paths.slice(0, 9),
+      layer0Paths.slice(9, 18),
+      layer0Paths.slice(18),
+      layer1Paths.slice(0, 10),
+      layer1Paths.slice(10, 20),
+      layer1Paths.slice(20, 30),
+      layer1Paths.slice(30, 40),
+      layer1Paths.slice(40, 50),
+      layer1Paths.slice(50, 60),
+      layer1Paths.slice(60)
+    ];
+
+    // 10組呼吸動畫的週期 (質數秒，製造隨機交錯感)
+    const breatheDurations = [4.3, 5.7, 3.8, 6.1, 4.7, 5.2, 3.9, 6.5, 4.1, 5.9];
+
+    // 開始幫每個碎片穿衣服
+    groups.forEach((groupPaths, index) => {
+      let dropDelay = index * 0.2;            // 降落進場時間：每組相隔 0.2 秒
+      let breatheDelay = dropDelay + 4.8;     // 呼吸開始時間：等大家降落完再開始
+
+      groupPaths.forEach(path => {
+        // 1. 創造一件全新的 <g> 保護衣
+        const wrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        wrapper.classList.add('anim-wrapper'); // 加上 CSS 類別
+        
+        // 2. 獨立寫入這件保護衣的「動畫速度」與「延遲時間」
+        wrapper.style.animationDuration = `1.5s, ${breatheDurations[index]}s`;
+        wrapper.style.animationDelay = `${dropDelay}s, ${breatheDelay}s`;
+
+        // 3. 把保護衣穿到 <path> 外面！
+        path.parentNode.insertBefore(wrapper, path);
+        wrapper.appendChild(path);
+      });
+    });
   })
   .catch(error => console.error('無法載入 SVG:', error));
 });
