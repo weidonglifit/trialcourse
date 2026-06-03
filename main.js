@@ -3517,7 +3517,7 @@ fetch('weidong0.svg')
 
     // 開始幫每個碎片穿衣服
     groups.forEach((groupPaths, index) => {
-      let dropDelay = index * 0.2;            // 降落進場時間：每組相隔 0.2 秒
+      let dropDelay = index * 0.3;            // 降落進場時間：每組相隔 0.2 秒
       let breatheDelay = dropDelay + 4.8;     // 呼吸開始時間：等大家降落完再開始
 
       groupPaths.forEach(path => {
@@ -3526,7 +3526,7 @@ fetch('weidong0.svg')
         wrapper.classList.add('anim-wrapper'); // 加上 CSS 類別
         
         // 2. 獨立寫入這件保護衣的「動畫速度」與「延遲時間」
-        wrapper.style.animationDuration = `2.5s, ${breatheDurations[index]}s`;
+        wrapper.style.animationDuration = `2s, ${breatheDurations[index]}s`;
         wrapper.style.animationDelay = `${dropDelay}s, ${breatheDelay}s`;
 
         // 3. 把保護衣穿到 <path> 外面！
