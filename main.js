@@ -3518,9 +3518,9 @@ fetch('weidong0.svg')
         // 1. 創造一件全新的 <g> 保護衣
         const wrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
         wrapper.classList.add('anim-wrapper'); // 加上 CSS 類別
-        let randomAngle = Math.floor(Math.random() * 90) - 45; 
-        let randomX = Math.floor(Math.random() * 201) - 100; 
-        let randomY = Math.floor(Math.random() * 201) - 100;
+        let randomAngle = Math.floor(Math.random() * 360) - 180; 
+        let randomX = Math.floor(Math.random() * 301) - 150; 
+        let randomY = Math.floor(Math.random() * 301) - 150;
         let randomFlip = Math.random() > 0.5 ? 1 : -1;
         wrapper.style.setProperty('--random-rot', `${randomAngle}deg`);
         wrapper.style.setProperty('--random-x', `${randomX}px`);
