@@ -3103,7 +3103,7 @@ select {
    ========================================= */
 @media (max-width: 600px) {
   #svg1 {
-    width: 90%;
+    width: 95%;
     max-width: none;
   }
 }
