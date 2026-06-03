@@ -3093,7 +3093,7 @@ select {
 
 /* 控制整張圖在螢幕中間的大小 */
 #svg1 {
-  width: 600px;  /* 你可以根據需求微調這個數值 */
+  width: 700px;  /* 你可以根據需求微調這個數值 */
   height: auto;
 }
 
@@ -3107,7 +3107,7 @@ select {
 #layer-MC0 path,
 #layer-MC1 path {
   opacity: 0;
-  animation: partFadeIn 1s ease-in forwards;
+  animation: partFadeIn 1.5s ease-in forwards;
 }
 
 /* --- LOGO 圖形部分 (切分為第 1~3 組) --- */
