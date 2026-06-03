@@ -876,19 +876,12 @@ select {
 /* 定義一個消失的動畫 */
 @keyframes customExit {
   0% {
-    transform: scale(1);
     opacity: 1;
     filter: blur(0px);
   }
 
-  30% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-
   /* 先稍微放大一點點 */
   100% {
-    transform: scale(0.2);
     opacity: 0;
     filter: blur(10px);
   }
@@ -911,14 +904,7 @@ select {
 }
 
 .exit-animation {
-  transform-origin: 10% 5%;
   animation: customExit 0.8s forwards;
-}
-
-@media (min-width: 1024px) {
-  .exit-animation {
-    transform-origin: 48% 5%;
-  }
 }
 
 /* 查詢結果卡片彈出動畫 */
