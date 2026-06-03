@@ -3094,7 +3094,7 @@ select {
 @keyframes partDropIn {
   from { 
     opacity: 0; 
-    transform: scale(2) scaleX(var(--random-flip, 1)) translateX(var(--random-x, 0px)) translateY(var(--random-y, 0px)) rotate(var(--random-rot, 0deg)); 
+    transform: scale(0.1) scaleX(var(--random-flip, 1)) translateX(var(--random-x, 0px)) translateY(var(--random-y, 0px)) rotate(var(--random-rot, 0deg)); 
   }
   to { 
     opacity: 1; 
