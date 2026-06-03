@@ -3094,24 +3094,29 @@ select {
 @keyframes partDropIn {
   from { 
     opacity: 0; 
-    /* 1. 加入 perspective 和立體旋轉 */
     transform: perspective(500px) scale(2) translateX(var(--random-x, 0px)) translateY(var(--random-y, 0px)) rotateX(var(--random-rx, 0deg)) rotateY(var(--random-ry, 0deg)); 
-    /* 2. 初始帶有強烈的發光濾鏡 */
-    filter: drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.8));
+    filter: drop-shadow(0px 10px 20px rgba(238, 219, 165, 0.8));
   }
   to { 
     opacity: 1; 
-    /* 全部歸零回正 */
     transform: perspective(500px) scale(1) translateX(0px) translateY(0px) rotateX(0deg) rotateY(0deg); 
-    /* 光暈消失 */
     filter: drop-shadow(0px 0px 0px rgba(255, 255, 255, 0));
   }
 }
 
 /* 動畫 B：微光呼吸 */
+/* =========================================
+   動畫 B：品牌能量光暈呼吸 (不再變透明)
+   ========================================= */
 @keyframes partBreathe {
-  0%, 100% { opacity: 1; filter: blur(0px); }
-  50% { opacity: 0.6; filter: blur(1.5px); }
+  0%, 100% { 
+    opacity: 1;
+    filter: drop-shadow(0px 10px 20px rgba(238, 219, 165, 0));
+  }
+  50% { 
+    opacity: 0.9; 
+    filter: drop-shadow(0px 10px 20px rgba(238, 219, 165, 0.8));
+  }
 }
 
 /* =========================================
