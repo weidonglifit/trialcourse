@@ -3518,14 +3518,14 @@ fetch('weidong0.svg')
         // 1. 創造一件全新的 <g> 保護衣
         const wrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
         wrapper.classList.add('anim-wrapper'); // 加上 CSS 類別
-        let randomAngle = Math.floor(Math.random() * 360) - 180; 
         let randomX = Math.floor(Math.random() * 301) - 150; 
         let randomY = Math.floor(Math.random() * 301) - 150;
-        let randomFlip = Math.random() > 0.5 ? 1 : -1;
-        wrapper.style.setProperty('--random-rot', `${randomAngle}deg`);
+        let randomRX = Math.floor(Math.random() * 361) - 180; // X軸 3D 翻轉 -180 到 180度
+        let randomRY = Math.floor(Math.random() * 361) - 180; // Y軸 3D 翻轉 -180 到 180度
         wrapper.style.setProperty('--random-x', `${randomX}px`);
         wrapper.style.setProperty('--random-y', `${randomY}px`);
-        wrapper.style.setProperty('--random-flip', randomFlip);
+        wrapper.style.setProperty('--random-rx', `${randomRX}deg`);
+        wrapper.style.setProperty('--random-ry', `${randomRY}deg`);
         
         // 2. 獨立寫入這件保護衣的「動畫速度」與「延遲時間」
         wrapper.style.animationDuration = `2.5s, ${breatheDurations[index]}s`;
