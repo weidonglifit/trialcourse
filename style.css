@@ -1968,7 +1968,10 @@ select {
 .num-inner {
   display: inline-block;
   border: none;
-  padding: none;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  min-width: 0;
   transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease;
   opacity: 1;
   transform: translateY(0);
