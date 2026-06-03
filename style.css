@@ -3100,8 +3100,6 @@ select {
 #layer-MC0 path,
 #layer-MC1 path {
   opacity: 0;
-  transform-origin: center;
-  transform-box: fill-box;
   /* 動畫 1: 進場 (partFadeIn)
      動畫 2: 呼吸 (partBreathe) */
   animation-name: partFadeIn, partBreathe;
