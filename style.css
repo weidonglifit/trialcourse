@@ -3095,7 +3095,7 @@ select {
   from { 
     opacity: 0; 
     /* 放大、往上偏、且隨機傾斜 15 度 */
-    transform: scale(2) translateY(-30px) rotate(15deg); 
+    transform: scale(2) translateY(-50px) rotate(30deg); 
   }
   to { 
     opacity: 1; 
