@@ -303,26 +303,30 @@ window.addEventListener('load', function () {
 });
 
 function animateCountdownValue(el, newValue) {
-  // 檢查有沒有包裝內層，沒有的話就動態建立一個
-  let inner = el.querySelector('.num-inner');
+  let inner = el.querySelector('i.num-inner');
+
+  // 如果沒有內層，就動態建立一個 <i> 標籤
   if (!inner) {
-    const currentVal = el.innerText;
-    el.innerHTML = `<span class="num-inner">${currentVal}</span>`;
-    inner = el.querySelector('.num-inner');
+    el.innerHTML = `<i class="num-inner">${newValue}</i>`;
+    inner = el.querySelector('i.num-inner');
+    return; // 第一次建立不需要動畫
   }
 
+  // 如果數值沒變，就不執行任何動作
   if (inner.innerText === newValue) return;
 
-  // 針對「內層數字」加上動畫，外框保持不動
+  // 1. 執行向上滑出動畫
   inner.classList.add('exit');
 
+  // 2. 等待滑出動畫結束 (250ms)
   setTimeout(() => {
-    inner.innerText = newValue;
+    inner.innerText = newValue;        // 替換新數字
     inner.classList.remove('exit');
-    inner.classList.add('enter');
+    inner.classList.add('enter');      // 瞬間移動到下方
 
-    void inner.offsetWidth; // 觸發重繪
+    void inner.offsetWidth;            // ⚠️ 強制瀏覽器重繪 (重要！沒有這行不會有動畫)
 
+    // 3. 拔掉 enter，數字就會平滑滑入原位
     inner.classList.remove('enter');
   }, 250);
 }

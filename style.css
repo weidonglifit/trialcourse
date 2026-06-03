@@ -1965,27 +1965,23 @@ select {
   overflow: hidden; 
 }
 
-.num-inner {
+.countdown-timer i.num-inner {
+  font-style: normal; /* 讓 i 標籤維持正常字體不傾斜 */
   display: inline-block;
-  border: none;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-  min-width: 0;
   transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease;
   opacity: 1;
   transform: translateY(0);
 }
 
-.num-inner.exit {
+.countdown-timer i.num-inner.exit {
   opacity: 0;
-  transform: translateY(-15px);
+  transform: translateY(-20px);
 }
 
-.num-inner.enter {
+.countdown-timer i.num-inner.enter {
   opacity: 0;
-  transform: translateY(15px);
-  transition: none; /* 瞬間到位，不觸發動畫 */
+  transform: translateY(20px);
+  transition: none;
 }
 
 .countdown-timer small {
