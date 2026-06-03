@@ -3068,24 +3068,23 @@ select {
   #svg1 {
     width: 100vw !important; 
     max-width: none !important;
+    transform: scale(1.1) !important; 
     transform-origin: center center !important;
-    animation: mobileSvgDropIn 3.3s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
   }
 }
-@keyframes mobileSvgDropIn {
-  from { 
-    transform: scale(2); /* 從 1.5 倍開始 (製造降落感) */
-  }
-  to { 
-    transform: scale(1.1); /* 完美降落並停在你原本設定的 1.1 倍大小！ */
-  }
-}
+
 /* =========================================
    3. 定義雙重動畫：進場 + 永續呼吸
    ========================================= */
 @keyframes partFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+0% { 
+    opacity: 0; 
+    filter: blur(12px); /* 高度模糊，營造空間深處的錯覺 */
+  }
+  100% { 
+    opacity: 1; 
+    filter: blur(0px);  /* 清晰對焦拼合 */
+  }
 }
 
 @keyframes partBreathe {
