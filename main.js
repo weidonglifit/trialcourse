@@ -70,7 +70,7 @@ window.addEventListener('load', function () {
         整期課程報名 (${globalSettings.title[1]})
       </span>
     `;
-    //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+      //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
       document.getElementById('single-course-title').innerHTML = `
       <span style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="width: 24px; height: 24px; fill: #D05A6E;">
@@ -79,7 +79,7 @@ window.addEventListener('load', function () {
         單堂課程報名 (${globalSettings.title[2]})
       </span>
     `;
-    //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+      //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
 
       // 3. 處理跑馬燈邏輯
       const newsBoardEl = document.getElementById('news-board-content');
@@ -831,7 +831,7 @@ function executeBatchSubmit(list, baseData, btn, output) {
         <path fill="white" d="M125.4 128C91.5 128 64 155.5 64 189.4C64 190.3 64 191.1 64.1 192L64 192L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 192L575.9 192C575.9 191.1 576 190.3 576 189.4C576 155.5 548.5 128 514.6 128L125.4 128zM528 256.3L528 448C528 456.8 520.8 464 512 464L128 464C119.2 464 112 456.8 112 448L112 256.3L266.8 373.7C298.2 397.6 341.7 397.6 373.2 373.7L528 256.3zM112 189.4C112 182 118 176 125.4 176L514.6 176C522 176 528 182 528 189.4C528 193.6 526 197.6 522.7 200.1L344.2 335.5C329.9 346.3 310.1 346.3 295.8 335.5L117.3 200.1C114 197.6 112 193.6 112 189.4z"/>
       </svg>
     `;
-    //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+  //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
 
   output.style.color = "#34495e";
   output.innerText = "正在處理報名資料，請稍候...";
@@ -3192,7 +3192,7 @@ function openQueryCourse() {
   const container = document.getElementById('queryInputContainer');
   const contentBox = document.getElementById('queryCourseContent');
   const sourceTable = document.getElementById('schedule-content');
-  
+
   if (!container || !contentBox || !sourceTable) return;
 
   document.body.appendChild(container);
@@ -3280,8 +3280,8 @@ function buildCustomDropdown(realSelectId, containerId, menuId, defaultText, cus
   Array.from(realSelect.options).forEach(opt => {
     // 根據你原本的邏輯，多數選單會跳過 value === "" 的選項
     // 但因為有些選單原本沒有特別過濾空值，這邊我們用 `!opt.text.includes("--")` 或 `opt.value !== ""` 來過濾預設提示項
-    if (opt.value === "" && realSelectId !== 'roomSelect' && realSelectId !== 'durationSelect') return; 
-    
+    if (opt.value === "" && realSelectId !== 'roomSelect' && realSelectId !== 'durationSelect') return;
+
     // 如果是教室跟時數，你原本的寫法會把所有的 option 印出來，所以特別繞開過濾
     if (opt.value === "" && (realSelectId === 'roomSelect' || realSelectId === 'durationSelect')) return;
 
@@ -3296,25 +3296,25 @@ function buildCustomDropdown(realSelectId, containerId, menuId, defaultText, cus
       li.onclick = function () {
         // 1. 更新美化觸發框的顯示文字
         triggerText.innerText = opt.text;
-        
+
         // 2. 同步選取真實的 select 值
         realSelect.value = opt.value;
-        
+
         // 3. 觸發真實選單綁定的連動事件 (例如 onChange)
         realSelect.dispatchEvent(new Event('change'));
-        
+
         // 4. 收起美化選單
         const container = document.getElementById(containerId);
         if (container.classList.contains('open')) {
-             container.classList.remove('open');
-        } else if (container.classList.contains('expanded')){
-             container.classList.remove('expanded');
-             document.body.style.overflow = ''; // 放開鎖定
+          container.classList.remove('open');
+        } else if (container.classList.contains('expanded')) {
+          container.classList.remove('expanded');
+          document.body.style.overflow = ''; // 放開鎖定
         }
 
         // 5. 執行額外的自訂邏輯 (如果有傳入)
         if (customLogic && typeof customLogic === 'function') {
-            customLogic();
+          customLogic();
         }
       };
     }
@@ -3486,58 +3486,63 @@ function fetchTomorrowWeather() {
 window.addEventListener('DOMContentLoaded', function () {
   fetchTomorrowWeather();
   // 動態載入外部 SVG 並啟動保護衣包裝機
-fetch('weidong0.svg')
-  .then(response => response.text())
-  .then(svgData => {
-    document.getElementById('logo-container').innerHTML = svgData;
-    
-    // ==========================================
-    // ✨ SVG 碎片保護衣：自動化包裝腳本 ✨
-    // ==========================================
-    // 抓取所有的路徑
-    const layer0Paths = Array.from(document.querySelectorAll('#layer-MC0 path'));
-    const layer1Paths = Array.from(document.querySelectorAll('#layer-MC1 path'));
-    
-    // 按照我們之前的邏輯，切分成 10 組
-    const groups = [
-      layer0Paths.slice(0, 9),
-      layer0Paths.slice(9, 18),
-      layer0Paths.slice(18),
-      layer1Paths
-    ];
+  fetch('weidong0.svg')
+    .then(response => response.text())
+    .then(svgData => {
+      document.getElementById('logo-container').innerHTML = svgData;
 
-    // 10組呼吸動畫的週期 (質數秒，製造隨機交錯感)
-    const breatheDurations = [4.3, 5.7, 3.8, 6.1];
+      // ==========================================
+      // ✨ SVG 碎片保護衣：自動化包裝腳本 ✨
+      // ==========================================
+      // 抓取所有的路徑
+      const layer0Paths = Array.from(document.querySelectorAll('#layer-MC0 path'));
+      const layer1Paths = Array.from(document.querySelectorAll('#layer-MC1 path'));
 
-    // 開始幫每個碎片穿衣服
-    groups.forEach((groupPaths, index) => {
-      let dropDelay = index * 0.6;            // 降落進場時間：每組相隔 0.2 秒
-      let breatheDelay = dropDelay + 4.8;     // 呼吸開始時間：等大家降落完再開始
+      // 按照我們之前的邏輯，切分成 10 組
+      const groups = [
+        layer0Paths.slice(0, 9),
+        layer0Paths.slice(9, 18),
+        layer0Paths.slice(18),
+        layer1Paths
+      ];
 
-      groupPaths.forEach(path => {
-        // 1. 創造一件全新的 <g> 保護衣
-        const wrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        wrapper.classList.add('anim-wrapper'); // 加上 CSS 類別
-        let randomX = Math.floor(Math.random() * 301) - 150; 
-        let randomY = Math.floor(Math.random() * 301) - 150;
-        let randomRX = Math.floor(Math.random() * 361) - 180; // X軸 3D 翻轉 -180 到 180度
-        let randomRY = Math.floor(Math.random() * 361) - 180; // Y軸 3D 翻轉 -180 到 180度
-        wrapper.style.setProperty('--random-x', `${randomX}px`);
-        wrapper.style.setProperty('--random-y', `${randomY}px`);
-        wrapper.style.setProperty('--random-rx', `${randomRX}deg`);
-        wrapper.style.setProperty('--random-ry', `${randomRY}deg`);
-        
-        // 2. 獨立寫入這件保護衣的「動畫速度」與「延遲時間」
-        wrapper.style.animationDuration = `2.5s, ${breatheDurations[index]}s`;
-        wrapper.style.animationDelay = `${dropDelay}s, ${breatheDelay}s`;
+      // 10組呼吸動畫的週期 (質數秒，製造隨機交錯感)
+      const breatheDurations = [4.3, 5.7, 3.8, 6.1];
 
-        // 3. 把保護衣穿到 <path> 外面！
-        path.parentNode.insertBefore(wrapper, path);
-        wrapper.appendChild(path);
+      // 開始幫每個碎片穿衣服
+      groups.forEach((groupPaths, index) => {
+        let dropDelay = index * 0.6;
+        let breatheDelay = dropDelay + 4.8;
+
+        groupPaths.forEach(path => {
+          // 1. 創造一件全新的 <g> 保護衣
+          const wrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          wrapper.classList.add('anim-wrapper'); // 加上 CSS 類別
+          let randomX = Math.floor(Math.random() * 301) - 150;
+          let randomY = Math.floor(Math.random() * 301) - 150;
+          let randomRX = Math.floor(Math.random() * 361) - 180; // X軸 3D 翻轉 -180 到 180度
+          let randomRY = Math.floor(Math.random() * 361) - 180; // Y軸 3D 翻轉 -180 到 180度
+          wrapper.style.setProperty('--random-x', `${randomX}px`);
+          wrapper.style.setProperty('--random-y', `${randomY}px`);
+          wrapper.style.setProperty('--random-rx', `${randomRX}deg`);
+          wrapper.style.setProperty('--random-ry', `${randomRY}deg`);
+
+          // 2. 獨立寫入這件保護衣的「動畫速度」與「延遲時間」
+          let dropDuration = 3;
+          if (index === 3) {
+            dropDuration = 1.3;
+          }
+
+          wrapper.style.animationDuration = `${dropDuration}s, ${breatheDurations[index]}s`;
+          wrapper.style.animationDelay = `${dropDelay}s, ${breatheDelay}s`;
+
+          // 3. 把保護衣穿到 <path> 外面！
+          path.parentNode.insertBefore(wrapper, path);
+          wrapper.appendChild(path);
+        });
       });
-    });
-  })
-  .catch(error => console.error('無法載入 SVG:', error));
+    })
+    .catch(error => console.error('無法載入 SVG:', error));
 });
 
 function sendAIMessage() {
@@ -3575,7 +3580,7 @@ function sendAIMessage() {
     document.getElementById("multiReg").style.display = "";
     return;
   }
-  
+
   var phoneMatch = userText.match(/09\d{8}/);
   aiChatHistory.push({ role: "user", content: userText });
   // 2. 顯示思考中動畫
@@ -4043,7 +4048,7 @@ function getOrCreateExpandOverlay() {
     overlay.id = 'expandSharedOverlay';
     overlay.className = 'expand-overlay';
     // 點擊背景也能順便關閉
-    overlay.onclick = function() {
+    overlay.onclick = function () {
       if (document.getElementById('expandInputContainer')?.classList.contains('expanded')) {
         closeExpandedCourse();
       }
