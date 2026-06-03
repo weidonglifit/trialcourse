@@ -3094,13 +3094,11 @@ select {
 @keyframes partDropIn {
   from { 
     opacity: 0; 
-    /* 同時接收 X 軸、Y 軸與旋轉的隨機變數 */
-    transform: scale(2) translateX(var(--random-x, 0px)) translateY(var(--random-y, 0px)) rotate(var(--random-rot, 0deg)); 
+    transform: scale(2) scaleX(var(--random-flip, 1)) translateX(var(--random-x, 0px)) translateY(var(--random-y, 0px)) rotate(var(--random-rot, 0deg)); 
   }
   to { 
     opacity: 1; 
-    /* 所有的變數在此刻全部歸零，完美拼合！ */
-    transform: scale(1) translateX(0px) translateY(0px) rotate(0deg); 
+    transform: scale(1) scaleX(1) translateX(0px) translateY(0px) rotate(0deg); 
   }
 }
 

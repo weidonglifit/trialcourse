@@ -3521,9 +3521,11 @@ fetch('weidong0.svg')
         let randomAngle = Math.floor(Math.random() * 90) - 45; 
         let randomX = Math.floor(Math.random() * 201) - 100; 
         let randomY = Math.floor(Math.random() * 201) - 100;
+        let randomFlip = Math.random() > 0.5 ? 1 : -1;
         wrapper.style.setProperty('--random-rot', `${randomAngle}deg`);
         wrapper.style.setProperty('--random-x', `${randomX}px`);
         wrapper.style.setProperty('--random-y', `${randomY}px`);
+        wrapper.style.setProperty('--random-flip', randomFlip);
         
         // 2. 獨立寫入這件保護衣的「動畫速度」與「延遲時間」
         wrapper.style.animationDuration = `2.5s, ${breatheDurations[index]}s`;
