@@ -3198,5 +3198,5 @@ select {
   color: #ffffff;
   font-weight: bold;
   /* 直接重複利用你已經寫好的 breathText 呼吸動畫 */
-  animation: breathText 1.5s infinite ease-in-out; 
+  animation: breathText 0.5s infinite ease-in-out; 
 }
