@@ -3093,6 +3093,7 @@ select {
 
 /* 控制整張圖在螢幕中間的大小 */
 #svg1 {
+  flex-shrink: 0 !important;
   width: 60%;         /* 在大螢幕佔 60% 空間 */
   max-width: 750px;   /* 電腦上最大不要超過這個數值，以免太巨無霸 */
   height: auto;
@@ -3103,8 +3104,8 @@ select {
    ========================================= */
 @media (max-width: 600px) {
   #svg1 {
-    width: 95%;
-    max-width: none;
+    width: 85vw !important; 
+    max-width: none !important;
   }
 }
 
