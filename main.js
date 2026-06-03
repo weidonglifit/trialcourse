@@ -3547,16 +3547,18 @@ window.addEventListener('DOMContentLoaded', function () {
           let randomY = Math.floor(Math.random() * 301) - 150;
           let randomRX = Math.floor(Math.random() * 361) - 180; // X軸 3D 翻轉 -180 到 180度
           let randomRY = Math.floor(Math.random() * 361) - 180; // Y軸 3D 翻轉 -180 到 180度
+          let dropDuration = 3;
+          if (index === 3) {
+            dropDuration = 1.3;
+            randomRX = 0;
+            randomRY = 0;
+          }
           wrapper.style.setProperty('--random-x', `${randomX}px`);
           wrapper.style.setProperty('--random-y', `${randomY}px`);
           wrapper.style.setProperty('--random-rx', `${randomRX}deg`);
           wrapper.style.setProperty('--random-ry', `${randomRY}deg`);
 
           // 2. 獨立寫入這件保護衣的「動畫速度」與「延遲時間」
-          let dropDuration = 3;
-          if (index === 3) {
-            dropDuration = 1.3;
-          }
 
           wrapper.style.animationDuration = `${dropDuration}s, ${breatheDurations[index]}s`;
           wrapper.style.animationDelay = `${dropDelay}s, ${breatheDelay}s`;
