@@ -3526,7 +3526,7 @@ fetch('weidong0.svg')
         wrapper.classList.add('anim-wrapper'); // 加上 CSS 類別
         
         // 2. 獨立寫入這件保護衣的「動畫速度」與「延遲時間」
-        wrapper.style.animationDuration = `1.5s, ${breatheDurations[index]}s`;
+        wrapper.style.animationDuration = `2.5s, ${breatheDurations[index]}s`;
         wrapper.style.animationDelay = `${dropDelay}s, ${breatheDelay}s`;
 
         // 3. 把保護衣穿到 <path> 外面！
