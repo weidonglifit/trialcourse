@@ -3106,7 +3106,7 @@ select {
   #svg1 {
     width: 100vw !important; 
     max-width: none !important;
-    transform: scale(1.2) !important; 
+    transform: scale(1.1) !important; 
     transform-origin: center center !important;
   }
 }
