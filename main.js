@@ -3485,6 +3485,13 @@ function fetchTomorrowWeather() {
 // 💡 網頁初始化載入時，自動執行一次抓天氣
 window.addEventListener('DOMContentLoaded', function () {
   fetchTomorrowWeather();
+  fetch('weidong0.svg') // 請換成你實際的 SVG 檔名或路徑
+  .then(response => response.text())
+  .then(svgData => {
+    // 將抓取到的 SVG 原始碼，直接塞進容器的 HTML 中
+    document.getElementById('logo-container').innerHTML = svgData;
+  })
+  .catch(error => console.error('無法載入 SVG:', error));
 });
 
 function sendAIMessage() {
