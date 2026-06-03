@@ -3095,7 +3095,7 @@ select {
   from { 
     opacity: 0; 
     transform: perspective(500px) scale(2) translateX(var(--random-x, 0px)) translateY(var(--random-y, 0px)) rotateX(var(--random-rx, 0deg)) rotateY(var(--random-ry, 0deg)); 
-    filter: drop-shadow(0px 10px 20px rgba(238, 219, 165, 0.8));
+    filter: drop-shadow(0px 10px 20px rgba(226, 125, 152, 0.6));
   }
   to { 
     opacity: 1; 
@@ -3111,11 +3111,11 @@ select {
 @keyframes partBreathe {
   0%, 100% { 
     opacity: 1;
-    filter: drop-shadow(0px 10px 20px rgba(238, 219, 165, 0));
+    filter: drop-shadow(0px 10px 20px rgba(226, 125, 152, 0));
   }
   50% { 
     opacity: 0.9; 
-    filter: drop-shadow(0px 10px 20px rgba(238, 219, 165, 0.8));
+    filter: drop-shadow(0px 10px 20px rgba(226, 125, 152, 0.6));
   }
 }
 
