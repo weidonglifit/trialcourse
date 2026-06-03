@@ -303,23 +303,27 @@ window.addEventListener('load', function () {
 });
 
 function animateCountdownValue(el, newValue) {
-  // 如果數值沒變，就不執行任何動畫 (例如分鐘數、小時數沒有改變時)
-  if (el.innerText === newValue) return;
+  // 檢查有沒有包裝內層，沒有的話就動態建立一個
+  let inner = el.querySelector('.num-inner');
+  if (!inner) {
+    const currentVal = el.innerText;
+    el.innerHTML = `<span class="num-inner">${currentVal}</span>`;
+    inner = el.querySelector('.num-inner');
+  }
 
-  // 1. 加上 exit class 讓數字往上滑出
-  el.classList.add('exit');
+  if (inner.innerText === newValue) return;
 
-  // 2. 等待滑出動畫結束 (對應 CSS 的 0.25s = 250ms)
+  // 針對「內層數字」加上動畫，外框保持不動
+  inner.classList.add('exit');
+
   setTimeout(() => {
-    el.innerText = newValue; // 更新數值
-    el.classList.remove('exit');
-    el.classList.add('enter'); // 瞬間移到下方準備
+    inner.innerText = newValue;
+    inner.classList.remove('exit');
+    inner.classList.add('enter');
 
-    // 強制瀏覽器重繪 (Reflow)，讓 CSS 變化生效
-    void el.offsetWidth;
+    void inner.offsetWidth; // 觸發重繪
 
-    // 3. 移除 enter class，觸發往上滑入的動畫
-    el.classList.remove('enter');
+    inner.classList.remove('enter');
   }, 250);
 }
 

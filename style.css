@@ -1958,23 +1958,29 @@ select {
   border-radius: 6px;
   border: 1px solid #F4A7B9;
   min-width: 32px;
-  display: inline-block;
+  display: inline-flex; 
+  justify-content: center;
+  align-items: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden; 
+}
 
+.num-inner {
+  display: inline-block;
   transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease;
   opacity: 1;
   transform: translateY(0);
 }
 
-.countdown-timer span.exit {
+.num-inner.exit {
   opacity: 0;
   transform: translateY(-15px);
 }
 
-.countdown-timer span.enter {
+.num-inner.enter {
   opacity: 0;
   transform: translateY(15px);
-  transition: none; /* 瞬間移動到位，不觸發動畫 */
+  transition: none; /* 瞬間到位，不觸發動畫 */
 }
 
 .countdown-timer small {
