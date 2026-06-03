@@ -70,7 +70,7 @@ window.addEventListener('load', function () {
         整期課程報名 (${globalSettings.title[1]})
       </span>
     `;
-      //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+    //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
       document.getElementById('single-course-title').innerHTML = `
       <span style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="width: 24px; height: 24px; fill: #D05A6E;">
@@ -79,7 +79,7 @@ window.addEventListener('load', function () {
         單堂課程報名 (${globalSettings.title[2]})
       </span>
     `;
-      //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+    //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
 
       // 3. 處理跑馬燈邏輯
       const newsBoardEl = document.getElementById('news-board-content');
@@ -831,7 +831,7 @@ function executeBatchSubmit(list, baseData, btn, output) {
         <path fill="white" d="M125.4 128C91.5 128 64 155.5 64 189.4C64 190.3 64 191.1 64.1 192L64 192L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 192L575.9 192C575.9 191.1 576 190.3 576 189.4C576 155.5 548.5 128 514.6 128L125.4 128zM528 256.3L528 448C528 456.8 520.8 464 512 464L128 464C119.2 464 112 456.8 112 448L112 256.3L266.8 373.7C298.2 397.6 341.7 397.6 373.2 373.7L528 256.3zM112 189.4C112 182 118 176 125.4 176L514.6 176C522 176 528 182 528 189.4C528 193.6 526 197.6 522.7 200.1L344.2 335.5C329.9 346.3 310.1 346.3 295.8 335.5L117.3 200.1C114 197.6 112 193.6 112 189.4z"/>
       </svg>
     `;
-  //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+    //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
 
   output.style.color = "#34495e";
   output.innerText = "正在處理報名資料，請稍候...";
@@ -3192,7 +3192,7 @@ function openQueryCourse() {
   const container = document.getElementById('queryInputContainer');
   const contentBox = document.getElementById('queryCourseContent');
   const sourceTable = document.getElementById('schedule-content');
-
+  
   if (!container || !contentBox || !sourceTable) return;
 
   document.body.appendChild(container);
@@ -3280,8 +3280,8 @@ function buildCustomDropdown(realSelectId, containerId, menuId, defaultText, cus
   Array.from(realSelect.options).forEach(opt => {
     // 根據你原本的邏輯，多數選單會跳過 value === "" 的選項
     // 但因為有些選單原本沒有特別過濾空值，這邊我們用 `!opt.text.includes("--")` 或 `opt.value !== ""` 來過濾預設提示項
-    if (opt.value === "" && realSelectId !== 'roomSelect' && realSelectId !== 'durationSelect') return;
-
+    if (opt.value === "" && realSelectId !== 'roomSelect' && realSelectId !== 'durationSelect') return; 
+    
     // 如果是教室跟時數，你原本的寫法會把所有的 option 印出來，所以特別繞開過濾
     if (opt.value === "" && (realSelectId === 'roomSelect' || realSelectId === 'durationSelect')) return;
 
@@ -3296,25 +3296,25 @@ function buildCustomDropdown(realSelectId, containerId, menuId, defaultText, cus
       li.onclick = function () {
         // 1. 更新美化觸發框的顯示文字
         triggerText.innerText = opt.text;
-
+        
         // 2. 同步選取真實的 select 值
         realSelect.value = opt.value;
-
+        
         // 3. 觸發真實選單綁定的連動事件 (例如 onChange)
         realSelect.dispatchEvent(new Event('change'));
-
+        
         // 4. 收起美化選單
         const container = document.getElementById(containerId);
         if (container.classList.contains('open')) {
-          container.classList.remove('open');
-        } else if (container.classList.contains('expanded')) {
-          container.classList.remove('expanded');
-          document.body.style.overflow = ''; // 放開鎖定
+             container.classList.remove('open');
+        } else if (container.classList.contains('expanded')){
+             container.classList.remove('expanded');
+             document.body.style.overflow = ''; // 放開鎖定
         }
 
         // 5. 執行額外的自訂邏輯 (如果有傳入)
         if (customLogic && typeof customLogic === 'function') {
-          customLogic();
+            customLogic();
         }
       };
     }
@@ -3485,82 +3485,13 @@ function fetchTomorrowWeather() {
 // 💡 網頁初始化載入時，自動執行一次抓天氣
 window.addEventListener('DOMContentLoaded', function () {
   fetchTomorrowWeather();
-
-  // 動態載入外部 SVG 並保持可控性
-  fetch('weidong0.svg') // 請換成你實際的 SVG 檔名
-    .then(response => response.text())
-    .then(svgData => {
-      // 1. 將 SVG 放入容器
-      document.getElementById('logo-container').innerHTML = svgData;
-
-      // 2. 確保 SVG 放進網頁後，立刻啟動 GSAP 動畫
-      initGsapAnimation();
-    })
-    .catch(error => console.error('無法載入 SVG:', error));
-
-
-  // --- GSAP 動畫核心控制 ---
-  function initGsapAnimation() {
-    // 將原本 CSS 的 10 個分組轉成 JS 陣列
-    const svgGroups = [
-      "#layer-MC0 path:nth-child(-n+9)",
-      "#layer-MC0 path:nth-child(n+10):nth-child(-n+18)",
-      "#layer-MC0 path:nth-child(n+19)",
-      "#layer-MC1 path:nth-child(-n+10)",
-      "#layer-MC1 path:nth-child(n+11):nth-child(-n+20)",
-      "#layer-MC1 path:nth-child(n+21):nth-child(-n+30)",
-      "#layer-MC1 path:nth-child(n+31):nth-child(-n+40)",
-      "#layer-MC1 path:nth-child(n+41):nth-child(-n+50)",
-      "#layer-MC1 path:nth-child(n+51):nth-child(-n+60)",
-      "#layer-MC1 path:nth-child(n+61)"
-    ];
-
-    // 建立 GSAP 時間軸 (Timeline)
-    const tl = gsap.timeline({
-      // 當「進場動畫」全部播完後的 1.5 秒，觸發呼吸效果
-      onComplete: () => {
-        setTimeout(() => {
-          startRandomBreathing(svgGroups);
-        }, 1500); // 停頓 1.5 秒
-      }
-    });
-
-    // 遍歷 10 組碎片，設定進場動畫
-    svgGroups.forEach((selector, index) => {
-      tl.fromTo(selector,
-        {
-          opacity: 0,
-          scale: 1.5,
-          transformOrigin: "50% 50%" // ✨ GSAP 魔法：自動算出每個碎片的真實正中心
-        },
-        {
-          opacity: 1,
-          scale: 1,                  // 完美降落回原尺寸，座標絕不跑掉
-          duration: 1.5,             // 降落花費時間
-          ease: "power2.out"         // 帶有阻尼感的滑順減速
-        },
-        index * 0.2 // 時間軸排程：每隔 0.2 秒觸發下一組 (0s, 0.2s, 0.4s...)
-      );
-    });
-  }
-
-  // --- 隨機呼吸特效 ---
-  function startRandomBreathing(groups) {
-    groups.forEach((selector) => {
-      // 創造隨機變數，讓每組看起來像是獨立的生命體
-      let randomDuration = 2 + Math.random() * 3; // 週期：隨機 2~5 秒
-      let randomDelay = Math.random() * 2;        // 延遲：隨機 0~2 秒開始
-
-      gsap.to(selector, {
-        opacity: 0.25,             // 呼吸變暗時剩下的亮度
-        duration: randomDuration,
-        delay: randomDelay,
-        repeat: -1,                // 無限重複 (-1)
-        yoyo: true,                // 像悠悠球一樣來回 (暗 -> 亮 -> 暗)
-        ease: "sine.inOut"         // 柔和的波浪速率
-      });
-    });
-  }
+  fetch('weidong0.svg') // 請換成你實際的 SVG 檔名或路徑
+  .then(response => response.text())
+  .then(svgData => {
+    // 將抓取到的 SVG 原始碼，直接塞進容器的 HTML 中
+    document.getElementById('logo-container').innerHTML = svgData;
+  })
+  .catch(error => console.error('無法載入 SVG:', error));
 });
 
 function sendAIMessage() {
@@ -3598,7 +3529,7 @@ function sendAIMessage() {
     document.getElementById("multiReg").style.display = "";
     return;
   }
-
+  
   var phoneMatch = userText.match(/09\d{8}/);
   aiChatHistory.push({ role: "user", content: userText });
   // 2. 顯示思考中動畫
@@ -4066,7 +3997,7 @@ function getOrCreateExpandOverlay() {
     overlay.id = 'expandSharedOverlay';
     overlay.className = 'expand-overlay';
     // 點擊背景也能順便關閉
-    overlay.onclick = function () {
+    overlay.onclick = function() {
       if (document.getElementById('expandInputContainer')?.classList.contains('expanded')) {
         closeExpandedCourse();
       }
