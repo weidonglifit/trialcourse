@@ -1581,6 +1581,7 @@ select {
   overflow-y: auto;
   line-height: 1.8;
   color: #444;
+  flex: 1;
 }
 
 .close-drawer {
