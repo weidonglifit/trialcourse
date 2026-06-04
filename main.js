@@ -1713,27 +1713,28 @@ function renderSlotTile(item, index) {
     }
   }
 
+  // 🌟 共用按鈕基礎樣式 (確保所有磁磚尺寸、排版絕對一致)
+  const commonBtnStyle = "height: 60px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; box-sizing: border-box; padding: 0; margin: 0; transition: all 0.2s;";
+
   if (displayStatus === "可預約") {
-    // 🟢 空檔：粉紅色空心按鈕 (裡面的文字改用 <div> 包裝，保證 100% 換行)
+    // 🟢 空檔：粉紅色空心按鈕，可點擊 (cursor: pointer)
     return `
       <button type="button" class="time-slot-btn" 
         data-index="${index}" data-time="${startTime}"
         onclick="selectStartTime('${startTime}', this)"
-        style="background: #fff; border: 1.5px solid #F4A7B9; color: #E87A90; 
-               padding: 8px 0; border-radius: 8px; cursor: pointer; text-align: center;
-               box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%; transition: all 0.2s; box-sizing: border-box;">
-        <div style="font-size: 1.1em; font-weight: bold; pointer-events: none;">${startTime}</div>
-        <div style="font-size: 0.75em; margin-top: 2px; font-weight: bold; pointer-events: none;">預約</div>
+        style="${commonBtnStyle} background: #fff; border: 1.5px solid #F4A7B9; color: #E87A90; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <div style="font-size: 1.1em; font-weight: bold; pointer-events: none; line-height: 1.2;">${startTime}</div>
+        <div style="font-size: 0.75em; margin-top: 2px; font-weight: bold; pointer-events: none; line-height: 1.2;">預約</div>
       </button>
     `;
   } else {
-    // ⚪️ 滿檔/課程/單獨時段：灰色無法點擊方塊 (同樣改用 <div> 包裝)
+    // ⚪️ 滿檔/課程/單獨時段：一樣是 button，但加上 disabled 屬性
     return `
-      <div style="background: #f5f5f5; border: 1px solid #eee; color: #aaa; text-align: center;
-                  padding: 8px 0; border-radius: 8px; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 1.1em; text-decoration: line-through;">${startTime}</div>
-        <div style="font-size: 0.75em; margin-top: 2px; color: #888;">${displayStatus}</div>
-      </div>
+      <button type="button" disabled
+        style="${commonBtnStyle} background: #f5f5f5; border: 1.5px solid #eee; color: #aaa; cursor: not-allowed;">
+        <div style="font-size: 1.1em; text-decoration: line-through; line-height: 1.2;">${startTime}</div>
+        <div style="font-size: 0.75em; margin-top: 2px; color: #888; line-height: 1.2;">${displayStatus}</div>
+      </button>
     `;
   }
 }
