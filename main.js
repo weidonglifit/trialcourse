@@ -2090,8 +2090,7 @@ function handleRoomQuery() {
   }
 
   // 1. 查詢開始：按鈕禁用，顯示查詢中狀態
-  btn.innerHTML = '<svg class="walking-circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path fill="white" d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z"/></svg>';
-  //<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+  btn.innerHTML = '<svg class="walking-circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="16" height="16"><path fill="white" d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z"/></svg>';
   btn.disabled = true;
   btn.style.backgroundColor = "#E87A90";
   btn.style.cursor = "not-allowed";
@@ -2111,46 +2110,53 @@ function handleRoomQuery() {
         resultDiv.innerText = res;
         resultDiv.style.color = "red";
       } else {
-        // --- 核心修改：建構具備 10px 圓角容器的表格 ---
+        // --- 核心修改：建構「簡易小卡」列表 ---
         const rows = res.split("\n");
+        resultDiv.style.padding = "0"; // 確保外層沒有多餘留白
 
-        // 1. 確保外層 resultDiv 沒有預設 padding
-        resultDiv.style.padding = "0";
+        // 建立一個卡片容器，使用 gap 讓每張卡片間隔 8px
+        let cardHtml = '<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">';
 
-        // 2. 使用完全緊湊的字串，中間不留任何換行，並加入 display: block
-        let tableHtml = '<div style="border-radius:10px; overflow:hidden; border:1px solid #ddd; margin-top:10px; display:flex; flex-direction:column; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">';
-        tableHtml += '<table style="width:100%; border-collapse:collapse; background-color:white; font-size:16px; border:none; margin:0; padding:0; display:table;">';
-        tableHtml += '<thead style="margin:0; padding:0;">';
-        tableHtml += '<tr style="background-color:#F4A7B9; margin:0;">';
-        tableHtml += '<th style="border-right:1px solid rgba(0,0,0,0.05); padding:12px 5px; text-align:center; color:#2c3e50; line-height:1; vertical-align:middle;">教室</th>';
-        tableHtml += '<th style="border-right:1px solid rgba(0,0,0,0.05); padding:12px 5px; text-align:center; color:#2c3e50; line-height:1; vertical-align:middle;">日期</th>';
-        tableHtml += '<th style="padding:12px 5px; text-align:center; color:#2c3e50; line-height:1; vertical-align:middle;">時間</th>';
-        tableHtml += '</tr></thead><tbody>';
-
-        rows.forEach((rowStr, index) => {
+        rows.forEach((rowStr) => {
           const parts = rowStr.split('｜');
           if (parts.length === 3) {
             const room = parts[0].replace('教室: ', '').trim();
             const date = parts[1].replace('日期: ', '').trim();
             const time = parts[2].replace('時間: ', '').trim();
-            const rowStyle = (index === rows.length - 1) ? '' : 'border-bottom: 1px solid #eee;';
 
-            tableHtml += `<tr style="${rowStyle}"><td style="border-right:1px solid #eee; padding:10px 5px; text-align:center;">${room}</td><td style="border-right:1px solid #eee; padding:10px 5px; text-align:center;">${date}</td><td style="padding:10px 5px; text-align:center;">${time}</td></tr>`;
+            // 單張簡易小卡的設計：左邊(日期+時間) / 右邊(教室標籤)
+            // 緊湊的 padding: 上下 8px，左右 12px
+            cardHtml += `
+              <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; border-radius: 8px; padding: 8px 12px; background: #fafafa; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+                
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                  <span style="font-size: 0.85em; color: #777;">${date}</span>
+                  <span style="font-size: 1.05em; font-weight: bold; color: #333; line-height: 1.2;">${time}</span>
+                </div>
+
+                <div>
+                  <span style="background: #fff; border: 1px solid #F4A7B9; color: #E87A90; padding: 3px 8px; border-radius: 12px; font-size: 0.85em; font-weight: bold;">
+                    ${room}
+                  </span>
+                </div>
+
+              </div>
+            `;
           }
         });
 
-        tableHtml += `</tbody></table></div>`;
+        cardHtml += `</div>`;
 
         resultDiv.style.color = "#2c3e50";
-        resultDiv.innerHTML = "\n" + tableHtml;
+        resultDiv.innerHTML = cardHtml;
       }
     })
     .catch(function (err) {
-      btn.innerText = "查詢我的預約";
+      btn.innerText = "查詢"; // 統一錯誤時也顯示查詢
       btn.disabled = false;
       btn.style.backgroundColor = "#E87A90";
+      btn.style.cursor = "pointer";
 
-      // 可以將錯誤訊息印在 Console 方便除錯
       console.error("查詢預約失敗:", err.message || err);
       resultDiv.innerText = "❌ 系統錯誤，請稍後再試。";
       resultDiv.style.color = "red";
