@@ -321,7 +321,7 @@ window.addEventListener('load', function () {
             // 指標 +1，並觸發重新計算
             window.currentWallIndex = (window.currentWallIndex + 1) % items.length;
             updateWallPositions();
-          }, 3000);
+          }, 5000);
 
         } else {
           wallSection.style.display = 'none';
