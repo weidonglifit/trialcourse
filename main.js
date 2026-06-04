@@ -3549,6 +3549,7 @@ window.addEventListener('DOMContentLoaded', function () {
           wrapper.classList.add('anim-wrapper'); // 加上 CSS 類別
           let randomX = Math.floor(Math.random() * 301) - 150;
           let randomY = Math.floor(Math.random() * 301) - 150;
+          let randomAngle = Math.floor(Math.random() * 90) - 45;
           let randomRX = Math.floor(Math.random() * 361) - 180; // X軸 3D 翻轉 -180 到 180度
           let randomRY = Math.floor(Math.random() * 361) - 180; // Y軸 3D 翻轉 -180 到 180度
           let dropDuration = 3;
@@ -3556,6 +3557,8 @@ window.addEventListener('DOMContentLoaded', function () {
             dropDuration = 1.3;
             randomRX = 0;
             randomRY = 0;
+          } else {
+            randomAngle = 0;
           }
           wrapper.style.setProperty('--random-x', `${randomX}px`);
           wrapper.style.setProperty('--random-y', `${randomY}px`);
