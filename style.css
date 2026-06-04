@@ -2436,7 +2436,7 @@ select {
   border-radius: 10px;
   background: #fdfdfd;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-  
+  border: 1px dashed #FFB6C1;
   /* 以下為新增的絕對定位與動畫設定 */
   position: absolute;
   width: calc(100% - 10px);
