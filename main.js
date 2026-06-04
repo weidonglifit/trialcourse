@@ -1727,7 +1727,7 @@ function renderSlotTile(item, index) {
         onclick="selectStartTime('${startTime}', this)"
         style="${commonBtnStyle} background: #fff; border: 1.5px solid #F4A7B9; color: #E87A90; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         ${innerWrapper}
-          <div style="font-size: 1.15em; font-weight: bold; line-height: 1.1;">${startTime}</div>
+          <div style="font-size: 1.2em; font-weight: bold; line-height: 1.1;">${startTime}</div>
           <div style="font-size: 1em; margin-top: 3px; font-weight: bold; line-height: 1.1;">預約</div>
         </div>
       </button>
@@ -1738,7 +1738,7 @@ function renderSlotTile(item, index) {
       <button type="button" disabled
         style="${commonBtnStyle} background: #f5f5f5; border: 1.5px solid #eee; color: #aaa; cursor: not-allowed;">
         ${innerWrapper}
-          <div style="font-size: 1.15em; text-decoration: line-through; line-height: 1.1;">${startTime}</div>
+          <div style="font-size: 1.2em; text-decoration: line-through; line-height: 1.1;">${startTime}</div>
           <div style="font-size: 1em; margin-top: 3px; color: #888; line-height: 1.1;">${displayStatus}</div>
         </div>
       </button>
