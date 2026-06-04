@@ -1714,7 +1714,7 @@ function renderSlotTile(item, index) {
   }
 
   // 🌟 外層按鈕樣式：移除 flex，並加入 -webkit-appearance: none 消除手機預設隱藏樣式
-  const commonBtnStyle = "height: 60px; width: 100%; border-radius: 8px; box-sizing: border-box; padding: 0; margin: 0; transition: all 0.2s; -webkit-appearance: none; overflow: hidden;";
+  const commonBtnStyle = "height: 60px; width: 100%; border-radius: 8px; box-sizing: border-box; padding: 0; margin: 0; transition: all 0.5s; -webkit-appearance: none; overflow: hidden;";
   
   // 🌟 內層排版容器：利用一個佔滿 100% 高度的 div 來負責完美的垂直置中 (完美避開 iOS 按鈕 Bug)
   const innerWrapper = `<div style="height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">`;
@@ -1809,7 +1809,7 @@ function updateAvailableTimes() {
         if (btn.style.opacity === "0") {
           btn.style.display = "none";
         }
-      }, 200);
+      }, 500);
     }
   });
 }
