@@ -2112,12 +2112,12 @@ function handleRoomQuery() {
       } else {
         const rows = res.split("\n");
         
-        // 🌟 核心防禦：強制清除父元素的 padding，並重置 whiteSpace 屬性，避免換行字元撐破版面
+        // 防禦設定：清除 padding 與確保白淨的格式
         resultDiv.style.padding = "0"; 
         resultDiv.style.whiteSpace = "normal"; 
 
-        // 外層列表容器
-        let cardHtml = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">';
+        // 縮小卡片間距，讓清單更緊湊
+        let cardHtml = '<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">';
 
         rows.forEach((rowStr) => {
           const parts = rowStr.split('｜');
@@ -2126,8 +2126,11 @@ function handleRoomQuery() {
             const date = parts[1].replace('日期: ', '').trim();
             const time = parts[2].replace('時間: ', '').trim();
 
-            // 🌟 核心防禦：將原本排版用的換行與空白全部移除，以「單行字串」注入，杜絕任何隱形空白
-            cardHtml += `<div style="display:flex;justify-content:space-between;align-items:center;border:1px solid #eee;border-radius:8px;padding:8px 12px;background:#fafafa;box-shadow:0 1px 2px rgba(0,0,0,0.03);"><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:0.85em;color:#777;line-height:1.2;">${date}</span><span style="font-size:1.05em;font-weight:bold;color:#333;line-height:1.2;">${time}</span></div><div><span style="background:#fff;border:1px solid #F4A7B9;color:#E87A90;padding:3px 8px;border-radius:12px;font-size:0.85em;font-weight:bold;line-height:1;white-space:nowrap;">${room}</span></div></div>`;
+            // 🌟 核心修改：
+            // 1. 外層改為「白底 + 1.5px 粉紅框」，完全比照教室樣式
+            // 2. 日期與時間「放在同一行」，字體放大為 1.05em
+            // 3. 右側教室標籤改為「粉底白字」，讓畫面有視覺重點但不突兀
+            cardHtml += `<div style="display:flex;justify-content:space-between;align-items:center;border:1.5px solid #F4A7B9;border-radius:10px;padding:12px 15px;background:#fff;box-shadow:0 2px 6px rgba(244,167,185,0.15);"><div style="font-size:1.05em;font-weight:bold;color:#666;">${date}<span style="margin-left:10px;color:#333;">${time}</span></div><div><span style="background:#F4A7B9;color:#fff;padding:5px 12px;border-radius:15px;font-size:0.95em;font-weight:bold;white-space:nowrap;">${room}</span></div></div>`;
           }
         });
 
