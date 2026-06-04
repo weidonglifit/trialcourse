@@ -1905,12 +1905,6 @@ select {
   }
 }
 
-/* 綁定到文字或整個容器上 */
-.notice-pulse-text {
-  /* animation: soft-pulse 3s ease-in-out infinite; */
-  /* 3秒慢速呼吸一趟，靜謐卻引人注目 */
-}
-
 /* 早鳥倒數計時器專屬樣式 */
 #earlybird-countdown-container {
   width: 100%;
