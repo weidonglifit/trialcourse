@@ -1704,7 +1704,7 @@ function renderSlotTile(item, index) {
   let displayStatus = item.status;
   const startTime = item.time.split("-")[0]; // 只取前半段時間顯示，如 "09:00"
 
-  // 保留您原本的邏輯：判斷前後時段，如果只剩下單一 30 分鐘則不可預約
+  // 判斷前後時段，如果只剩下單一 30 分鐘則不可預約
   if (displayStatus === "可預約") {
     const prev = currentStatusData[index - 1];
     const next = currentStatusData[index + 1];
@@ -1714,27 +1714,25 @@ function renderSlotTile(item, index) {
   }
 
   if (displayStatus === "可預約") {
-    // 🟢 空檔：粉紅色空心按鈕
+    // 🟢 空檔：粉紅色空心按鈕 (裡面的文字改用 <div> 包裝，保證 100% 換行)
     return `
       <button type="button" class="time-slot-btn" 
         data-index="${index}" data-time="${startTime}"
         onclick="selectStartTime('${startTime}', this)"
-        style="display: flex; flex-direction: column; align-items: center; justify-content: center; 
-               background: #fff; border: 1.5px solid #F4A7B9; color: #E87A90; 
-               padding: 10px 0; border-radius: 8px; cursor: pointer; 
+        style="background: #fff; border: 1.5px solid #F4A7B9; color: #E87A90; 
+               padding: 8px 0; border-radius: 8px; cursor: pointer; text-align: center;
                box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%; transition: all 0.2s; box-sizing: border-box;">
-        <span style="font-size: 1.1em; font-weight: bold; pointer-events: none;">${startTime}</span>
-        <span style="font-size: 0.75em; margin-top: 4px; font-weight: bold; pointer-events: none;">預約</span>
+        <div style="font-size: 1.1em; font-weight: bold; pointer-events: none;">${startTime}</div>
+        <div style="font-size: 0.75em; margin-top: 2px; font-weight: bold; pointer-events: none;">預約</div>
       </button>
     `;
   } else {
-    // ⚪️ 滿檔/課程/單獨時段：灰色無法點擊方塊
+    // ⚪️ 滿檔/課程/單獨時段：灰色無法點擊方塊 (同樣改用 <div> 包裝)
     return `
-      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; 
-                  background: #f5f5f5; border: 1px solid #eee; color: #aaa; 
-                  padding: 10px 0; border-radius: 8px; width: 100%; box-sizing: border-box;">
-        <span style="font-size: 1.1em; text-decoration: line-through;">${startTime}</span>
-        <span style="font-size: 0.75em; margin-top: 4px; color: #888;">${displayStatus}</span>
+      <div style="background: #f5f5f5; border: 1px solid #eee; color: #aaa; text-align: center;
+                  padding: 8px 0; border-radius: 8px; width: 100%; box-sizing: border-box;">
+        <div style="font-size: 1.1em; text-decoration: line-through;">${startTime}</div>
+        <div style="font-size: 0.75em; margin-top: 2px; color: #888;">${displayStatus}</div>
       </div>
     `;
   }
