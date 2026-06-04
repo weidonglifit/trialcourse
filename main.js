@@ -3562,6 +3562,7 @@ window.addEventListener('DOMContentLoaded', function () {
           }
           wrapper.style.setProperty('--random-x', `${randomX}px`);
           wrapper.style.setProperty('--random-y', `${randomY}px`);
+          wrapper.style.setProperty('--random-rot', `${randomAngle}deg`);
           wrapper.style.setProperty('--random-rx', `${randomRX}deg`);
           wrapper.style.setProperty('--random-ry', `${randomRY}deg`);
 
