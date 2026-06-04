@@ -47,7 +47,7 @@ window.addEventListener('load', function () {
       subtitleTextEl.innerText = loadingTexts[textIdx];
     }, 1500);
   }
-  callGasApi("getAppInitData")
+  callGasApi("getAppInitData_PerformanceTest")
     .then(function (initData) {
       const mTime = performance.now();
       const durationSeconds = ((mTime - startTime) / 1000).toFixed(3);
