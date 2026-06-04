@@ -1782,8 +1782,35 @@ function updateAvailableTimes() {
       }
     }
 
-    // 根據檢查結果切換按鈕顯示狀態
-    btn.style.display = canBook ? "inline-block" : "none";
+    // --- 🌟 動畫切換邏輯 ---
+    if (canBook) {
+      // 【進場動畫】：若原本是隱藏的，必須先取消 none 才能開始播動畫
+      if (btn.style.display === "none") {
+        btn.style.display = ""; // 恢復原本的網格顯示模式
+        
+        // 觸發重繪 (Reflow) 的小魔法：這行看起來沒做事，但它能強制瀏覽器刷新，確保接下來的動畫會完美觸發
+        btn.offsetHeight; 
+      }
+      
+      // 狀態設定為：完全不透明 + 正常大小
+      btn.style.opacity = "1";
+      btn.style.transform = "scale(1)";
+      btn.style.pointerEvents = "auto";
+
+    } else {
+      // 【退場動畫】：先播放淡出與縮小，不馬上隱藏
+      btn.style.opacity = "0";
+      btn.style.transform = "scale(0.8)";
+      btn.style.pointerEvents = "none";
+      
+      // 等待 200 毫秒（與我們剛剛寫的按鈕 transition 0.2s 一致）後，才真正把元素抽掉
+      setTimeout(() => {
+        // 雙重檢查：避免在動畫期間，使用者又快速切換時數導致錯亂
+        if (btn.style.opacity === "0") {
+          btn.style.display = "none";
+        }
+      }, 200);
+    }
   });
 }
 
