@@ -3555,6 +3555,7 @@ window.addEventListener('DOMContentLoaded', function () {
           let dropDuration = 3;
           if (index === 3) {
             dropDuration = 1.3;
+            dropDelay = index * 0.8;
             randomRX = 0;
             randomRY = 0;
           } else {
