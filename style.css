@@ -2420,23 +2420,12 @@ select {
   gap: 8px;
 }
 
+/* --- 輪播容器設定 --- */
 .popular-wall-container {
-  max-height: 280px;
-  /* 超過高度時會出現捲軸，營造出滿滿的稠密感 */
-  overflow-y: auto;
-  padding-right: 5px;
-  /* 隱藏滾動條但保留滾動功能，增加現代感 */
-  scrollbar-width: thin;
-  scrollbar-color: #F4A7B9 transparent;
-}
-
-.popular-wall-container::-webkit-scrollbar {
-  width: 5px;
-}
-
-.popular-wall-container::-webkit-scrollbar-thumb {
-  background: #F4A7B9;
-  border-radius: 10px;
+  position: relative;
+  height: 185px; /* 容納 3 個卡片(55px) + 2 個間距(10px) = 185px */
+  overflow: hidden; /* 隱藏超出範圍的卡片 */
+  padding-right: 0px; 
 }
 
 .booking-wall-item {
@@ -2444,11 +2433,54 @@ select {
   justify-content: space-between;
   align-items: center;
   padding: 6px 15px;
-  margin-bottom: 10px;
   border-radius: 10px;
   background: #fdfdfd;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  /* 以下為新增的絕對定位與動畫設定 */
+  position: absolute;
+  width: calc(100% - 10px);
+  left: 5px;
+  height: 55px; /* 固定高度，讓動畫軌跡精準 */
+  margin-bottom: 0;
+  box-sizing: border-box;
+  
+  /* 預設狀態 (準備進場，藏在最下方) */
+  transform: translateY(195px); 
+  opacity: 0;
+  pointer-events: none;
+  
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
+}
+
+/* 動畫專用的狀態類別 */
+.wall-pos-exit {
+  transform: translateY(-70px); /* 往上滑出並淡出 */
+  opacity: 0;
+}
+.wall-pos-0 {
+  transform: translateY(0px); /* 第一個位置 */
+  opacity: 1;
+  pointer-events: auto;
+}
+.wall-pos-1 {
+  transform: translateY(65px); /* 第二個位置 (55高度 + 10間距) */
+  opacity: 1;
+  pointer-events: auto;
+}
+.wall-pos-2 {
+  transform: translateY(130px); /* 第三個位置 (65 + 65) */
+  opacity: 1;
+  pointer-events: auto;
+}
+.wall-pos-enter {
+  transform: translateY(195px); /* 準備進場的位置 (130 + 65) */
+  opacity: 0;
+}
+
+/* 核心防呆：未參與動畫的卡片瞬間歸位，不顯示滑動痕跡 */
+.booking-wall-item:not(.wall-pos-0):not(.wall-pos-1):not(.wall-pos-2):not(.wall-pos-exit):not(.wall-pos-enter) {
+  transition: none; 
 }
 
 .wall-date {

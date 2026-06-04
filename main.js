@@ -253,14 +253,22 @@ window.addEventListener('load', function () {
       if (scheduleBodyPast) {
         renderAccordionSchedule(allCourseDataPast, scheduleBodyPast, "SINGLE");
       }
+      // 動態牆
       const wallSection = document.getElementById('popularBookingWall');
       const wallContainer = document.getElementById('popularWallContainer');
       if (wallSection && wallContainer) {
         if (initData.popularWallData && initData.popularWallData.length > 0) {
           wallSection.style.display = 'block';
-          let wallHtml = '';
+          
+          let wallItemsData = initData.popularWallData;
+          
+          // 若資料過少 (小於 5 筆)，我們將陣列複製疊加，確保有足夠的節點能完美執行「進場/退場」的狀態切換
+          if(wallItemsData.length > 0 && wallItemsData.length < 5) {
+            wallItemsData = [...wallItemsData, ...wallItemsData, ...wallItemsData];
+          }
 
-          initData.popularWallData.forEach(item => {
+          let wallHtml = '';
+          wallItemsData.forEach(item => {
             wallHtml += `
             <div class="booking-wall-item" style="border-left: 5px solid ${item.color};">
               <div class="wall-date">${item.displayDate}</div>
@@ -268,13 +276,60 @@ window.addEventListener('load', function () {
                 ${item.status}
               </div>
             </div>
-          `;
+            `;
           });
           wallContainer.innerHTML = wallHtml;
+          
+          // 清除可能殘留的舊計時器
+          if (window.popularWallInterval) clearInterval(window.popularWallInterval);
+          window.currentWallIndex = 0; // 重置起點
+          
+          // 更新卡片狀態的函數
+          function updateWallPositions() {
+            const items = document.querySelectorAll('#popularWallContainer .booking-wall-item');
+            const total = items.length;
+            if (total === 0) return;
+
+            // 先清除所有狀態 Class
+            items.forEach(item => {
+              item.classList.remove('wall-pos-0', 'wall-pos-1', 'wall-pos-2', 'wall-pos-exit', 'wall-pos-enter');
+            });
+
+            // 計算當前輪播的各個目標索引
+            const idx0 = window.currentWallIndex % total;
+            const idx1 = (window.currentWallIndex + 1) % total;
+            const idx2 = (window.currentWallIndex + 2) % total;
+            const idxExit = (window.currentWallIndex - 1 + total) % total;  // 剛退場的卡片
+            const idxEnter = (window.currentWallIndex + 3) % total;         // 準備進場的卡片
+
+            // 賦予新的狀態 Class
+            items[idx0].classList.add('wall-pos-0');
+            items[idx1].classList.add('wall-pos-1');
+            items[idx2].classList.add('wall-pos-2');
+            items[idxExit].classList.add('wall-pos-exit');
+            items[idxEnter].classList.add('wall-pos-enter');
+          }
+
+          // 初始化第一次排版
+          updateWallPositions();
+          
+          // 設定每 3 秒往上滾動輪播一次 (可自行調整毫秒數)
+          window.popularWallInterval = setInterval(() => {
+            const items = document.querySelectorAll('#popularWallContainer .booking-wall-item');
+            if (items.length === 0) return;
+            
+            // 指標 +1，並觸發重新計算
+            window.currentWallIndex = (window.currentWallIndex + 1) % items.length;
+            updateWallPositions();
+          }, 3000);
+
         } else {
           wallSection.style.display = 'none';
         }
       }
+
+      
+
       // 9. 💡 初始化「單堂下拉選單」與「查詢老師下拉選單」
       initSingleCourseDropdown();
       renderTeacherDropdownUI(initData.teachers);
