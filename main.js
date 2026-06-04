@@ -3514,6 +3514,8 @@ function fetchTomorrowWeather() {
 // 💡 網頁初始化載入時，自動執行一次抓天氣
 window.addEventListener('DOMContentLoaded', function () {
   fetchTomorrowWeather();
+  const SVGstartTime = performance.now();
+  console.log("開始載入SVG資料...");
   // 動態載入外部 SVG 並啟動保護衣包裝機
   fetch('weidong0.svg')
     .then(response => response.text())
@@ -3579,6 +3581,9 @@ window.addEventListener('DOMContentLoaded', function () {
       });
     })
     .catch(error => console.error('無法載入 SVG:', error));
+  const SVGendTime = performance.now();
+  const SVGdurationSeconds = ((SVGendTime - SVGstartTime) / 1000).toFixed(3);
+  console.log(`🎉 SVG包裝完成！總共花費了 ${SVGdurationSeconds} 秒。`);
 });
 
 function sendAIMessage() {
