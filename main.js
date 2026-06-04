@@ -2130,7 +2130,10 @@ function handleRoomQuery() {
             // 1. 外層改為「白底 + 1.5px 粉紅框」，完全比照教室樣式
             // 2. 日期與時間「放在同一行」，字體放大為 1.05em
             // 3. 右側教室標籤改為「粉底白字」，讓畫面有視覺重點但不突兀
-            cardHtml += `<div style="display:flex;justify-content:space-between;align-items:center;border:1.5px solid #F4A7B9;border-radius:10px;padding:12px 15px;background:#fff;box-shadow:0 2px 6px rgba(244,167,185,0.15);"><div style="font-size:1.05em;font-weight:bold;color:#666;">${date}<span style="margin-left:10px;color:#333;">${time}</span></div><div><span style="background:#F4A7B9;color:#fff;padding:5px 12px;border-radius:15px;font-size:0.95em;font-weight:bold;white-space:nowrap;">${room}</span></div></div>`;
+            cardHtml += `<div style="display:flex;justify-content:space-between;align-items:center;border:1.5px solid #F4A7B9;border-radius:20px;padding:12px 15px;background:#fff;box-shadow:0 2px 6px rgba(244,167,185,0.15);">
+            <div style="font-size:1.1em;font-weight:bold;color:#666;">${date}
+            <span style="margin-left:15px;color:#333;font-size:1em;border:1.5px solid #F4A7B9;border-radius:20px;">${time}</span></div>
+            <div><span style="background:#F4A7B9;color:#fff;padding:5px 12px;border-radius:15px;font-size:0.95em;font-weight:bold;white-space:nowrap;">${room}</span></div></div>`;
           }
         });
 
