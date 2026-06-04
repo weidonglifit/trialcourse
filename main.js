@@ -3552,7 +3552,7 @@ window.addEventListener('DOMContentLoaded', function () {
           let randomAngle = Math.floor(Math.random() * 90) - 45;
           let randomRX = Math.floor(Math.random() * 361) - 180; // X軸 3D 翻轉 -180 到 180度
           let randomRY = Math.floor(Math.random() * 361) - 180; // Y軸 3D 翻轉 -180 到 180度
-          let dropDuration = 3;
+          let dropDuration = 2.5;
           if (index === 3) {
             dropDuration = 1.3;
             dropDelay = index * 0.8;
