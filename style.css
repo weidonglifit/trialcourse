@@ -2210,11 +2210,13 @@ select {
 /* 當激活（選單打開）時的樣式 */
 .wd-dropdown-container.open .wd-dropdown-menu {
   display: block;
-  /* 讓它變成區塊元件，強行把下方的內容往下推 */
   opacity: 1;
   transform: translateY(0);
 }
-
+.wd-dropdown-container.open {
+  position: relative;
+  z-index: 9999;
+}
 /* 每個下拉選項的單元格保持原樣 */
 .wd-dropdown-item {
   padding: 12px 15px;
