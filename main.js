@@ -1608,7 +1608,7 @@ function fetchRoomStatus() {
   const head = document.getElementById('roomTableHead');
 
   if (!room || !dateString) return;
-  body.innerHTML = '<tr><td colspan="4">讀取時段中...</td></tr>';
+  body.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">讀取時段中...</td></tr>';
 
   const weekDays = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
   const d = new Date(dateString);
@@ -1645,7 +1645,6 @@ function fetchRoomStatus() {
     }
   });
 
-
   allCourseDataPast.forEach(course => {
     if (course.room === room && course.name.includes(selectedDayName) && course.dates.includes(formattedDate)) {
       const timeMatch = course.name.match(/\d{2}:\d{2}-\d{2}:\d{2}/);
@@ -1659,9 +1658,6 @@ function fetchRoomStatus() {
     }
   });
 
-
-
-
   callGasApi("getRoomStatus", [room, dateString])
     .then(function (serverStatus) {
       currentStatusData = localStatusGrid.map((item, idx) => {
@@ -1669,41 +1665,30 @@ function fetchRoomStatus() {
         return serverStatus[idx];
       });
 
-      // 修改表頭：顯示為兩組「時間/狀態」
-      head.innerHTML = `
-      <th>時間</th><th>${selectedDayName} 預約狀態</th>
-      <th>時間</th><th>${selectedDayName} 預約狀態</th>`;
+      // 由於改用網格排版，不需要傳統的表頭了，將其清空讓畫面更乾淨
+      head.innerHTML = ""; 
 
-      let html = "";
-      const totalSlots = currentStatusData.length;
-      const half = Math.ceil(totalSlots / 2); // 將資料分成兩半
-
-      for (let i = 0; i < half; i++) {
-        html += "<tr>";
-
-        // --- 左半部 (第 i 個) ---
-        html += renderSlotCell(currentStatusData[i], i);
-
-        // --- 右半部 (第 i + half 個) ---
-        if (i + half < totalSlots) {
-          html += renderSlotCell(currentStatusData[i + half], i + half);
-        } else {
-          html += "<td></td><td></td>"; // 補空白格
-        }
-
-        html += "</tr>";
-      }
+      // 建立 4 欄式網格容器
+      let gridHtml = '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 5px;">';
+      
+      currentStatusData.forEach((item, i) => {
+        gridHtml += renderSlotTile(item, i);
+      });
+      
+      gridHtml += '</div>';
 
       const msgDiv = document.getElementById('roomstatusmsg');
       if (msgDiv) {
-        msgDiv.innerHTML = "<span style='color: red;'>注意：預約以1小時為單位</span>";
+        msgDiv.innerHTML = "<span style='color: red;'>注意：預約以 1 小時為單位</span>";
       }
-      body.innerHTML = html;
+      
+      // 將網格直接放入 tbody 中，無縫接軌原本的 HTML 結構
+      body.innerHTML = `<tr><td colspan="4" style="padding: 0; border: none;">${gridHtml}</td></tr>`;
+      
       document.getElementById('statusTableSection').style.display = 'block';
       updateAvailableTimes();
     })
     .catch(function (err) {
-      // 增加例外處理，避免查詢失敗時畫面卡死或沒有提示
       console.error("❌ 讀取教室狀態失敗:", err);
       const msgDiv = document.getElementById('roomstatusmsg');
       if (msgDiv) {
@@ -1714,45 +1699,60 @@ function fetchRoomStatus() {
     });
 }
 
-function renderSlotCell(item, index) {
+// 將原本的 renderSlotCell 改名並改為卡片式輸出
+function renderSlotTile(item, index) {
   let displayStatus = item.status;
-  let fontColor = displayStatus === "可預約" ? "green" : "red";
-  let statusContent = displayStatus;
+  const startTime = item.time.split("-")[0]; // 只取前半段時間顯示，如 "09:00"
 
+  // 保留您原本的邏輯：判斷前後時段，如果只剩下單一 30 分鐘則不可預約
   if (displayStatus === "可預約") {
     const prev = currentStatusData[index - 1];
     const next = currentStatusData[index + 1];
     if ((!prev || prev.status !== "可預約") && (!next || next.status !== "可預約")) {
-      statusContent = "不可預約";
-      fontColor = "#999";
-    } else {
-      const startTime = item.time.split("-")[0];
-      statusContent = `<button type="button" class="time-slot-btn" 
-                data-index="${index}" data-time="${startTime}"
-                onclick="selectStartTime('${startTime}', this)"
-                style="width: 90%; padding: 2px 0; background: #E87A90; color: white; border: none; border-radius: 11px; cursor: pointer; font-size: 16px; display: block; margin: auto; max-height: 26px; font-weight:normal;">
-                ${startTime}
-              </button>`;
+      displayStatus = "不可預約"; 
     }
   }
 
-  return `
-    <td style="font-weight:bold; background:#fafafa;">${item.time}</td>
-    <td style="color:${fontColor}; font-weight:bold;">${statusContent}</td>`;
+  if (displayStatus === "可預約") {
+    // 🟢 空檔：粉紅色空心按鈕
+    return `
+      <button type="button" class="time-slot-btn" 
+        data-index="${index}" data-time="${startTime}"
+        onclick="selectStartTime('${startTime}', this)"
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center; 
+               background: #fff; border: 1.5px solid #F4A7B9; color: #E87A90; 
+               padding: 10px 0; border-radius: 8px; cursor: pointer; 
+               box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%; transition: all 0.2s; box-sizing: border-box;">
+        <span style="font-size: 1.1em; font-weight: bold; pointer-events: none;">${startTime}</span>
+        <span style="font-size: 0.75em; margin-top: 4px; font-weight: bold; pointer-events: none;">預約</span>
+      </button>
+    `;
+  } else {
+    // ⚪️ 滿檔/課程/單獨時段：灰色無法點擊方塊
+    return `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; 
+                  background: #f5f5f5; border: 1px solid #eee; color: #aaa; 
+                  padding: 10px 0; border-radius: 8px; width: 100%; box-sizing: border-box;">
+        <span style="font-size: 1.1em; text-decoration: line-through;">${startTime}</span>
+        <span style="font-size: 0.75em; margin-top: 4px; color: #888;">${displayStatus}</span>
+      </div>
+    `;
+  }
 }
 
-// 點擊表格按鈕時，將時間填入文字框，並改變按鈕顏色
+// 點擊磁磚按鈕時，將時間填入文字框，並改變按鈕顏色
 function selectStartTime(time, btnEl) {
   document.getElementById('startTimeSelect').value = time;
 
-  // 恢復所有按鈕顏色
+  // 1. 恢復所有按鈕為「白底粉字」的未選取狀態
   document.querySelectorAll('.time-slot-btn').forEach(b => {
-    b.style.background = "#E87A90";
-    b.style.fontWeight = "normal";
+    b.style.background = "#fff";
+    b.style.color = "#E87A90";
   });
-  // 讓選中的按鈕變色
-  btnEl.style.background = "#D05A6E";
-  btnEl.style.fontWeight = "bold";
+  
+  // 2. 讓當前選中的按鈕變成「實心粉色」的選取狀態
+  btnEl.style.background = "#E87A90";
+  btnEl.style.color = "white";
 }
 
 function updateAvailableTimes() {
