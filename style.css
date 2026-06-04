@@ -2215,7 +2215,7 @@ select {
 }
 .wd-dropdown-container.open {
   position: relative;
-  z-index: 9999;
+  z-index: 10002;
 }
 /* 每個下拉選項的單元格保持原樣 */
 .wd-dropdown-item {
