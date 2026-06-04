@@ -2136,7 +2136,7 @@ select {
 .wd-dropdown-container {
   position: relative;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 /* 模擬選單的「點擊觸發框」 */
