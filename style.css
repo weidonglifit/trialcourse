@@ -2180,8 +2180,9 @@ select {
 /* 真正彈出的「下拉選項卡片清單」 */
 .wd-dropdown-menu {
   /* 1. 關鍵修改：將原本的 absolute 改為 relative (相對定位) */
-  position: relative;
-  top: 10px;
+  position: absolute;
+  top: calc(100% + 5px);
+  z-index: 1000;
   /* 改為與上方點擊框保持 10px 的安全距離 */
   left: 0;
   width: 100%;
@@ -2195,7 +2196,7 @@ select {
   max-height: 250px;
   overflow-y: auto;
   padding: 5px 0;
-  margin: 0 0 15px 0;
+  margin: 0;
   /* 下方補上 15px 外距，推開後續元件 */
   list-style: none;
 
