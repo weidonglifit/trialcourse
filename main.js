@@ -165,6 +165,7 @@ window.addEventListener('load', function () {
         const hEl = document.getElementById('cd-hours');
         const mEl = document.getElementById('cd-minutes');
         const sEl = document.getElementById('cd-seconds');
+        document.getElementById('priceDisplayAreaEb').style.display = "inline-flex";
 
         function updateCountdown() {
           const now = new Date().getTime();
