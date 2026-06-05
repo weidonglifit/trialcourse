@@ -538,7 +538,8 @@ function renderAllRules() {
     "報名須知": "noticeDisplayArea",
     "課程費用": "priceDisplayArea",
     "取消政策": "policyDisplayArea",
-    "教室規章": "rulesDisplayArea"
+    "教室規章": "rulesDisplayArea",
+    "行前通知": "remindDisplayArea"
   };
 
   for (const sheetCategory in rulesMap) {
