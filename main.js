@@ -3431,9 +3431,10 @@ function selectTeacherCard(teacherValue, selectedCard) {
 function resetTeacherSelection() {
   // 1. 隱藏下方介紹區，清空 select
   const displayArea = document.getElementById('teacherDisplayArea');
-  displayArea.style.opacity = '0'; // 觸發淡出動畫
+  displayArea.classList.add('fade-out');
   setTimeout(() => {
-    displayArea.style.display = 'none'; // 動畫結束後徹底隱藏佔位
+    displayArea.style.display = 'none';
+    displayArea.classList.remove('fade-out');
   }, 500);
   const teacherSelect = document.getElementById('teacherSelect');
   if (teacherSelect) teacherSelect.value = "";
@@ -3482,11 +3483,11 @@ function displayTeacherIntro() {
     if (introEl) {
       introEl.innerHTML = teacher.intro;
     }
-    displayArea.style.display = 'block';
-    setTimeout(() => {
-      displayArea.style.opacity = '1';
-    }, 10);
-
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        displayArea.style.display = 'block';
+      });
+    });
   }
 }
 
