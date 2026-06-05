@@ -3460,7 +3460,7 @@ function resetTeacherSelection() {
 function displayTeacherIntro() {
   const selectedName = document.getElementById('teacherSelect').value;
   const imgEl = document.getElementById('teacherImg');
-  const titleEl = document.getElementById('teacherNameTitle');
+  //const titleEl = document.getElementById('teacherNameTitle');
   const introEl = document.getElementById('teacherIntroText');
   const displayArea = document.getElementById('teacherDisplayArea');
   const cardContainer = document.querySelector('.teacher-card-container');
@@ -3471,7 +3471,7 @@ function displayTeacherIntro() {
 
   const teacher = globalSettings.teachers.find(t => t.name === selectedName);
   if (teacher) {
-    titleEl.innerText = teacher.name + " 老師";
+    //titleEl.innerText = teacher.name + " 老師";
     imgEl.src = teacher.url;
     imgEl.setAttribute('referrerpolicy', 'no-referrer');
     if (introEl) {
