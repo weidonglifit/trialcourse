@@ -2152,18 +2152,26 @@ function handleRoomQuery() {
             const room = parts[0].replace('教室: ', '').trim();
             const date = parts[1].replace('日期: ', '').trim();
             const time = parts[2].replace('時間: ', '').trim();
+            const [startTime, endTime] = time.split('-');
 
-            // 🌟 核心修改：
-            // 1. 外層改為「白底 + 1.5px 粉紅框」，完全比照教室樣式
-            // 2. 日期與時間「放在同一行」，字體放大為 1.05em
-            // 3. 右側教室標籤改為「粉底白字」，讓畫面有視覺重點但不突兀
-            cardHtml += `<div style="display:flex;justify-content:space-between;align-items:center;border:1.5px solid #F4A7B9;border-radius:20px;padding:12px 15px;background:#fff;box-shadow:0 2px 6px rgba(244,167,185,0.15);">
-            <div style="display:flex;align-items:center;font-weight:bold;color:#666;">
-            <div style="width:110px;font-size:1.1em;text-align:right;">${date}</div>
-            <div style="width:105px;text-align:center;margin-left:10px;color:#333;font-size:0.95em;border:1px solid #F4A7B9;border-radius:8px;padding:3px 0;">${time}</div>
-            </div><div>
-            <span style="background:#F4A7B9;color:#fff;padding:5px 12px;border-radius:15px;font-size:0.95em;font-weight:bold;white-space:nowrap;">${room}</span>
-            </div></div>`;
+            const dateObj = new Date(date);
+            const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
+            const weekDayStr = isNaN(dateObj) ? "" : `(週${weekDays[dateObj.getDay()]})`;
+
+            cardHtml += `<div style="display:flex;justify-content:space-between;align-items:center;border:1.5px solid #F4A7B9;border-radius:15px;padding:12px 15px;background:#fff;box-shadow:0 2px 6px rgba(244,167,185,0.15);">` + 
+                `<div class="time-tag" style="display:flex;flex-direction:column;align-items:center;color:#E87A90;font-weight:bold;font-size:1.05em;width:55px;flex-shrink:0;">` +
+                  `<span style="line-height:1;">${startTime}</span>` +
+                  `<div class="time-line" style="width:2px;height:12px;background:#F4A7B9;margin:4px 0;border-radius:2px;"></div>` +
+                  `<span style="line-height:1;">${endTime}</span>` +
+                `</div>` +
+                `<div style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;">` +
+                  `<span style="font-size:1.1em;font-weight:bold;color:#555;line-height:1.2;">${date}</span>` +
+                  `<span style="font-size:0.85em;color:#888;font-weight:bold;margin-top:2px;">${weekDayStr}</span>` +
+                `</div>` +
+                `<div style="flex-shrink:0;">` +
+                  `<span style="background:#F4A7B9;color:#fff;padding:5px 12px;border-radius:15px;font-size:0.95em;font-weight:bold;white-space:nowrap;">${room}</span>` +
+                `</div>` +
+              `</div>`;
           }
         });
 
