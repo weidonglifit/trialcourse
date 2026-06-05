@@ -3430,7 +3430,12 @@ function selectTeacherCard(teacherValue, selectedCard) {
  */
 function resetTeacherSelection() {
   // 1. 隱藏下方介紹區，清空 select
-  document.getElementById('teacherDisplayArea').style.display = 'none';
+  requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById('teacherDisplayArea').style.display = 'none';
+      });
+    });
+  
   const teacherSelect = document.getElementById('teacherSelect');
   if (teacherSelect) teacherSelect.value = "";
 
