@@ -3355,34 +3355,68 @@ function selectTeacherCard(teacherValue, selectedCard) {
   // 抓取所有的老師小卡（不包含重選按鈕）
   const allTeacherCards = document.querySelectorAll('.teacher-small-card:not(#reselectTeacherBtn)');
 
+  // 1. 點擊瞬間：其他卡片開始 0.5秒 淡出，選中卡片變色
   allTeacherCards.forEach(card => {
     if (card !== selectedCard) {
-      // 沒被選中的老師：0.5秒淡出並隱藏
       card.style.opacity = '0';
-      setTimeout(() => {
-        card.style.display = 'none';
-      }, 500);
     } else {
-      // 被選中的老師：加上強調樣式
       card.classList.add('selected-card');
     }
   });
 
-  // 0.5 秒後，讓「重新選擇小卡」在左邊滑順淡入
-  setTimeout(() => {
-    const reselectBtn = document.getElementById('reselectTeacherBtn');
-    reselectBtn.style.display = 'block'; // 先恢復佔位
-    setTimeout(() => {
-      reselectBtn.style.opacity = '1';  /* 觸發 0.5 秒淡入 */
-    }, 10);
-  }, 500);
-
-  // 更新隱藏的 select 值並顯示介紹
+  // 更新隱藏的 select 值並提早顯示下方介紹
   const teacherSelect = document.getElementById('teacherSelect');
   if (teacherSelect) {
     teacherSelect.value = teacherValue;
     displayTeacherIntro();
   }
+
+  // 2. 等待 0.5 秒其他卡片淡出後，執行滑順歸位動畫
+  setTimeout(() => {
+    // === 開始 FLIP 動畫計算 ===
+    // A. 紀錄移動前的初始位置
+    const startRect = selectedCard.getBoundingClientRect();
+
+    // B. 正式隱藏其他卡片 (此時畫面排版會瞬間改變)
+    allTeacherCards.forEach(card => {
+      if (card !== selectedCard) card.style.display = 'none';
+    });
+
+    // 顯示「重新選擇」按鈕佔位 (先保持全透明)
+    const reselectBtn = document.getElementById('reselectTeacherBtn');
+    reselectBtn.style.display = 'block';
+
+    // C. 紀錄排版改變後，這張卡片的新位置
+    const endRect = selectedCard.getBoundingClientRect();
+
+    // D. 計算新舊位置的差距
+    const deltaX = startRect.left - endRect.left;
+    const deltaY = startRect.top - endRect.top;
+
+    // E. 關閉動畫，瞬間把選中的卡片「推回」原本的位置
+    selectedCard.style.transition = 'none';
+    selectedCard.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+    // F. 強制瀏覽器重新計算畫面 (Reflow)
+    selectedCard.offsetHeight; 
+
+    // G. 打開動畫，讓卡片從舊位置「滑順移動」到新位置 (設定 0.4 秒，加上漂亮的緩動曲線)
+    selectedCard.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    selectedCard.style.transform = 'translate(0, 0)';
+    // === FLIP 動畫結束 ===
+
+    // 同步讓「重新選擇」按鈕淡入
+    setTimeout(() => {
+      reselectBtn.style.opacity = '1';
+    }, 10);
+
+    // 等待 0.4 秒滑動結束後，清除我們剛剛加上的臨時樣式，以免破壞原有的 hover 動畫
+    setTimeout(() => {
+      selectedCard.style.transition = '';
+      selectedCard.style.transform = '';
+    }, 400);
+
+  }, 500); // 在其他卡片淡出的 0.5 秒後執行
 }
 
 /**
