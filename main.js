@@ -3492,13 +3492,12 @@ function displayTeacherIntro() {
         });
       });
     };
-
     imgEl.onerror = () => {
       console.log("老師圖片載入失敗，直接顯示區塊");
       displayArea.style.display = 'block';
     };
-
-    imgEl.src = teacher.url;
+    imgEl.src = teacher.url; 
+  }
 }
 
 
