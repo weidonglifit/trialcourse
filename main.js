@@ -3248,30 +3248,31 @@ function selectCourseCard(courseValue, selectedCard) {
  * 4. 點擊「重新選擇課程」的處理邏輯
  */
 function resetCourseSelection() {
-  // 隱藏下方介紹區
+  // 1. 隱藏下方介紹區，清空 select
   document.getElementById('introDisplayArea').style.display = 'none';
-  
-  // 清空 select
   const select = document.getElementById('courseIntroSelect');
   if (select) select.value = "";
 
-  // 重選按鈕自己先 0.5 秒淡出並隱藏
+  // 2. 「重新選擇課程」按鈕開始 0.5 秒淡出
   const reselectBtn = document.getElementById('reselectCourseBtn');
   reselectBtn.style.opacity = '0';
+
+  // 3. 關鍵修正：等待 0.5 秒完全消失後再載入其他卡片
   setTimeout(() => {
-    reselectBtn.style.display = 'none';
+    reselectBtn.style.display = 'none'; // 徹底退出空間
+
+    // 讓原本所有被隱藏的課程小卡重新回到畫面上並淡入
+    const allCards = document.querySelectorAll('#courseCardsContainer .teacher-small-card:not(#reselectCourseBtn)');
+    allCards.forEach(card => {
+      card.classList.remove('selected-card');
+      card.style.display = 'block';
+
+      // 延遲 10ms 觸發 CSS opacity 淡入
+      setTimeout(() => {
+        card.style.opacity = '1';
+      }, 10);
+    });
   }, 500);
-
-  // 讓原本所有被隱藏的課程小卡重新回到畫面上並淡入
-  const allCards = document.querySelectorAll('#courseCardsContainer .teacher-small-card:not(#reselectCourseBtn)');
-  allCards.forEach(card => {
-    card.classList.remove('selected-card');
-    card.style.display = 'block';
-
-    setTimeout(() => {
-      card.style.opacity = '1';
-    }, 10);
-  });
 }
 
 /**
@@ -3427,31 +3428,31 @@ function selectTeacherCard(teacherValue, selectedCard) {
  * 3. 點擊「重新選擇老師」的處理邏輯
  */
 function resetTeacherSelection() {
-  // 隱藏下方介紹區
+  // 1. 隱藏下方介紹區，清空 select
   document.getElementById('teacherDisplayArea').style.display = 'none';
-  
-  // 清空隱藏的 select
   const teacherSelect = document.getElementById('teacherSelect');
   if (teacherSelect) teacherSelect.value = "";
 
-  // 「重新選擇小卡」自己先 0.5 秒淡出並隱藏
+  // 2. 「重新選擇小卡」開始 0.5 秒淡出
   const reselectBtn = document.getElementById('reselectTeacherBtn');
   reselectBtn.style.opacity = '0';
+
+  // 3. 關鍵修正：等待 0.5 秒，等按鈕「完全消失並退出排版」後，才進行後續動作
   setTimeout(() => {
-    reselectBtn.style.display = 'none';
-  }, 500);
+    reselectBtn.style.display = 'none'; // 徹底退出空間
 
-  // 讓原本所有被隱藏的老師小卡重新回到畫面上並淡入
-  const allTeacherCards = document.querySelectorAll('.teacher-small-card:not(#reselectTeacherBtn)');
-  allTeacherCards.forEach(card => {
-    card.classList.remove('selected-card'); // 移除選取狀態
-    card.style.display = 'block';           // 恢復顯示佔位
+    // 讓原本所有被隱藏的老師小卡重新回到畫面上並淡入
+    const allTeacherCards = document.querySelectorAll('.teacher-small-card:not(#reselectTeacherBtn)');
+    allTeacherCards.forEach(card => {
+      card.classList.remove('selected-card'); // 移除選取狀態
+      card.style.display = 'block';           // 恢復顯示佔位
 
-    // 延遲 10ms 觸發 CSS opacity 淡入
-    setTimeout(() => {
-      card.style.opacity = '1';
-    }, 10);
-  });
+      // 延遲 10ms 觸發 CSS opacity 淡入
+      setTimeout(() => {
+        card.style.opacity = '1';
+      }, 10);
+    });
+  }, 500); // 這裡的 500 對應 CSS transition 的 0.5s
 }
 /**
  * 顯示選中的老師圖片與名字
