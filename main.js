@@ -3205,12 +3205,6 @@ function selectCourseCard(courseValue, selectedCard) {
     }
   });
 
-  const select = document.getElementById('courseIntroSelect');
-  if (select) {
-    select.value = courseValue;
-    loadCourseIntro();
-  }
-
   // 2. 等待 0.5 秒其他卡片淡出後，執行滑順歸位動畫
   setTimeout(() => {
     // === 開始 FLIP 動畫計算 ===
@@ -3243,6 +3237,12 @@ function selectCourseCard(courseValue, selectedCard) {
     }, 400);
 
   }, 500); // 在其他卡片淡出的 0.5 秒後執行
+
+  const select = document.getElementById('courseIntroSelect');
+  if (select) {
+    select.value = courseValue;
+    loadCourseIntro();
+  }
 }
 
 /**
@@ -3391,12 +3391,6 @@ function selectTeacherCard(teacherValue, selectedCard) {
     }
   });
 
-  const teacherSelect = document.getElementById('teacherSelect');
-  if (teacherSelect) {
-    teacherSelect.value = teacherValue;
-    displayTeacherIntro();
-  }
-
   // 2. 等待 0.5 秒其他卡片淡出後，執行滑順歸位動畫
   setTimeout(() => {
     const startRect = selectedCard.getBoundingClientRect();
@@ -3428,6 +3422,12 @@ function selectTeacherCard(teacherValue, selectedCard) {
     }, 400);
 
   }, 500); // 在其他卡片淡出的 0.5 秒後執行
+
+  const teacherSelect = document.getElementById('teacherSelect');
+  if (teacherSelect) {
+    teacherSelect.value = teacherValue;
+    displayTeacherIntro();
+  }
 }
 
 /**
