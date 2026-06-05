@@ -3480,18 +3480,25 @@ function displayTeacherIntro() {
 
   const teacher = globalSettings.teachers.find(t => t.name === selectedName);
   if (teacher) {
-    //titleEl.innerText = teacher.name + " 老師";
-    imgEl.src = teacher.url;
-    imgEl.setAttribute('referrerpolicy', 'no-referrer');
     if (introEl) {
       introEl.innerHTML = teacher.intro;
     }
-    requestAnimationFrame(() => {
+
+    imgEl.setAttribute('referrerpolicy', 'no-referrer');
+    imgEl.onload = () => {
       requestAnimationFrame(() => {
-        displayArea.style.display = 'block';
+        requestAnimationFrame(() => {
+          displayArea.style.display = 'block';
+        });
       });
-    });
-  }
+    };
+
+    imgEl.onerror = () => {
+      console.log("老師圖片載入失敗，直接顯示區塊");
+      displayArea.style.display = 'block';
+    };
+
+    imgEl.src = teacher.url;
 }
 
 
