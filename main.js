@@ -533,21 +533,16 @@ function renderAllRules() {
 
   const rulesMap = globalSettings.rules;
 
-  // 🌟 新增：建立「試算表名稱」與「HTML ID」的對應字典
+  // 建立「試算表名稱」與「HTML ID」的對應字典
   const idMapping = {
     "報名須知": "noticeDisplayArea",
     "課程費用": "priceDisplayArea",
     "取消政策": "policyDisplayArea",
-    "教室規章": "rulesDisplayArea",
-    "行前通知": "remindDisplayArea"
+    "教室規章": "rulesDisplayArea"
   };
 
-  // 遍歷所有在試算表中的分類 (例如 "報名須知", "課程費用")
   for (const sheetCategory in rulesMap) {
-    
-    // 透過字典找出正確的 HTML ID，如果字典沒寫，就預設使用試算表填的值
     const targetId = idMapping[sheetCategory] || sheetCategory;
-    
     const container = document.getElementById(targetId);
     
     // 如果畫面上沒有這個 ID 的容器，就跳過
@@ -560,39 +555,42 @@ function renderAllRules() {
 
     // 依序生成這個 ID 裡面的所有區塊
     items.forEach(item => {
-      // 1. 建立 Section 容器
-      const section = document.createElement('section');
-      section.style.cssText = 'margin-bottom: 25px;';
-
-      // 2. 建立大標題 (h4)
-      const h4 = document.createElement('h4');
-      h4.style.cssText = 'color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px; margin-top: 0;';
-      h4.innerText = item.title;
-      section.appendChild(h4);
-
-      // 3. 建立內容區塊 (div)
-      const contentDiv = document.createElement('div');
-      contentDiv.style.cssText = 'padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px; line-height: 1.6; color: #555;';
-
-      // --- 開始處理文字格式 ---
+      
       let parsedContent = item.content;
-
-      // 變化 A：將 *文字* 轉換成純加粗
       parsedContent = parsedContent.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-
-      // 變化 B：將 !文字! 轉換成紅色加粗
       parsedContent = parsedContent.replace(/!(.*?)!/g, '<strong style="color:#e74c3c;">$1</strong>');
-
-      // 變化 C：將試算表裡的換行 (Enter)，轉換成 HTML 的換行標籤 <br>
       parsedContent = parsedContent.replace(/\n/g, '<br>');
-      // ----------------------
 
-      // 把處理完的 HTML 塞進內容區塊
-      contentDiv.innerHTML = parsedContent;
+      if (item.title === "⚠️ 注意事項") {
+        
+        // 🌟 特殊樣式：黃色警告框
+        const warningDiv = document.createElement('div');
+        warningDiv.style.cssText = 'margin-top: 20px; padding: 15px; background: #fff9db; border-radius: 8px; font-size: 0.85rem; color: #856404;';
+        
+        // 把固定的標題跟處理好的內文組裝起來
+        warningDiv.innerHTML = `<strong>⚠️ 注意事項：</strong><br>${parsedContent}`;
+        
+        // 直接塞入容器中
+        container.appendChild(warningDiv);
 
-      // 組裝並放進畫面上
-      section.appendChild(contentDiv);
-      container.appendChild(section);
+      } else {
+
+        const section = document.createElement('section');
+        section.style.cssText = 'margin-bottom: 25px;';
+
+        const h4 = document.createElement('h4');
+        h4.style.cssText = 'color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px; margin-top: 0;';
+        h4.innerText = item.title;
+        section.appendChild(h4);
+
+        const contentDiv = document.createElement('div');
+        contentDiv.style.cssText = 'padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px; line-height: 1.6; color: #555;';
+        contentDiv.innerHTML = parsedContent; // 塞入處理好的內文
+
+        section.appendChild(contentDiv);
+        container.appendChild(section);
+
+      }
     });
   }
 }
