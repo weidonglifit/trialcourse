@@ -1967,7 +1967,7 @@ select {
   opacity: 1;
   transform: translateY(0);
 }
-
+/*
 .countdown-timer i.num-inner.exit {
   opacity: 0;
   transform: translateY(-20px);
@@ -1978,7 +1978,17 @@ select {
   transform: translateY(20px);
   transition: none;
 }
+*/
+.countdown-timer i.num-inner.exit {
+  opacity: 0;
+  transform: perspective(200px) rotateX(90deg);
+}
 
+.countdown-timer i.num-inner.enter {
+  opacity: 0;
+  transform: perspective(200px) rotateX(-90deg);
+  transition: none;
+}
 .countdown-timer small {
   font-size: 0.85rem;
   color: #d14d72;
