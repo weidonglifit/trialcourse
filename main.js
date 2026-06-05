@@ -4598,6 +4598,7 @@ function renderNewsCarousel(photos) {
 /**
  * 切換上方大圖 (交叉淡入淡出 Cross-fade)
  */
+let isLayerA_Active = true;
 function changeNewsMainImage(index, isManual = false) {
   // 抓出兩層圖片容器
   const imgA = document.getElementById('newsImgA');
