@@ -2159,9 +2159,9 @@ function handleRoomQuery() {
             const weekDayStr = isNaN(dateObj) ? "" : `(週${weekDays[dateObj.getDay()]})`;
 
             cardHtml += `<div style="display:flex;justify-content:space-between;align-items:center;border:1.5px solid #F4A7B9;border-radius:15px;padding:12px 15px;background:#fff;box-shadow:0 2px 6px rgba(244,167,185,0.15);">` + 
-                `<div class="time-tag" style="display:flex;flex-direction:column;align-items:center;color:#E87A90;font-weight:bold;font-size:1.05em;width:55px;flex-shrink:0;">` +
+                `<div class="time-tag" style="display:flex;flex-direction:column;align-items:center;font-weight:bold;font-size:1.05em;width:55px;flex-shrink:0;">` +
                   `<span style="line-height:1;">${startTime}</span>` +
-                  `<div class="time-line" style="width:2px;height:12px;background:#F4A7B9;margin:4px 0;border-radius:2px;"></div>` +
+                  `<div class="time-line"></div>` +
                   `<span style="line-height:1;">${endTime}</span>` +
                 `</div>` +
                 `<div style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;">` +
