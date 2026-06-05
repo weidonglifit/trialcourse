@@ -3271,7 +3271,7 @@ select {
 .teacher-small-card {
   padding: 8px 16px;
   background: #ffffff;
-  border: 2px solid #F4A7B9;
+  border: 1px solid #F4A7B9;
   border-radius: 8px;
   color: #d14d72;
   font-weight: bold;
