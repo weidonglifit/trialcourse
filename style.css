@@ -3315,6 +3315,9 @@ select {
   color: #E87A90;
   /* 關鍵：利用 CSS Order 讓它強制排在所有小卡的「最左邊」 */
   order: -1; 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 6px;
 }
 .teacher-small-card.reselect-card-style:hover {
   background: #E87A90;

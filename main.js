@@ -3214,7 +3214,7 @@ function selectCourseCard(courseValue, selectedCard) {
     });
 
     const reselectBtn = document.getElementById('reselectCourseBtn');
-    reselectBtn.style.display = 'block';
+    reselectBtn.style.display = 'inline-flex';
 
     const endRect = selectedCard.getBoundingClientRect();
 
