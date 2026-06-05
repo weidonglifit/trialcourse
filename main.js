@@ -4565,7 +4565,7 @@ function renderNewsCarousel(photos) {
 
   // 1. 生成上方的大圖
   const mainImgHtml = `
-    <div class="news-carousel-wrapper" style="position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <div class="news-carousel-wrapper" style="position: relative; width: 100%; max-width: 400px; aspect-ratio: 2/3; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
       <img id="newsImgA" class="news-carousel-layer show" 
            src="${photos[0]}" 
            onclick="openLightbox(this.src)">
