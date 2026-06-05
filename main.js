@@ -3066,28 +3066,120 @@ function copyOnlyAccountNumber(e) {
   }
 }
 
+/**
+ * 1. 初始化課程選單 (改為小卡版，無篩選全顯示)
+ */
 function initCourseIntroDropdown() {
   const select = document.getElementById('courseIntroSelect');
-  if (!globalSettings.courseIntros || !allCourseData) return;
+  if (!globalSettings.courseIntros) return;
 
   select.innerHTML = '<option value="">-- 請選擇課程 --</option>';
+  let coursesArray = [];
 
   // 取得所有簡介中的課程名稱並排序
   Object.keys(globalSettings.courseIntros).sort().forEach(name => {
     const option = document.createElement('option');
-
-    // 檢查該簡介課程是否出現在目前的報名清單 (allCourseData) 中
-    // 使用 some 配合 includes 進行模糊比對（避免名稱後方有老師名或時間導致比對失敗）
-    const isOpening = allCourseData.some(course => course.name.includes(name));
-
-    // 如果沒有在報名清單中，加上 (未開課) 標籤
-    const displayName = isOpening ? name : name + "";
-
-    option.value = name; // value 保持原名，方便後續對應資料庫
-    option.text = displayName;
+    option.value = name;
+    option.text = name;
     select.appendChild(option);
+
+    // 把所有的課程都推進陣列
+    coursesArray.push({
+      value: name,
+      name: name
+    });
   });
-  buildCustomDropdown('courseIntroSelect', 'customCourseIntroDropdown', 'customCourseIntroMenu', '-- 請選擇課程 --');
+
+  // 呼叫生成課程小卡的函數
+  renderCourseCards(coursesArray);
+}
+
+/**
+ * 2. 生成課程小卡
+ */
+function renderCourseCards(courses) {
+  const container = document.getElementById('courseCardsContainer');
+  
+  // 清除舊卡片，只保留重選按鈕
+  const oldCards = container.querySelectorAll('.teacher-small-card:not(#reselectCourseBtn)');
+  oldCards.forEach(card => card.remove());
+
+  courses.forEach(course => {
+    const card = document.createElement('div');
+    card.className = 'teacher-small-card'; // 直接套用前一次寫好的 CSS
+    card.innerText = course.name;
+    
+    card.onclick = function() {
+      selectCourseCard(course.value, card);
+    };
+    
+    container.appendChild(card);
+  });
+}
+
+/**
+ * 3. 點擊課程小卡後的處理邏輯
+ */
+function selectCourseCard(courseValue, selectedCard) {
+  // 注意：這裡只抓 #courseCardsContainer 裡面的卡片，避免去動到老師的小卡
+  const allCards = document.querySelectorAll('#courseCardsContainer .teacher-small-card:not(#reselectCourseBtn)');
+
+  allCards.forEach(card => {
+    if (card !== selectedCard) {
+      card.style.opacity = '0';
+      setTimeout(() => {
+        card.style.display = 'none';
+      }, 500);
+    } else {
+      card.classList.add('selected-card');
+    }
+  });
+
+  // 0.5 秒後，讓「重新選擇課程」按鈕在左邊滑順淡入
+  setTimeout(() => {
+    const reselectBtn = document.getElementById('reselectCourseBtn');
+    reselectBtn.style.display = 'block';
+    setTimeout(() => {
+      reselectBtn.style.opacity = '1';
+    }, 10);
+  }, 500);
+
+  // 更新隱藏的 select 值並呼叫你原本顯示課程簡介的函數
+  const select = document.getElementById('courseIntroSelect');
+  if (select) {
+    select.value = courseValue;
+    loadCourseIntro(); // 觸發原本的介紹顯示邏輯
+  }
+}
+
+/**
+ * 4. 點擊「重新選擇課程」的處理邏輯
+ */
+function resetCourseSelection() {
+  // 隱藏下方介紹區
+  document.getElementById('introDisplayArea').style.display = 'none';
+  
+  // 清空 select
+  const select = document.getElementById('courseIntroSelect');
+  if (select) select.value = "";
+
+  // 重選按鈕自己先 0.5 秒淡出並隱藏
+  const reselectBtn = document.getElementById('reselectCourseBtn');
+  reselectBtn.style.opacity = '0';
+  setTimeout(() => {
+    reselectBtn.style.display = 'none';
+  }, 500);
+
+  // 讓原本所有被隱藏的課程小卡重新回到畫面上並淡入
+  const allCards = document.querySelectorAll('#courseCardsContainer .teacher-small-card:not(#reselectCourseBtn)');
+  allCards.forEach(card => {
+    card.classList.remove('selected-card');
+    card.style.display = 'block';
+
+    setTimeout(() => {
+      card.style.opacity = '1';
+    }, 10);
+  });
 }
 
 /**

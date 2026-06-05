@@ -878,15 +878,11 @@
     <div class="field">
       <span class="pink-highlight">請選擇欲查看的課程</span>
 
-      <div class="wd-dropdown-container" id="customCourseIntroDropdown">
-        <div class="wd-dropdown-trigger" onclick="toggleCustomDropdown('customCourseIntroDropdown')">
-          <span class="selected-text">-- 請選擇課程 --</span>
-          <span class="arrow">▼</span>
+      <div id="courseCardsContainer" class="teacher-cards-container">
+        <div id="reselectCourseBtn" class="teacher-small-card reselect-card-style" style="display: none; opacity: 0;" onclick="resetCourseSelection()">
+          ↺ 重新選擇課程
         </div>
-        <ul class="wd-dropdown-menu" id="customCourseIntroMenu">
-        </ul>
-      </div>
-
+        </div>
       <select id="courseIntroSelect" onchange="loadCourseIntro()" style="display: none;">
         <option value="">-- 請選擇課程 --</option>
       </select>
@@ -898,7 +894,7 @@
       </h4>
       <div id="introBody" style="line-height: 1.8; color: #555; white-space: pre-wrap;"></div>
     </div>
-  </div>
+</div>
 
   <div id="teacher-content" style="display:none;">
     <div class="field">
