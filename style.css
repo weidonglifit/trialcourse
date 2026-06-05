@@ -3332,7 +3332,7 @@ select {
   object-fit: cover;
   border-radius: 12px;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.4s ease;
 }
 
 /* 最新活動：縮圖容器 */

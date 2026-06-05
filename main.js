@@ -4597,6 +4597,9 @@ function renderNewsCarousel(photos) {
  * @param {number} index - 要切換到第幾張
  * @param {boolean} isManual - 是否為使用者手動點擊 (預設為 false)
  */
+/**
+ * 切換上方大圖 (支援完美半透明淡出淡入)
+ */
 function changeNewsMainImage(index, isManual = false) {
   const mainImg = document.getElementById('newsMainImg');
   if (!mainImg) return;
@@ -4604,16 +4607,28 @@ function changeNewsMainImage(index, isManual = false) {
   // 更新目前播放的索引
   currentNewsIndex = index;
 
-  // 1. 為了滑順視覺，先讓大圖稍微變透明
-  mainImg.style.opacity = '0.6';
+  // 🌟 1. 讓大圖開始淡出 (變成全透明)
+  mainImg.style.opacity = '0';
   
+  // 🌟 2. 用 setTimeout 等待 300 毫秒 (等 CSS 的 0.3s 淡出動畫播完)
   setTimeout(() => {
-    // 瞬間替換圖片網址，並恢復不透明度
+    
+    // 🌟 3. 在完全透明的狀態下，偷偷把圖片網址換掉
     mainImg.src = globalNewsPhotos[currentNewsIndex];
-    mainImg.style.opacity = '1';
-  }, 150);
+    
+    // 🌟 4. 利用 onload 確保新圖片下載完成後，才把它「淡入」回來
+    mainImg.onload = () => {
+      mainImg.style.opacity = '1';
+    };
 
-  // 2. 更新下方縮圖的狀態與滾動
+    // (防呆) 萬一圖片載入失敗，還是要讓它亮起來，不然會一直黑畫面
+    mainImg.onerror = () => {
+      mainImg.style.opacity = '1';
+    };
+
+  }, 300); // 這裡的 300 毫秒必須對應 CSS 的 0.3s
+
+  // 更新下方縮圖的狀態與滾動 (維持原本的邏輯)
   const allThumbs = document.querySelectorAll('.news-thumbnail');
   allThumbs.forEach((thumb, i) => {
     if (i === currentNewsIndex) {
@@ -4624,7 +4639,7 @@ function changeNewsMainImage(index, isManual = false) {
     }
   });
 
-  // 🌟 UX 防呆：如果是手動點擊的，我們就把計時器「重新歸零」再啟動
+  // UX 防呆：如果是手動點擊的，我們就把計時器重新歸零
   if (isManual) {
     startNewsAutoPlay();
   }
