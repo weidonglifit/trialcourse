@@ -4542,8 +4542,10 @@ function getOrCreateExpandOverlay() {
   return overlay;
 }
 
-// 建立全域變數來記住目前的照片陣列
+// 建立全域變數
 let globalNewsPhotos = [];
+let currentNewsIndex = 0;     // 記錄目前播到第幾張
+let newsCarouselTimer = null; // 記錄自動輪播的計時器
 
 /**
  * 渲染最新活動的輪播圖區塊
@@ -4558,10 +4560,10 @@ function renderNewsCarousel(photos) {
     return;
   }
 
-  // 將資料存入全域變數供點擊切換時使用
   globalNewsPhotos = photos;
+  currentNewsIndex = 0; // 重置為第一張
 
-  // 1. 生成上方的大圖 (預設顯示第 0 張，並綁定你原本的 openLightbox 燈箱功能)
+  // 1. 生成上方的大圖
   const mainImgHtml = `
     <div style="text-align: center; overflow: hidden; border-radius: 12px;">
       <img id="newsMainImg" class="news-carousel-main" 
@@ -4573,46 +4575,80 @@ function renderNewsCarousel(photos) {
   // 2. 生成下方的縮圖列
   let thumbHtml = '<div class="news-thumbnails-container">';
   photos.forEach((url, index) => {
-    // 第 0 張預設加上 'active' class
     const isActive = index === 0 ? 'active' : '';
+    // 🌟 注意：這裡的 onclick 多傳了一個 true，代表是「使用者手動點擊」
     thumbHtml += `
       <img class="news-thumbnail ${isActive}" 
            src="${url}" 
            id="newsThumb_${index}"
-           onclick="changeNewsMainImage(${index})">
+           onclick="changeNewsMainImage(${index}, true)">
     `;
   });
   thumbHtml += '</div>';
 
-  // 將組合好的 HTML 塞入畫面
   picBody.innerHTML = mainImgHtml + thumbHtml;
+
+  // 🚀 啟動自動輪播！
+  startNewsAutoPlay();
 }
 
 /**
- * 點擊縮圖時切換上方大圖
+ * 切換上方大圖
+ * @param {number} index - 要切換到第幾張
+ * @param {boolean} isManual - 是否為使用者手動點擊 (預設為 false)
  */
-function changeNewsMainImage(index) {
+function changeNewsMainImage(index, isManual = false) {
   const mainImg = document.getElementById('newsMainImg');
   if (!mainImg) return;
+
+  // 更新目前播放的索引
+  currentNewsIndex = index;
 
   // 1. 為了滑順視覺，先讓大圖稍微變透明
   mainImg.style.opacity = '0.6';
   
   setTimeout(() => {
     // 瞬間替換圖片網址，並恢復不透明度
-    mainImg.src = globalNewsPhotos[index];
+    mainImg.src = globalNewsPhotos[currentNewsIndex];
     mainImg.style.opacity = '1';
   }, 150);
 
-  // 2. 更新下方縮圖的框線狀態 (移除舊的，加上新的)
+  // 2. 更新下方縮圖的狀態與滾動
   const allThumbs = document.querySelectorAll('.news-thumbnail');
   allThumbs.forEach((thumb, i) => {
-    if (i === index) {
+    if (i === currentNewsIndex) {
       thumb.classList.add('active');
-      // 🌟 神級 UX 體驗：如果縮圖超出畫面，自動把它滑動到中央
       thumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     } else {
       thumb.classList.remove('active');
     }
   });
+
+  // 🌟 UX 防呆：如果是手動點擊的，我們就把計時器「重新歸零」再啟動
+  if (isManual) {
+    startNewsAutoPlay();
+  }
+}
+
+/**
+ * 啟動或重置自動輪播計時器
+ */
+function startNewsAutoPlay() {
+  // 先清除舊的計時器，避免越跑越快 (防呆)
+  if (newsCarouselTimer) {
+    clearInterval(newsCarouselTimer);
+  }
+  
+  // 設定每 3000 毫秒 (3秒) 自動切換下一張
+  newsCarouselTimer = setInterval(() => {
+    let nextIndex = currentNewsIndex + 1;
+    
+    // 如果播到最後一張了，就從 0 (第一張) 重新開始
+    if (nextIndex >= globalNewsPhotos.length) {
+      nextIndex = 0;
+    }
+    
+    // 觸發切換圖片 (false 代表是系統自己切的，不用重置計時器)
+    changeNewsMainImage(nextIndex, false);
+  }, 3000); // 👈 如果覺得 3 秒太快或太慢，可以直接改這個數字！
 }
