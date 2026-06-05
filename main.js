@@ -3126,22 +3126,114 @@ function loadCourseIntro() {
 }
 let allTeacherData = [];
 /**
- * 初始化師資選單
+ * 初始化師資選單 (改為小卡版)
  */
 function initTeacherDropdown() {
   const select = document.getElementById('teacherSelect');
   if (!globalSettings.teachers) return;
 
+  // 清空並加入預設選項
   select.innerHTML = '<option value="">-- 請選擇老師 --</option>';
+  
+  // 建立一個陣列，用來裝遞給小卡生成函數的資料
+  let teachersArray = [];
+
   globalSettings.teachers.forEach(teacher => {
+    // 1. 保留原本隱藏的 <select> 邏輯，以免破壞你其他依賴此 select 的程式碼
     const option = document.createElement('option');
     option.value = teacher.name;
     option.text = teacher.name;
     select.appendChild(option);
+
+    // 2. 將資料推進陣列，準備給小卡使用
+    teachersArray.push({
+      value: teacher.name, // 傳入 select 的 value
+      name: teacher.name   // 顯示在小卡上的文字
+    });
   });
-  buildCustomDropdown('teacherSelect', 'customTeacherDropdown', 'customTeacherMenu', '-- 請選擇老師 --');
+  renderTeacherCards(teachersArray);
 }
 
+/**
+ * 1. 生成老師小卡 (假設你有一個包含老師資料的陣列)
+ * 請在原本獲取老師資料後，呼叫此函數。
+ * 格式範例：teachers = [{value: "teacher1", name: "小明老師"}, ...]
+ */
+function renderTeacherCards(teachers) {
+  const container = document.getElementById('teacherCardsContainer');
+  container.innerHTML = ''; // 清空容器
+
+  teachers.forEach(teacher => {
+    const card = document.createElement('div');
+    card.className = 'teacher-small-card';
+    card.innerText = teacher.name;
+    
+    // 綁定點擊事件
+    card.onclick = function() {
+      selectTeacherCard(teacher.value, card);
+    };
+    
+    container.appendChild(card);
+  });
+}
+
+/**
+ * 2. 點擊小卡後的處理邏輯
+ */
+function selectTeacherCard(teacherValue, selectedCard) {
+  const allCards = document.querySelectorAll('.teacher-small-card');
+
+  allCards.forEach(card => {
+    if (card !== selectedCard) {
+      // 其他沒被選中的卡片：開始 0.5秒 淡出
+      card.style.opacity = '0';
+      // 動畫播完後 (500ms)，將元素從畫面上隱藏移除佔位
+      setTimeout(() => {
+        card.style.display = 'none';
+      }, 500);
+    } else {
+      // 被選中的卡片：加上強調樣式
+      card.classList.add('selected-card');
+    }
+  });
+
+  // 等待 0.5 秒其他卡片消失後，顯示「重新選擇」按鈕
+  setTimeout(() => {
+    document.getElementById('reselectTeacherBtn').style.display = 'inline-block';
+  }, 500);
+
+  // 更新隱藏的 select 值，並呼叫你原本顯示卡片的函數
+  const teacherSelect = document.getElementById('teacherSelect');
+  if (teacherSelect) {
+    teacherSelect.value = teacherValue;
+    displayTeacherIntro(); // 觸發你原本顯示 teacherDisplayArea 的函數
+  }
+}
+
+/**
+ * 3. 點擊「重新選擇老師」的處理邏輯
+ */
+function resetTeacherSelection() {
+  // 1. 清空並隱藏下方顯示區，隱藏重選按鈕
+  document.getElementById('teacherDisplayArea').style.display = 'none';
+  document.getElementById('reselectTeacherBtn').style.display = 'none';
+  
+  // 清空 select
+  const teacherSelect = document.getElementById('teacherSelect');
+  if (teacherSelect) teacherSelect.value = "";
+
+  // 2. 讓所有小卡重新出現
+  const allCards = document.querySelectorAll('.teacher-small-card');
+  allCards.forEach(card => {
+    card.classList.remove('selected-card'); // 移除選取狀態
+    card.style.display = 'block';           // 先恢復 display 佔位
+
+    // 必須延遲極短的時間再改透明度，否則瀏覽器會把 display 跟 opacity 變化算在同一幀，導致沒有淡入動畫
+    setTimeout(() => {
+      card.style.opacity = '1';             // 觸發 0.5秒 淡入動畫
+    }, 10); 
+  });
+}
 /**
  * 顯示選中的老師圖片與名字
  */

@@ -3258,3 +3258,56 @@ select {
   transform-origin: center; /* 確保從文字正中心放大 */
   animation: badgeTextHeartbeat 1.8s infinite ease-in-out; /* 無限循環重複 */
 }
+
+/* 老師小卡容器：使用 Flex 排列 */
+.teacher-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+/* 老師小卡樣式 */
+.teacher-small-card {
+  padding: 8px 16px;
+  background: #ffffff;
+  border: 2px solid #F4A7B9;
+  border-radius: 20px;
+  color: #d14d72;
+  font-weight: bold;
+  cursor: pointer;
+  /* 關鍵：設定 0.5 秒透明度動畫 */
+  opacity: 1;
+  transition: opacity 0.5s ease, background 0.3s, color 0.3s, transform 0.2s;
+}
+
+/* 小卡 Hover 效果 */
+.teacher-small-card:hover {
+  background: #FFF5F7;
+  transform: translateY(-2px);
+}
+
+/* 小卡被選中時的樣式 */
+.teacher-small-card.selected-card {
+  background: #E87A90;
+  color: #ffffff;
+}
+
+/* 重新選擇按鈕樣式 */
+.reselect-btn {
+  background: #ffffff;
+  color: #E87A90;
+  border: 1px solid #E87A90;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9em;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.3s;
+}
+
+.reselect-btn:hover {
+  background: #E87A90;
+  color: #ffffff;
+}

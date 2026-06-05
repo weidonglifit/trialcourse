@@ -904,15 +904,12 @@
     <div class="field">
       <span class="pink-highlight">請選擇欲查看的老師</span>
 
-      <div class="wd-dropdown-container" id="customTeacherDropdown">
-        <div class="wd-dropdown-trigger" onclick="toggleCustomDropdown('customTeacherDropdown')">
-          <span class="selected-text">-- 請選擇老師 --</span>
-          <span class="arrow">▼</span>
+      <div id="teacherCardsContainer" class="teacher-cards-container">
         </div>
-        <ul class="wd-dropdown-menu" id="customTeacherMenu">
-        </ul>
-      </div>
 
+      <button id="reselectTeacherBtn" class="reselect-btn" style="display: none;" onclick="resetTeacherSelection()">
+        ↺ 重新選擇老師
+      </button>
       <select id="teacherSelect" onchange="displayTeacherIntro()" style="display: none;">
         <option value="">-- 請選擇老師 --</option>
       </select>
@@ -943,7 +940,7 @@
         </div>
       </div>
     </div>
-  </div>
+</div>
 
 
   <div id="policy-content" style="display:none;">
