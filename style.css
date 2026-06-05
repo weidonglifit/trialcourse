@@ -1981,12 +1981,12 @@ select {
 */
 .countdown-timer i.num-inner.exit {
   opacity: 0;
-  transform: perspective(200px) rotateX(90deg);
+  transform: perspective(100px) rotateX(90deg);
 }
 
 .countdown-timer i.num-inner.enter {
   opacity: 0;
-  transform: perspective(200px) rotateX(-90deg);
+  transform: perspective(100px) rotateX(-90deg);
   transition: none;
 }
 .countdown-timer small {
