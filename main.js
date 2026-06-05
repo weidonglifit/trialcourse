@@ -3250,7 +3250,12 @@ function selectCourseCard(courseValue, selectedCard) {
  */
 function resetCourseSelection() {
   // 1. 隱藏下方介紹區，清空 select
-  document.getElementById('introDisplayArea').style.display = 'none';
+  const displayArea = document.getElementById('introDisplayArea');
+  displayArea.classList.add('fade-out');
+  setTimeout(() => {
+    displayArea.style.display = 'none';
+    displayArea.classList.remove('fade-out');
+  }, 500);
   const select = document.getElementById('courseIntroSelect');
   if (select) select.value = "";
 

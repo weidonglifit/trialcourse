@@ -1161,7 +1161,7 @@ select {
 }
 
 /* 加上這個 class 時，執行淡出動畫 */
-#teacherDisplayArea.fade-out {
+#teacherDisplayArea.fade-out, #introDisplayArea.fade-out{
   animation: teacherFadeOut 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
 }
 
