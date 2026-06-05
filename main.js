@@ -78,7 +78,7 @@ window.addEventListener('load', function () {
       allCourseDataPast = initData.pastCourses;
       allRoomBookState = initData.popularWallData;
       globalSingleBookedMap = initData.singleBookedMap;
-
+      renderAllRules();
       // 2. 處理網頁與表單標題
       //document.getElementById('main-title').innerText = globalSettings.title[0] + "\n課程報名｜教室預約";
       document.getElementById('main-title').innerText = "課程報名｜教室預約";
@@ -523,6 +523,66 @@ function renderTeacherDropdownUI(teachers) {
   });
 }
 
+/**
+ * 渲染所有規章與注意事項
+ * 請在取得 GAS 回傳資料並設定好 globalSettings 後呼叫此函式
+ */
+function renderAllRules() {
+  // 確認資料是否存在
+  if (!globalSettings || !globalSettings.rules) return;
+
+  const rulesMap = globalSettings.rules;
+
+  // 遍歷所有在試算表中設定的目標 ID (例如: noticeDisplayArea, policyDisplayArea)
+  for (const targetId in rulesMap) {
+    const container = document.getElementById(targetId);
+    
+    // 如果畫面上沒有這個 ID 的容器，就跳過
+    if (!container) continue;
+
+    // 清空該容器
+    container.innerHTML = ''; 
+
+    const items = rulesMap[targetId];
+
+    // 依序生成這個 ID 裡面的所有區塊
+    items.forEach(item => {
+      // 1. 建立 Section 容器
+      const section = document.createElement('section');
+      section.style.cssText = 'margin-bottom: 25px;';
+
+      // 2. 建立大標題 (h4)
+      const h4 = document.createElement('h4');
+      h4.style.cssText = 'color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px; margin-top: 0;';
+      h4.innerText = item.title;
+      section.appendChild(h4);
+
+      // 3. 建立內容區塊 (div)
+      const contentDiv = document.createElement('div');
+      contentDiv.style.cssText = 'padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px; line-height: 1.6; color: #555;';
+
+      // --- 開始處理文字格式 ---
+      let parsedContent = item.content;
+
+      // 變化 A：將 *文字* 轉換成純加粗
+      parsedContent = parsedContent.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+
+      // 變化 B：將 !文字! 轉換成紅色加粗
+      parsedContent = parsedContent.replace(/!(.*?)!/g, '<strong style="color:#e74c3c;">$1</strong>');
+
+      // 變化 C：將試算表裡的換行 (Enter)，轉換成 HTML 的換行標籤 <br>
+      parsedContent = parsedContent.replace(/\n/g, '<br>');
+      // ----------------------
+
+      // 把處理完的 HTML 塞進內容區塊
+      contentDiv.innerHTML = parsedContent;
+
+      // 組裝並放進畫面上
+      section.appendChild(contentDiv);
+      container.appendChild(section);
+    });
+  }
+}
 
 function openQueryTab(evt, tabName) {
   const targetBtn = evt.currentTarget;

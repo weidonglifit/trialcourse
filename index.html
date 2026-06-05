@@ -738,53 +738,7 @@
     <p style="color:#7f8c8d; font-size: 0.9rem; margin-bottom: 20px;">
       為營造良好環境，進入「微動身活」之人員均視為同意以下規範：
     </p>
-
-    <!-- 第一部分 -->
-    <section style="margin-bottom: 25px;">
-      <h4 style="color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">一、 入場與報到</h4>
-      <div style="padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px;">
-        • <strong>報到流程：</strong>進入前請先完成櫃檯/線上簽到以取得開鎖密碼。<br>
-        • <strong>準時入場：</strong>建議課前 10-15 分鐘抵達。<br>
-        • <strong>個人衛生：</strong>入內更換室內專用鞋或赤腳（依課程性質而定），禁止室外鞋入內。
-      </div>
-    </section>
-
-    <!-- 第二部分 -->
-    <section style="margin-bottom: 25px;">
-      <h4 style="color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">二、 空間使用規範</h4>
-      <div style="padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px;">
-        • <strong>器材使用：</strong>使用後請以清潔噴霧消毒並歸位。<br>
-        • <strong>愛護愛物：</strong>損壞電器或設備須負賠償責任。<br>
-        • <strong>環境整潔：</strong>禁止飲食（飲用水除外，需有蓋）。若有垃圾請自行帶走或置於指定垃圾桶。<br>
-        • <strong>空調管理：</strong>最後離開者請確認關閉所有空調與電器。
-      </div>
-    </section>
-
-    <!-- 第三部分 -->
-    <section style="margin-bottom: 25px;">
-      <h4 style="color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">三、 健康與安全聲明</h4>
-      <div style="padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px;">
-        • <strong>健康評估：</strong>身有潛在疾病或懷孕應預先告知，避免高風險動作。<br>
-        • <strong>運動安全：</strong>嚴禁在無專業教練陪同下私自操作高難度器材。<br>
-        • <strong>意外處理：</strong>發生受傷或不適請立即通知工作人員。
-      </div>
-    </section>
-
-    <!-- 第四部分 -->
-    <section style="margin-bottom: 25px;">
-      <h4 style="color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">四、 行為與財物</h4>
-      <div style="padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px;">
-        • <strong>寧靜維持：</strong>請勿大聲喧嘩，手機轉為靜音或震動。<br>
-        • <strong>個人財物：</strong>貴重物品隨身攜帶，教室置物櫃供放置但不負保管責任。<br>
-        • <strong>肖像權：</strong>教室內禁止未經許可之商業攝影。官方側拍僅供推廣，不便入鏡請告知。
-      </div>
-    </section>
-
-    <!-- 第五部分 -->
-    <section style="margin-bottom: 25px; background: #fff5f5; padding: 15px; border-radius: 8px;">
-      <h4 style="color:#c0392b; margin-top:0;">五、 違規處理</h4>
-      <p style="margin:0; font-size: 0.95rem;">經勸導無效者，本教室有權要求立即離場且不予退費，情節嚴重將取消資格。</p>
-    </section>
+    <div id="rulesDisplayArea"></div>
   </div>
 
 
@@ -863,15 +817,7 @@
 
   <!-- 隱藏的資料庫 (儲存長文字) -->
   <div id="price-content" style="display:none;">
-    <section style="margin-bottom: 25px;">
-      <h4 style="color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">課程費用</h4>
-      <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
-        • 有氧/瑜珈課程：<strong>$250/單堂</strong><br>
-        • 有氧/瑜珈課程：<strong>$220/全期</strong><br>
-        • 兒童課程：<strong>$350/單堂</strong><br>
-        • 兒童課程：<strong>$320/全期</strong>
-      </div>
-    </section>
+    <div id="priceDisplayArea"></div>
   </div>
 
   <div id="course-content" style="display:none;">
@@ -942,24 +888,7 @@
 
 
   <div id="policy-content" style="display:none;">
-
-    <section style="margin-bottom: 25px;">
-      <h4 style="color:#e74c3c; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">退費規定</h4>
-      <div style="padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px;">
-        • 開課前 7 天取消者，予以全額退費（需扣除轉帳手續費）。<br>
-        • 開課前 3-6 天取消者，退還學費之 80%。<br>
-        • 開課前 2 天至開課當日取消者，恕不予退費。
-      </div>
-    </section>
-
-    <section style="margin-bottom: 25px;">
-      <h4 style="color:#e74c3c; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">請假補課</h4>
-      <div style="padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px;">
-        • 團體課程因名額固定，若因個人因素請假，請於課前 <strong>24小時</strong> 告知。<br>
-        • 補課需於該期課程結束前，自行於其他有空位之時段預約完畢，並籌收 <strong>30元</strong> 手續費，逾期視同放棄。<br>
-        • <strong>課程變動：</strong>若因人數不足或不可抗力因素（如天災、颱風假）導致無法開課，教室將全額退費或安排課程延期。
-      </div>
-    </section>
+    <div id="policyDisplayArea"></div>
   </div>
 
   <!-- 隱藏的資料庫：報名注意事項 -->
@@ -967,38 +896,7 @@
     <p style="color:#7f8c8d; font-size: 0.9rem; padding-left: 10px;">
       感謝您參與「微動身活」課程。為維護課程品質及學員權益，請詳細閱讀以下條款：
     </p>
-
-
-    <!-- 第一部分 -->
-    <section style="margin-bottom: 25px;">
-      <h4 style="color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">一、 報名與繳費</h4>
-      <div style="padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px;">
-        • <strong>名額保留：</strong>請於 <strong>24 小時內</strong> 完成繳費並回傳證明，逾期系統將自動釋出名額。<br>
-        • <strong>成功確認：</strong>請利用系統「查詢功能」確認狀態，方視為完成報名。若有收到mail，請注意本館場的通知信件<strong
-          style="color:#e74c3c;">不會有任何連結與銀行帳號</strong>。<br>
-        • <strong>開班人數：</strong>有氧/瑜珈滿 4 人、兒童滿 3 人開班。
-      </div>
-    </section>
-
-    <!-- 第二部分 -->
-    <section style="margin-bottom: 25px;">
-      <h4 style="color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">二、 上課規範</h4>
-      <div style="padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px;">
-        • <strong>準時出席：</strong>建議課前 10 分鐘抵達。<strong>遲到超過 15 分鐘</strong> 者，老師有權拒絕入場且該堂課視同扣課。<br>
-        • <strong>穿著建議：</strong>請穿著運動服裝與乾淨室內運動鞋。<br>
-        • <strong>健康聲明：</strong>若患有疾病或懷孕，請徵詢醫師建議並主動告知老師。
-      </div>
-    </section>
-
-    <!-- 第三部分 -->
-    <section style="margin-bottom: 25px;">
-      <h4 style="color:#2c3e50; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">三、 環境維護</h4>
-      <div style="padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px;">
-        • <strong>個人財物：</strong>貴重物品請自行保管，教室不負賠償責任。<br>
-        • <strong>環境整潔：</strong>禁止飲食（開水除外），器材使用後請清潔歸位。<br>
-        • <strong>肖像權：</strong>課程中老師或工作人員可能會進行側拍記錄，用於品牌宣傳或成果分享。若不希望入鏡，請事先告知。
-      </div>
-    </section>
+    <div id="noticeDisplayArea"></div>
   </div>
 
   <!-- 隱藏的資料庫：行前通知提醒 -->
