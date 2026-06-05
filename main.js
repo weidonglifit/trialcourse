@@ -3162,20 +3162,20 @@ function initTeacherDropdown() {
 }
 
 /**
- * 1. 生成老師小卡 (假設你有一個包含老師資料的陣列)
- * 請在原本獲取老師資料後，呼叫此函數。
- * 格式範例：teachers = [{value: "teacher1", name: "小明老師"}, ...]
+ * 1. 生成老師小卡 (注意：不要清空了原本寫在 HTML 的重選按鈕)
  */
 function renderTeacherCards(teachers) {
   const container = document.getElementById('teacherCardsContainer');
-  container.innerHTML = ''; // 清空容器
+  
+  // 為了不清空 HTML 裡的重選按鈕，我們先把原本的老師小卡刪除，只保留重選按鈕
+  const oldCards = container.querySelectorAll('.teacher-small-card:not(#reselectTeacherBtn)');
+  oldCards.forEach(card => card.remove());
 
   teachers.forEach(teacher => {
     const card = document.createElement('div');
     card.className = 'teacher-small-card';
     card.innerText = teacher.name;
     
-    // 綁定點擊事件
     card.onclick = function() {
       selectTeacherCard(teacher.value, card);
     };
@@ -3188,32 +3188,36 @@ function renderTeacherCards(teachers) {
  * 2. 點擊小卡後的處理邏輯
  */
 function selectTeacherCard(teacherValue, selectedCard) {
-  const allCards = document.querySelectorAll('.teacher-small-card');
+  // 抓取所有的老師小卡（不包含重選按鈕）
+  const allTeacherCards = document.querySelectorAll('.teacher-small-card:not(#reselectTeacherBtn)');
 
-  allCards.forEach(card => {
+  allTeacherCards.forEach(card => {
     if (card !== selectedCard) {
-      // 其他沒被選中的卡片：開始 0.5秒 淡出
+      // 沒被選中的老師：0.5秒淡出並隱藏
       card.style.opacity = '0';
-      // 動畫播完後 (500ms)，將元素從畫面上隱藏移除佔位
       setTimeout(() => {
         card.style.display = 'none';
       }, 500);
     } else {
-      // 被選中的卡片：加上強調樣式
+      // 被選中的老師：加上強調樣式
       card.classList.add('selected-card');
     }
   });
 
-  // 等待 0.5 秒其他卡片消失後，顯示「重新選擇」按鈕
+  // 0.5 秒後，讓「重新選擇小卡」在左邊滑順淡入
   setTimeout(() => {
-    document.getElementById('reselectTeacherBtn').style.display = 'inline-block';
+    const reselectBtn = document.getElementById('reselectTeacherBtn');
+    reselectBtn.style.display = 'block'; // 先恢復佔位
+    setTimeout(() => {
+      reselectBtn.style.opacity = '1';  /* 觸發 0.5 秒淡入 */
+    }, 10);
   }, 500);
 
-  // 更新隱藏的 select 值，並呼叫你原本顯示卡片的函數
+  // 更新隱藏的 select 值並顯示介紹
   const teacherSelect = document.getElementById('teacherSelect');
   if (teacherSelect) {
     teacherSelect.value = teacherValue;
-    displayTeacherIntro(); // 觸發你原本顯示 teacherDisplayArea 的函數
+    displayTeacherIntro();
   }
 }
 
@@ -3221,24 +3225,30 @@ function selectTeacherCard(teacherValue, selectedCard) {
  * 3. 點擊「重新選擇老師」的處理邏輯
  */
 function resetTeacherSelection() {
-  // 1. 清空並隱藏下方顯示區，隱藏重選按鈕
+  // 隱藏下方介紹區
   document.getElementById('teacherDisplayArea').style.display = 'none';
-  document.getElementById('reselectTeacherBtn').style.display = 'none';
   
-  // 清空 select
+  // 清空隱藏的 select
   const teacherSelect = document.getElementById('teacherSelect');
   if (teacherSelect) teacherSelect.value = "";
 
-  // 2. 讓所有小卡重新出現
-  const allCards = document.querySelectorAll('.teacher-small-card');
-  allCards.forEach(card => {
-    card.classList.remove('selected-card'); // 移除選取狀態
-    card.style.display = 'block';           // 先恢復 display 佔位
+  // 「重新選擇小卡」自己先 0.5 秒淡出並隱藏
+  const reselectBtn = document.getElementById('reselectTeacherBtn');
+  reselectBtn.style.opacity = '0';
+  setTimeout(() => {
+    reselectBtn.style.display = 'none';
+  }, 500);
 
-    // 必須延遲極短的時間再改透明度，否則瀏覽器會把 display 跟 opacity 變化算在同一幀，導致沒有淡入動畫
+  // 讓原本所有被隱藏的老師小卡重新回到畫面上並淡入
+  const allTeacherCards = document.querySelectorAll('.teacher-small-card:not(#reselectTeacherBtn)');
+  allTeacherCards.forEach(card => {
+    card.classList.remove('selected-card'); // 移除選取狀態
+    card.style.display = 'block';           // 恢復顯示佔位
+
+    // 延遲 10ms 觸發 CSS opacity 淡入
     setTimeout(() => {
-      card.style.opacity = '1';             // 觸發 0.5秒 淡入動畫
-    }, 10); 
+      card.style.opacity = '1';
+    }, 10);
   });
 }
 /**

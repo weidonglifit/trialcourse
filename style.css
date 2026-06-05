@@ -3293,21 +3293,15 @@ select {
   color: #ffffff;
 }
 
-/* 重新選擇按鈕樣式 */
-.reselect-btn {
-  background: #ffffff;
+.teacher-small-card.reselect-card-style {
+  background: #FFF5F7;      /* 淡淡的粉底底色做出區隔 */
+  border: 2px dashed #E87A90; /* 改用虛線邊框，更有功能按鈕的感覺 */
   color: #E87A90;
-  border: 1px solid #E87A90;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.9em;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: 0.3s;
+  /* 關鍵：利用 CSS Order 讓它強制排在所有小卡的「最左邊」 */
+  order: -1; 
 }
-
-.reselect-btn:hover {
+.teacher-small-card.reselect-card-style:hover {
   background: #E87A90;
   color: #ffffff;
+  border-style: solid;
 }

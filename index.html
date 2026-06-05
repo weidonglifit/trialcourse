@@ -905,11 +905,13 @@
       <span class="pink-highlight">請選擇欲查看的老師</span>
 
       <div id="teacherCardsContainer" class="teacher-cards-container">
+        <div id="reselectTeacherBtn" class="teacher-small-card reselect-card-style" style="display: none; opacity: 0;"
+          onclick="resetTeacherSelection()">
+          ↺ 重新選擇老師
         </div>
+      </div>
 
-      <button id="reselectTeacherBtn" class="reselect-btn" style="display: none;" onclick="resetTeacherSelection()">
-        ↺ 重新選擇老師
-      </button>
+
       <select id="teacherSelect" onchange="displayTeacherIntro()" style="display: none;">
         <option value="">-- 請選擇老師 --</option>
       </select>
@@ -940,7 +942,7 @@
         </div>
       </div>
     </div>
-</div>
+  </div>
 
 
   <div id="policy-content" style="display:none;">
