@@ -3235,14 +3235,13 @@ function selectCourseCard(courseValue, selectedCard) {
       selectedCard.style.transition = '';
       selectedCard.style.transform = '';
     }, 400);
+    const select = document.getElementById('courseIntroSelect');
+    if (select) {
+      select.value = courseValue;
+      loadCourseIntro();
+    }
 
-  }, 500); // 在其他卡片淡出的 0.5 秒後執行
-
-  const select = document.getElementById('courseIntroSelect');
-  if (select) {
-    select.value = courseValue;
-    loadCourseIntro();
-  }
+  }, 500); // 在其他卡片淡出的 0.5 秒後執行  
 }
 
 /**
@@ -3420,14 +3419,13 @@ function selectTeacherCard(teacherValue, selectedCard) {
       selectedCard.style.transition = '';
       selectedCard.style.transform = '';
     }, 400);
+    const teacherSelect = document.getElementById('teacherSelect');
+    if (teacherSelect) {
+      teacherSelect.value = teacherValue;
+      displayTeacherIntro();
+    }
 
   }, 500); // 在其他卡片淡出的 0.5 秒後執行
-
-  const teacherSelect = document.getElementById('teacherSelect');
-  if (teacherSelect) {
-    teacherSelect.value = teacherValue;
-    displayTeacherIntro();
-  }
 }
 
 /**
