@@ -4565,9 +4565,12 @@ function renderNewsCarousel(photos) {
 
   // 1. 生成上方的大圖
   const mainImgHtml = `
-    <div style="text-align: center; overflow: hidden; border-radius: 12px;">
-      <img id="newsMainImg" class="news-carousel-main" 
+    <div class="news-carousel-wrapper" style="position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+      <img id="newsImgA" class="news-carousel-layer show" 
            src="${photos[0]}" 
+           onclick="openLightbox(this.src)">
+      <img id="newsImgB" class="news-carousel-layer" 
+           src="" 
            onclick="openLightbox(this.src)">
     </div>
   `;
@@ -4593,42 +4596,40 @@ function renderNewsCarousel(photos) {
 }
 
 /**
- * 切換上方大圖
- * @param {number} index - 要切換到第幾張
- * @param {boolean} isManual - 是否為使用者手動點擊 (預設為 false)
- */
-/**
- * 切換上方大圖 (支援完美半透明淡出淡入)
+ * 切換上方大圖 (交叉淡入淡出 Cross-fade)
  */
 function changeNewsMainImage(index, isManual = false) {
-  const mainImg = document.getElementById('newsMainImg');
-  if (!mainImg) return;
+  // 抓出兩層圖片容器
+  const imgA = document.getElementById('newsImgA');
+  const imgB = document.getElementById('newsImgB');
+  if (!imgA || !imgB) return;
 
   // 更新目前播放的索引
   currentNewsIndex = index;
+  const targetUrl = globalNewsPhotos[currentNewsIndex];
 
-  // 🌟 1. 讓大圖開始淡出 (變成全透明)
-  mainImg.style.opacity = '0';
-  
-  // 🌟 2. 用 setTimeout 等待 300 毫秒 (等 CSS 的 0.3s 淡出動畫播完)
-  setTimeout(() => {
-    
-    // 🌟 3. 在完全透明的狀態下，偷偷把圖片網址換掉
-    mainImg.src = globalNewsPhotos[currentNewsIndex];
-    
-    // 🌟 4. 利用 onload 確保新圖片下載完成後，才把它「淡入」回來
-    mainImg.onload = () => {
-      mainImg.style.opacity = '1';
+  // 🌟 判斷現在是哪一層亮著，就把新圖片載入到「另一層(暗著的那層)」
+  if (isLayerA_Active) {
+    // A 亮著，準備把圖塞給 B
+    imgB.src = targetUrl;
+    imgB.onload = () => {
+      // 確定 B 的圖下載好了，同時切換透明度！
+      imgB.classList.add('show');
+      imgA.classList.remove('show');
+      isLayerA_Active = false; // 狀態切換為 B 亮著
     };
-
-    // (防呆) 萬一圖片載入失敗，還是要讓它亮起來，不然會一直黑畫面
-    mainImg.onerror = () => {
-      mainImg.style.opacity = '1';
+  } else {
+    // B 亮著，準備把圖塞給 A
+    imgA.src = targetUrl;
+    imgA.onload = () => {
+      // 確定 A 的圖下載好了，同時切換透明度！
+      imgA.classList.add('show');
+      imgB.classList.remove('show');
+      isLayerA_Active = true; // 狀態切換為 A 亮著
     };
+  }
 
-  }, 300); // 這裡的 300 毫秒必須對應 CSS 的 0.3s
-
-  // 更新下方縮圖的狀態與滾動 (維持原本的邏輯)
+  // 👇 下方縮圖狀態切換 (這段維持不變)
   const allThumbs = document.querySelectorAll('.news-thumbnail');
   allThumbs.forEach((thumb, i) => {
     if (i === currentNewsIndex) {
@@ -4639,7 +4640,7 @@ function changeNewsMainImage(index, isManual = false) {
     }
   });
 
-  // UX 防呆：如果是手動點擊的，我們就把計時器重新歸零
+  // UX 防呆：如果是手動點擊，重置計時器
   if (isManual) {
     startNewsAutoPlay();
   }

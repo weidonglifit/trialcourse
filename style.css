@@ -3326,13 +3326,25 @@ select {
 }
 
 /* 最新活動：主圖片 */
-.news-carousel-main {
+.news-carousel-layer {
+  position: absolute; /* 絕對定位，讓兩張圖疊在一起 */
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 400px;
+  height: 100%;
   object-fit: cover;
-  border-radius: 12px;
   cursor: pointer;
-  transition: opacity 0.4s ease;
+  
+  /* 🌟 核心魔法：透明度 0.5 秒滑順漸變 */
+  transition: opacity 0.5s ease-in-out; 
+  opacity: 0; /* 預設為全透明 */
+  z-index: 1;
+}
+
+/* 當加上 .show 時，圖片就會浮現並移到上層 */
+.news-carousel-layer.show {
+  opacity: 1;
+  z-index: 2;
 }
 
 /* 最新活動：縮圖容器 */
