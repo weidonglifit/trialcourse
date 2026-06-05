@@ -533,8 +533,20 @@ function renderAllRules() {
 
   const rulesMap = globalSettings.rules;
 
-  // 遍歷所有在試算表中設定的目標 ID (例如: noticeDisplayArea, policyDisplayArea)
-  for (const targetId in rulesMap) {
+  // 🌟 新增：建立「試算表名稱」與「HTML ID」的對應字典
+  const idMapping = {
+    "報名須知": "noticeDisplayArea",
+    "課程費用": "priceDisplayArea",
+    "取消政策": "policyDisplayArea",
+    "教室規章": "rulesDisplayArea"
+  };
+
+  // 遍歷所有在試算表中的分類 (例如 "報名須知", "課程費用")
+  for (const sheetCategory in rulesMap) {
+    
+    // 透過字典找出正確的 HTML ID，如果字典沒寫，就預設使用試算表填的值
+    const targetId = idMapping[sheetCategory] || sheetCategory;
+    
     const container = document.getElementById(targetId);
     
     // 如果畫面上沒有這個 ID 的容器，就跳過
@@ -543,7 +555,7 @@ function renderAllRules() {
     // 清空該容器
     container.innerHTML = ''; 
 
-    const items = rulesMap[targetId];
+    const items = rulesMap[sheetCategory];
 
     // 依序生成這個 ID 裡面的所有區塊
     items.forEach(item => {
