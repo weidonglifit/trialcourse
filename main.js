@@ -3132,25 +3132,32 @@ function initTeacherDropdown() {
   const select = document.getElementById('teacherSelect');
   if (!globalSettings.teachers) return;
 
-  // 清空並加入預設選項
   select.innerHTML = '<option value="">-- 請選擇老師 --</option>';
   
-  // 建立一個陣列，用來裝遞給小卡生成函數的資料
   let teachersArray = [];
 
-  globalSettings.teachers.forEach(teacher => {
-    // 1. 保留原本隱藏的 <select> 邏輯，以免破壞你其他依賴此 select 的程式碼
-    const option = document.createElement('option');
-    option.value = teacher.name;
-    option.text = teacher.name;
-    select.appendChild(option);
+  const combinedCourses = [...allCourseData, ...allCourseDataPast];
 
-    // 2. 將資料推進陣列，準備給小卡使用
-    teachersArray.push({
-      value: teacher.name, // 傳入 select 的 value
-      name: teacher.name   // 顯示在小卡上的文字
+  globalSettings.teachers.forEach(teacher => {
+    
+    const hasCourse = combinedCourses.some(course => {
+      // 確保 course.name 存在，再檢查是否包含老師名字
+      return course.name && course.name.includes(teacher.name);
     });
+
+    if (hasCourse) {
+      const option = document.createElement('option');
+      option.value = teacher.name;
+      option.text = teacher.name;
+      select.appendChild(option);
+
+      teachersArray.push({
+        value: teacher.name, // 傳入 select 的 value
+        name: teacher.name   // 顯示在小卡上的文字
+      });
+    }
   });
+
   renderTeacherCards(teachersArray);
 }
 
