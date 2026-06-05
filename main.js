@@ -4549,7 +4549,7 @@ let globalNewsPhotos = [];
  * 渲染最新活動的輪播圖區塊
  */
 function renderNewsCarousel(photos) {
-  const picBody = document.getElementById('pic-body');
+  const picBody = document.getElementById('news-body');
   if (!picBody) return;
 
   // 如果沒有資料，顯示預設提示
