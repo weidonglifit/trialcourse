@@ -3133,7 +3133,7 @@ select {
   from { 
     opacity: 0; 
     transform: perspective(500px) scale(2) translateX(var(--random-x, 0px)) translateY(var(--random-y, 0px)) rotate(var(--random-rot, 0deg)) rotateX(var(--random-rx, 0deg)) rotateY(var(--random-ry, 0deg)); 
-    filter: blur(10px) drop-shadow(0px 10px 20px rgba(226, 125, 152, 0.6));
+    filter: blur(15px) drop-shadow(0px 10px 20px rgba(226, 125, 152, 0.6));
   }
   to { 
     opacity: 1; 
