@@ -3399,7 +3399,7 @@ function selectTeacherCard(teacherValue, selectedCard) {
     });
 
     const reselectBtn = document.getElementById('reselectTeacherBtn');
-    reselectBtn.style.display = 'block';
+    reselectBtn.style.display = 'inline-flex';
 
     const endRect = selectedCard.getBoundingClientRect();
 
