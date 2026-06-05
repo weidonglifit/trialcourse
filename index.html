@@ -98,9 +98,12 @@
       <div class="info-box" id="ifb-course">
         <div class="drawer-trigger-list">
 
-          <div class="info-card-btn" onclick="toggleDrawer('news-content', '最新活動內容')">
-            <span style="font-size: 1.5em;">最新活動</span>
-            <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
+          <div class="info-card-btn" onclick="toggleDrawer('news-content', '最新活動內容')"
+            style="background: linear-gradient(135deg, #fff9fa 0%, #ffeef1 100%); border-color: #E87A90; position: relative; overflow: hidden;">
+            <span class="badge-text-heartbeat" style="font-size: 1.5em; font-weight: bold; color: #E87A90;">
+              最新活動
+            </span>
+            <small style="color:#E87A90; margin-top: 8px; font-weight: bold;">查看詳情 ➔</small>
           </div>
 
           <div class="info-card-btn" onclick="toggleDrawer('notice-content', '報名注意事項')">
@@ -974,9 +977,9 @@
     <h4
       style="color: #d14d72; border-bottom: 2px solid #F4A7B9; padding-bottom: 8px; margin-bottom: 15px; margin-top: 0;">
       不能錯過</h4>
-      <div id="news-body"></div>
+    <div id="news-body"></div>
   </div>
-  
+
 
   <div id="paymentInfo"
     style="display: none; margin-top: 15px; padding: 15px; border: 2px dashed #E87A90; border-radius: 10px; background-color: #fff5f7; color: #333; text-align: center;">

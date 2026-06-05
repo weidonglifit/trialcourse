@@ -4647,8 +4647,7 @@ function startNewsAutoPlay() {
     if (nextIndex >= globalNewsPhotos.length) {
       nextIndex = 0;
     }
-    
-    // 觸發切換圖片 (false 代表是系統自己切的，不用重置計時器)
+
     changeNewsMainImage(nextIndex, false);
-  }, 3000); // 👈 如果覺得 3 秒太快或太慢，可以直接改這個數字！
+  }, 5000);
 }
