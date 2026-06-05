@@ -97,6 +97,12 @@
     <div id="courseTab" class="tab-content active">
       <div class="info-box" id="ifb-course">
         <div class="drawer-trigger-list">
+
+          <div class="info-card-btn" onclick="toggleDrawer('news-content', '最新活動內容')">
+            <span style="font-size: 1.5em;">最新活動</span>
+            <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
+          </div>
+
           <div class="info-card-btn" onclick="toggleDrawer('notice-content', '報名注意事項')">
             <span style="font-size: 1.5em;">報名須知</span>
             <small style="color:#f089a1; margin-top: 8px;">閱讀條款 ➔</small>
@@ -963,6 +969,14 @@
       <p style="color: #999; text-align: center; width: 100%;">照片載入中...</p>
     </div>
   </div>
+
+  <div id="news-content" style="display:none;">
+    <h4
+      style="color: #d14d72; border-bottom: 2px solid #F4A7B9; padding-bottom: 8px; margin-bottom: 15px; margin-top: 0;">
+      不能錯過</h4>
+      <div id="pic-body"></div>
+  </div>
+  
 
   <div id="paymentInfo"
     style="display: none; margin-top: 15px; padding: 15px; border: 2px dashed #E87A90; border-radius: 10px; background-color: #fff5f7; color: #333; text-align: center;">

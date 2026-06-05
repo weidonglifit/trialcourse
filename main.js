@@ -366,6 +366,7 @@ window.addEventListener('load', function () {
           picBody.innerHTML = '<p style="color: #999; text-align: center; width: 100%;">目前沒有活動照片</p>';
         }
       }
+      renderNewsCarousel(initData.newsphotos);
 
       const endTime = performance.now();
       // 3. 計算差值並換算成秒數 (保留三位小數)
@@ -4539,4 +4540,79 @@ function getOrCreateExpandOverlay() {
     document.body.appendChild(overlay);
   }
   return overlay;
+}
+
+// 建立全域變數來記住目前的照片陣列
+let globalNewsPhotos = [];
+
+/**
+ * 渲染最新活動的輪播圖區塊
+ */
+function renderNewsCarousel(photos) {
+  const picBody = document.getElementById('pic-body');
+  if (!picBody) return;
+
+  // 如果沒有資料，顯示預設提示
+  if (!photos || photos.length === 0) {
+    picBody.innerHTML = '<p style="color:#888; text-align:center; padding: 20px;">目前尚無最新活動，敬請期待！</p>';
+    return;
+  }
+
+  // 將資料存入全域變數供點擊切換時使用
+  globalNewsPhotos = photos;
+
+  // 1. 生成上方的大圖 (預設顯示第 0 張，並綁定你原本的 openLightbox 燈箱功能)
+  const mainImgHtml = `
+    <div style="text-align: center; overflow: hidden; border-radius: 12px;">
+      <img id="newsMainImg" class="news-carousel-main" 
+           src="${photos[0]}" 
+           onclick="openLightbox(this.src)">
+    </div>
+  `;
+
+  // 2. 生成下方的縮圖列
+  let thumbHtml = '<div class="news-thumbnails-container">';
+  photos.forEach((url, index) => {
+    // 第 0 張預設加上 'active' class
+    const isActive = index === 0 ? 'active' : '';
+    thumbHtml += `
+      <img class="news-thumbnail ${isActive}" 
+           src="${url}" 
+           id="newsThumb_${index}"
+           onclick="changeNewsMainImage(${index})">
+    `;
+  });
+  thumbHtml += '</div>';
+
+  // 將組合好的 HTML 塞入畫面
+  picBody.innerHTML = mainImgHtml + thumbHtml;
+}
+
+/**
+ * 點擊縮圖時切換上方大圖
+ */
+function changeNewsMainImage(index) {
+  const mainImg = document.getElementById('newsMainImg');
+  if (!mainImg) return;
+
+  // 1. 為了滑順視覺，先讓大圖稍微變透明
+  mainImg.style.opacity = '0.6';
+  
+  setTimeout(() => {
+    // 瞬間替換圖片網址，並恢復不透明度
+    mainImg.src = globalNewsPhotos[index];
+    mainImg.style.opacity = '1';
+  }, 150);
+
+  // 2. 更新下方縮圖的框線狀態 (移除舊的，加上新的)
+  const allThumbs = document.querySelectorAll('.news-thumbnail');
+  allThumbs.forEach((thumb, i) => {
+    if (i === index) {
+      thumb.classList.add('active');
+      // 🌟 神級 UX 體驗：如果縮圖超出畫面，自動把它滑動到中央
+      thumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    } else {
+      thumb.classList.remove('active');
+    }
+  });
 }

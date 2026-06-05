@@ -3324,3 +3324,49 @@ select {
   color: #ffffff;
   border-style: solid;
 }
+
+/* 最新活動：主圖片 */
+.news-carousel-main {
+  width: 100%;
+  max-height: 400px; /* 限制最高高度，避免直式照片撐破畫面 */
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+/* 最新活動：縮圖容器 */
+.news-thumbnails-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  overflow-x: auto; /* 若縮圖太多，允許橫向滑動 */
+  padding-bottom: 8px; /* 留一點空間給捲軸跟陰影 */
+  /* 隱藏捲軸但保留滾動功能 (Webkit) */
+  scrollbar-width: none; 
+}
+.news-thumbnails-container::-webkit-scrollbar {
+  display: none; 
+}
+
+/* 最新活動：單一縮圖 */
+.news-thumbnail {
+  width: 65px;
+  height: 65px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  flex-shrink: 0; /* 防止縮圖被擠壓變形 */
+}
+
+/* 縮圖被選中時的狀態 */
+.news-thumbnail.active {
+  border-color: #E87A90; /* 你的主品牌色 */
+  opacity: 1;
+  transform: scale(1.05); /* 微微放大 */
+  box-shadow: 0 2px 8px rgba(232, 122, 144, 0.4);
+}
