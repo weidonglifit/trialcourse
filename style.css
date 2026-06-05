@@ -3305,3 +3305,8 @@ select {
   color: #ffffff;
   border-style: solid;
 }
+
+#teacherDisplayArea {
+  opacity: 0; 
+  transition: opacity 0.5s ease; 
+}

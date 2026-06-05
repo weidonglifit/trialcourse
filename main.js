@@ -260,11 +260,11 @@ window.addEventListener('load', function () {
       if (wallSection && wallContainer) {
         if (initData.popularWallData && initData.popularWallData.length > 0) {
           wallSection.style.display = 'block';
-          
+
           let wallItemsData = initData.popularWallData;
-          
+
           // 若資料過少 (小於 5 筆)，我們將陣列複製疊加，確保有足夠的節點能完美執行「進場/退場」的狀態切換
-          if(wallItemsData.length > 0 && wallItemsData.length < 5) {
+          if (wallItemsData.length > 0 && wallItemsData.length < 5) {
             wallItemsData = [...wallItemsData, ...wallItemsData, ...wallItemsData];
           }
 
@@ -280,11 +280,11 @@ window.addEventListener('load', function () {
             `;
           });
           wallContainer.innerHTML = wallHtml;
-          
+
           // 清除可能殘留的舊計時器
           if (window.popularWallInterval) clearInterval(window.popularWallInterval);
           window.currentWallIndex = 0; // 重置起點
-          
+
           // 更新卡片狀態的函數
           function updateWallPositions() {
             const items = document.querySelectorAll('#popularWallContainer .booking-wall-item');
@@ -313,12 +313,12 @@ window.addEventListener('load', function () {
 
           // 初始化第一次排版
           updateWallPositions();
-          
+
           // 設定每 3 秒往上滾動輪播一次 (可自行調整毫秒數)
           window.popularWallInterval = setInterval(() => {
             const items = document.querySelectorAll('#popularWallContainer .booking-wall-item');
             if (items.length === 0) return;
-            
+
             // 指標 +1，並觸發重新計算
             window.currentWallIndex = (window.currentWallIndex + 1) % items.length;
             updateWallPositions();
@@ -329,7 +329,7 @@ window.addEventListener('load', function () {
         }
       }
 
-      
+
 
       // 9. 💡 初始化「單堂下拉選單」與「查詢老師下拉選單」
       initSingleCourseDropdown();
@@ -546,32 +546,32 @@ function renderAllRules() {
   for (const sheetCategory in rulesMap) {
     const targetId = idMapping[sheetCategory] || sheetCategory;
     const container = document.getElementById(targetId);
-    
+
     // 如果畫面上沒有這個 ID 的容器，就跳過
     if (!container) continue;
 
     // 清空該容器
-    container.innerHTML = ''; 
+    container.innerHTML = '';
 
     const items = rulesMap[sheetCategory];
 
     // 依序生成這個 ID 裡面的所有區塊
     items.forEach(item => {
-      
+
       let parsedContent = item.content;
       parsedContent = parsedContent.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
       parsedContent = parsedContent.replace(/!(.*?)!/g, '<strong style="color:#e74c3c;">$1</strong>');
       parsedContent = parsedContent.replace(/\n/g, '<br>');
 
       if (item.title === "⚠️ 注意事項") {
-        
+
         // 🌟 特殊樣式：黃色警告框
         const warningDiv = document.createElement('div');
         warningDiv.style.cssText = 'margin-top: 20px; padding: 15px; background: #fff9db; border-radius: 8px; font-size: 0.85rem; color: #856404;';
-        
+
         // 把固定的標題跟處理好的內文組裝起來
         warningDiv.innerHTML = `<strong>⚠️ 注意事項：</strong><br>${parsedContent}`;
-        
+
         // 直接塞入容器中
         container.appendChild(warningDiv);
 
@@ -1739,25 +1739,25 @@ function fetchRoomStatus() {
       });
 
       // 由於改用網格排版，不需要傳統的表頭了，將其清空讓畫面更乾淨
-      head.innerHTML = ""; 
+      head.innerHTML = "";
 
       // 建立 4 欄式網格容器
       let gridHtml = '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 5px;">';
-      
+
       currentStatusData.forEach((item, i) => {
         gridHtml += renderSlotTile(item, i);
       });
-      
+
       gridHtml += '</div>';
 
       const msgDiv = document.getElementById('roomstatusmsg');
       if (msgDiv) {
         msgDiv.innerHTML = "<span style='color: red;'>注意：預約以 1 小時為單位</span>";
       }
-      
+
       // 將網格直接放入 tbody 中，無縫接軌原本的 HTML 結構
       body.innerHTML = `<tr><td colspan="4" style="padding: 0; border: none;">${gridHtml}</td></tr>`;
-      
+
       document.getElementById('statusTableSection').style.display = 'block';
       updateAvailableTimes();
     })
@@ -1782,13 +1782,13 @@ function renderSlotTile(item, index) {
     const prev = currentStatusData[index - 1];
     const next = currentStatusData[index + 1];
     if ((!prev || prev.status !== "可預約") && (!next || next.status !== "可預約")) {
-      displayStatus = "不可預約"; 
+      displayStatus = "不可預約";
     }
   }
 
   // 🌟 外層按鈕樣式：移除 flex，並加入 -webkit-appearance: none 消除手機預設隱藏樣式
   const commonBtnStyle = "height: 60px; width: 100%; border-radius: 8px; box-sizing: border-box; padding: 0; margin: 0; transition: all 0.5s; -webkit-appearance: none; overflow: hidden;";
-  
+
   // 🌟 內層排版容器：利用一個佔滿 100% 高度的 div 來負責完美的垂直置中 (完美避開 iOS 按鈕 Bug)
   const innerWrapper = `<div style="height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">`;
 
@@ -1828,7 +1828,7 @@ function selectStartTime(time, btnEl) {
     b.style.background = "#fff";
     b.style.color = "#E87A90";
   });
-  
+
   // 2. 讓當前選中的按鈕變成「實心粉色」的選取狀態
   btnEl.style.background = "#E87A90";
   btnEl.style.color = "white";
@@ -1860,11 +1860,11 @@ function updateAvailableTimes() {
       // 【進場動畫】：若原本是隱藏的，必須先取消 none 才能開始播動畫
       if (btn.style.display === "none") {
         btn.style.display = ""; // 恢復原本的網格顯示模式
-        
+
         // 觸發重繪 (Reflow) 的小魔法：這行看起來沒做事，但它能強制瀏覽器刷新，確保接下來的動畫會完美觸發
-        btn.offsetHeight; 
+        btn.offsetHeight;
       }
-      
+
       // 狀態設定為：完全不透明 + 正常大小
       btn.style.opacity = "1";
       btn.style.transform = "scale(1)";
@@ -1875,7 +1875,7 @@ function updateAvailableTimes() {
       btn.style.opacity = "0";
       btn.style.transform = "scale(0.8)";
       btn.style.pointerEvents = "none";
-      
+
       // 等待 200 毫秒（與我們剛剛寫的按鈕 transition 0.2s 一致）後，才真正把元素抽掉
       setTimeout(() => {
         // 雙重檢查：避免在動畫期間，使用者又快速切換時數導致錯亂
@@ -2211,10 +2211,10 @@ function handleRoomQuery() {
         resultDiv.style.color = "red";
       } else {
         const rows = res.split("\n");
-        
+
         // 防禦設定：清除 padding 與確保白淨的格式
-        resultDiv.style.padding = "0"; 
-        resultDiv.style.whiteSpace = "normal"; 
+        resultDiv.style.padding = "0";
+        resultDiv.style.whiteSpace = "normal";
 
         // 縮小卡片間距，讓清單更緊湊
         let cardHtml = '<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">';
@@ -2231,19 +2231,19 @@ function handleRoomQuery() {
             const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
             const weekDayStr = isNaN(dateObj) ? "" : `(週${weekDays[dateObj.getDay()]})`;
 
-            cardHtml += `<div style="display:flex;justify-content:space-between;align-items:center;border:1.5px solid #F4A7B9;border-radius:15px;padding:12px 15px;background:#fff;box-shadow:0 2px 6px rgba(244,167,185,0.15);">` + 
-                `<div class="time-tag" style="display:flex;flex-direction:column;align-items:center;font-weight:bold;font-size:1.05em;width:55px;flex-shrink:0;">` +
-                  `<span style="line-height:1;">${startTime}</span>` +
-                  `<div class="time-line"></div>` +
-                  `<span style="line-height:1;">${endTime}</span>` +
-                `</div>` +
-                `<div style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;">` +
-                  `<span style="font-size:1.1em;font-weight:bold;color:#555;line-height:1.2;">${date}</span>` +
-                  `<span style="font-size:0.85em;color:#888;font-weight:bold;margin-top:2px;">${weekDayStr}</span>` +
-                `</div>` +
-                `<div style="flex-shrink:0;">` +
-                  `<span style="background:#F4A7B9;color:#fff;padding:5px 12px;border-radius:15px;font-size:0.95em;font-weight:bold;white-space:nowrap;">${room}</span>` +
-                `</div>` +
+            cardHtml += `<div style="display:flex;justify-content:space-between;align-items:center;border:1.5px solid #F4A7B9;border-radius:15px;padding:12px 15px;background:#fff;box-shadow:0 2px 6px rgba(244,167,185,0.15);">` +
+              `<div class="time-tag" style="display:flex;flex-direction:column;align-items:center;font-weight:bold;font-size:1.05em;width:55px;flex-shrink:0;">` +
+              `<span style="line-height:1;">${startTime}</span>` +
+              `<div class="time-line"></div>` +
+              `<span style="line-height:1;">${endTime}</span>` +
+              `</div>` +
+              `<div style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;">` +
+              `<span style="font-size:1.1em;font-weight:bold;color:#555;line-height:1.2;">${date}</span>` +
+              `<span style="font-size:0.85em;color:#888;font-weight:bold;margin-top:2px;">${weekDayStr}</span>` +
+              `</div>` +
+              `<div style="flex-shrink:0;">` +
+              `<span style="background:#F4A7B9;color:#fff;padding:5px 12px;border-radius:15px;font-size:0.95em;font-weight:bold;white-space:nowrap;">${room}</span>` +
+              `</div>` +
               `</div>`;
           }
         });
@@ -3172,7 +3172,7 @@ function initCourseIntroDropdown() {
  */
 function renderCourseCards(courses) {
   const container = document.getElementById('courseCardsContainer');
-  
+
   // 清除舊卡片，只保留重選按鈕
   const oldCards = container.querySelectorAll('.teacher-small-card:not(#reselectCourseBtn)');
   oldCards.forEach(card => card.remove());
@@ -3181,11 +3181,11 @@ function renderCourseCards(courses) {
     const card = document.createElement('div');
     card.className = 'teacher-small-card'; // 直接套用前一次寫好的 CSS
     card.innerText = course.name;
-    
-    card.onclick = function() {
+
+    card.onclick = function () {
       selectCourseCard(course.value, card);
     };
-    
+
     container.appendChild(card);
   });
 }
@@ -3208,7 +3208,7 @@ function selectCourseCard(courseValue, selectedCard) {
   const select = document.getElementById('courseIntroSelect');
   if (select) {
     select.value = courseValue;
-    loadCourseIntro(); 
+    loadCourseIntro();
   }
 
   // 2. 等待 0.5 秒其他卡片淡出後，執行滑順歸位動畫
@@ -3229,7 +3229,7 @@ function selectCourseCard(courseValue, selectedCard) {
 
     selectedCard.style.transition = 'none';
     selectedCard.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-    selectedCard.offsetHeight; 
+    selectedCard.offsetHeight;
     selectedCard.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
     selectedCard.style.transform = 'translate(0, 0)';
 
@@ -3319,13 +3319,13 @@ function initTeacherDropdown() {
   if (!globalSettings.teachers) return;
 
   select.innerHTML = '<option value="">-- 請選擇老師 --</option>';
-  
+
   let teachersArray = [];
 
   const combinedCourses = [...allCourseData, ...allCourseDataPast];
 
   globalSettings.teachers.forEach(teacher => {
-    
+
     const hasCourse = combinedCourses.some(course => {
       // 確保 course.name 存在，再檢查是否包含老師名字
       return course.name && course.name.includes(teacher.name);
@@ -3352,7 +3352,7 @@ function initTeacherDropdown() {
  */
 function renderTeacherCards(teachers) {
   const container = document.getElementById('teacherCardsContainer');
-  
+
   // 為了不清空 HTML 裡的重選按鈕，我們先把原本的老師小卡刪除，只保留重選按鈕
   const oldCards = container.querySelectorAll('.teacher-small-card:not(#reselectTeacherBtn)');
   oldCards.forEach(card => card.remove());
@@ -3361,11 +3361,11 @@ function renderTeacherCards(teachers) {
     const card = document.createElement('div');
     card.className = 'teacher-small-card';
     card.innerText = teacher.name;
-    
-    card.onclick = function() {
+
+    card.onclick = function () {
       selectTeacherCard(teacher.value, card);
     };
-    
+
     container.appendChild(card);
   });
 }
@@ -3410,7 +3410,7 @@ function selectTeacherCard(teacherValue, selectedCard) {
 
     selectedCard.style.transition = 'none';
     selectedCard.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-    selectedCard.offsetHeight; 
+    selectedCard.offsetHeight;
     selectedCard.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
     selectedCard.style.transform = 'translate(0, 0)';
     setTimeout(() => {
@@ -3430,12 +3430,11 @@ function selectTeacherCard(teacherValue, selectedCard) {
  */
 function resetTeacherSelection() {
   // 1. 隱藏下方介紹區，清空 select
-  requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        document.getElementById('teacherDisplayArea').style.display = 'none';
-      });
-    });
-  
+  const displayArea = document.getElementById('teacherDisplayArea');
+  displayArea.style.opacity = '0'; // 觸發淡出動畫
+  setTimeout(() => {
+    displayArea.style.display = 'none'; // 動畫結束後徹底隱藏佔位
+  }, 500);
   const teacherSelect = document.getElementById('teacherSelect');
   if (teacherSelect) teacherSelect.value = "";
 
@@ -3483,11 +3482,11 @@ function displayTeacherIntro() {
     if (introEl) {
       introEl.innerHTML = teacher.intro;
     }
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        displayArea.style.display = 'block';
-      });
-    });
+    displayArea.style.display = 'block';
+    setTimeout(() => {
+      displayArea.style.opacity = '1';
+    }, 10);
+
   }
 }
 
