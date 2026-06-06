@@ -1447,7 +1447,7 @@ select {
 /* 1. 卡片式標題佈局 */
 .drawer-trigger-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 10px;
   margin: 15px 0;
 }
@@ -1491,7 +1491,7 @@ select {
 .info-card-btn span {
   font-weight: bold;
   color: #d14d72;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
 }
 
 .info-card-btn small {
