@@ -2142,8 +2142,6 @@ function openTab(evt, tabName) {
     // 找不到幽靈按鈕時的保底機制
     executeTabSwitch(targetBtn, parent, tabName);
   }
-  startRandomJitter();
-  startPeekabooEgg();
 }
 
 /**
@@ -2629,22 +2627,20 @@ function injectCommonRules() {
 
 // 控制隨機微動的專屬函式
 function startRandomJitter() {
-  const activeTab = document.querySelector('.tab-content.active');
-  if (!activeTab) return;
-  const buttons = Array.from(activeTab.querySelectorAll('.info-card-btn'));
+  const buttons = Array.from(document.querySelectorAll('.info-card-btn'));
   if (buttons.length === 0) return;
 
   // 設定每 2000 毫秒 (2秒) 執行一次循環
   // (扣掉動畫本身的 0.6 秒，等於每次抖完會安靜休息 1.4 秒)
   setInterval(() => {
-
+    
     // 1. 先把所有按鈕的抖動 class 清除，讓它們歸零
     buttons.forEach(btn => btn.classList.remove('jitter'));
 
     // 2. 利用 setTimeout 製造一點極短的延遲，強迫瀏覽器重新載入動畫
     setTimeout(() => {
       // 隨機決定這次要抖幾個？ (1 或 2 個)
-      const jitterCount = Math.floor(Math.random() * 2) + 1;
+      const jitterCount = Math.floor(Math.random() * 2) + 1; 
 
       // 把按鈕陣列「洗牌打亂」，然後取出前 1~2 個
       const shuffled = buttons.sort(() => 0.5 - Math.random());
@@ -2652,10 +2648,10 @@ function startRandomJitter() {
 
       // 幫這幾個幸運兒加上抖動 class
       selectedButtons.forEach(btn => btn.classList.add('jitter'));
-
+      
     }, 50); // 50 毫秒的緩衝
 
-  }, 1400);
+  }, 1400); 
 }
 
 // 確保在頁面載入後執行
@@ -2674,7 +2670,7 @@ window.addEventListener('load', () => {
     }
   }
   injectCommonRules();
-
+  
   // 尋找所有的文字、電話、信箱輸入框
   const textInputs = document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]');
 
@@ -3533,7 +3529,7 @@ function displayTeacherIntro() {
       console.log("老師圖片載入失敗，直接顯示區塊");
       displayArea.style.display = 'block';
     };
-    imgEl.src = teacher.url;
+    imgEl.src = teacher.url; 
   }
 }
 
@@ -4691,11 +4687,11 @@ function startNewsAutoPlay() {
   if (newsCarouselTimer) {
     clearInterval(newsCarouselTimer);
   }
-
+  
   // 設定每 3000 毫秒 (3秒) 自動切換下一張
   newsCarouselTimer = setInterval(() => {
     let nextIndex = currentNewsIndex + 1;
-
+    
     // 如果播到最後一張了，就從 0 (第一張) 重新開始
     if (nextIndex >= globalNewsPhotos.length) {
       nextIndex = 0;
@@ -4715,15 +4711,13 @@ function formatButtonText() {
 }
 
 function startPeekabooEgg() {
-  const activeTab = document.querySelector('.tab-content.active');
-  if (!activeTab) return;
-  const buttons = Array.from(activeTab.querySelectorAll('.info-card-btn'));
+  const buttons = Array.from(document.querySelectorAll('.info-card-btn'));
   if (buttons.length === 0) return;
 
   // 1. 創造一隻貓咪元素 (DOM)
   const cat = document.createElement('div');
   cat.className = 'peekaboo-cat';
-
+  
   // 如果你想換成圖片，可以把 innerHTML 改成 <img src="黑豆的照片網址" style="width:24px;">
   cat.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#E87A90">
