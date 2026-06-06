@@ -4711,42 +4711,40 @@ function formatButtonText() {
 }
 
 function startPeekabooEgg() {
+  const list = document.querySelector('.drawer-trigger-list'); // 抓取外層的大網格
   const buttons = Array.from(document.querySelectorAll('.info-card-btn'));
-  if (buttons.length === 0) return;
+  
+  if (buttons.length === 0 || !list) return;
 
-  // 1. 創造一隻貓咪元素 (DOM)
   const cat = document.createElement('div');
   cat.className = 'peekaboo-cat';
   
-  // 如果你想換成圖片，可以把 innerHTML 改成 <img src="黑豆的照片網址" style="width:24px;">
   cat.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="#E87A90">
       <path d="M96 160C149 160 192 203 192 256L192 341.8C221.7 297.1 269.8 265.6 325.4 257.8C351 317.8 410.6 359.9 480 359.9C490.9 359.9 501.6 358.8 512 356.8L512 544C512 561.7 497.7 576 480 576C462.3 576 448 561.7 448 544L448 403.2L312 512L368 512C385.7 512 400 526.3 400 544C400 561.7 385.7 576 368 576L224 576C171 576 128 533 128 480L128 256C128 239.4 115.4 225.8 99.3 224.2L92.7 223.9C76.6 222.2 64 208.6 64 192C64 174.3 78.3 160 96 160zM565.8 67.2C576.2 58.5 592 65.9 592 79.5L592 192C592 253.9 541.9 304 480 304C418.1 304 368 253.9 368 192L368 79.5C368 65.9 383.8 58.5 394.2 67.2L448 112L512 112L565.8 67.2zM432 172C421 172 412 181 412 192C412 203 421 212 432 212C443 212 452 203 452 192C452 181 443 172 432 172zM528 172C517 172 508 181 508 192C508 203 517 212 528 212C539 212 548 203 548 192C548 181 539 172 528 172z"/>
     </svg>
   `;
 
-  // 先把貓咪隨便塞進第一個按鈕待命
-  buttons[0].appendChild(cat);
+  // 🌟 改變 1：這次把貓咪丟進大網格，而不是按鈕裡面
+  list.appendChild(cat);
 
-  // 2. 設定排程：每隔 8 秒鐘出來巡視一次
   setInterval(() => {
-    // 為了避免動畫錯亂，如果貓咪還在外面探頭，就先不要動牠
     if (cat.classList.contains('active')) return;
 
-    // 隨機挑選一個要躲藏的按鈕
     const randomIndex = Math.floor(Math.random() * buttons.length);
     const targetBtn = buttons[randomIndex];
 
-    // 把貓咪瞬間移動到新選中的按鈕底下
-    targetBtn.appendChild(cat);
+    // 🌟 改變 2：算出目標按鈕目前的絕對座標，讓貓咪瞬移過去！
+    // 水平位置：按鈕的最左邊距 + 按鈕寬度的一半 (剛好置中)
+    cat.style.left = (targetBtn.offsetLeft + targetBtn.offsetWidth / 2) + 'px';
+    // 垂直位置：按鈕的最上邊緣
+    cat.style.top = targetBtn.offsetTop + 'px';
 
-    // 觸發探頭動畫！
     cat.classList.add('active');
 
-    // 動畫設定是 3 秒，所以 3 秒後把 active 拔掉，讓牠恢復待命狀態
     setTimeout(() => {
       cat.classList.remove('active');
     }, 3000);
 
-  }, 8000); // 8000毫秒 = 8秒 (包含探頭的3秒，等於每躲藏5秒就會出來一次)
+  }, 8000); 
 }

@@ -1450,6 +1450,8 @@ select {
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 10px;
   margin: 15px 0;
+  position: relative; 
+  z-index: 1;
 }
 
 .rules-container {
@@ -3416,8 +3418,6 @@ select {
 /* 探頭彩蛋的本體 */
 .peekaboo-cat {
   position: absolute;
-  top: 5px;            /* 預設位置稍微靠上方，躲在按鈕背後 */
-  left: 50%;           
   transform: translateX(-50%);
   font-size: 24px;     /* Emoji 的大小，如果是用圖片可以改 width/height */
   z-index: -1;         /* 關鍵：把自己藏進按鈕背後 */
