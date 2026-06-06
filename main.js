@@ -4711,7 +4711,9 @@ function formatButtonText() {
 }
 
 function startPeekabooEgg() {
-  const buttons = Array.from(document.querySelectorAll('.info-card-btn'));
+  const activeTab = document.querySelector('.tab-content.active');
+    if (!activeTab) return;
+  const buttons = activeTab.querySelectorAll('.info-card-btn');
   if (buttons.length === 0) return;
 
   // 1. 創造一隻貓咪元素 (DOM)
