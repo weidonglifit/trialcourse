@@ -1448,8 +1448,8 @@ select {
 .drawer-trigger-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  margin: 20px 0;
+  gap: 10px;
+  margin: 15px 0;
 }
 
 .rules-container {
@@ -1492,6 +1492,10 @@ select {
   font-weight: bold;
   color: #d14d72;
   font-size: 1.1rem;
+}
+
+.info-card-btn small {
+  display: none; 
 }
 
 /* 飛出替身小卡的專屬外觀與動畫 */
