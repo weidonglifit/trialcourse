@@ -2627,9 +2627,7 @@ function injectCommonRules() {
 
 // 控制隨機微動的專屬函式
 function startRandomJitter() {
-  const activeTab = document.querySelector('.tab-content.active');
-    if (!activeTab) return;
-  const buttons = activeTab.querySelectorAll('.info-card-btn');
+  const buttons = Array.from(document.querySelectorAll('.info-card-btn'));
   if (buttons.length === 0) return;
 
   // 設定每 2000 毫秒 (2秒) 執行一次循環
