@@ -1448,7 +1448,7 @@ select {
 .drawer-trigger-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 15px;
+  gap: 10px;
   margin: 15px 0;
 }
 
@@ -3440,7 +3440,7 @@ select {
 }
 
 .peekaboo-cat svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: block; /* 避免底部出現神祕的留白間隙 */
 }
