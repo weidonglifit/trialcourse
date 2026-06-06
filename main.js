@@ -4442,12 +4442,8 @@ document.addEventListener('click', function (event) {
 
 // 1. 監聽滾動事件，動態偵測「當前啟用 Tab」裡的 INFOBOX
 window.addEventListener('scroll', function () {
-  // 🔥 關鍵修改 1：找出當前正在顯示的 Tab 區塊
-  const activeTab = document.querySelector('.tab-content.active');
-  if (!activeTab) return;
-
-  // 🔥 關鍵修改 2：只抓取該 Tab 裡面的 info-box (會自動對應 ifb-course 或 ifb-room)
-  const infoBox = activeTab.querySelector('.info-box');
+  const infoBox = document.querySelector('.info-box');
+  if (!infoBox) return;
   const stickyNav = document.getElementById('stickyQuickNav');
   const drawer = document.getElementById('quickMenuDrawer');
   const btn = document.getElementById('quickMenuBtn');
@@ -4481,13 +4477,7 @@ function toggleQuickMenu() {
 
   if (isOpening) {
     list.innerHTML = '';
-
-    // 🔥 關鍵修改 3：先鎖定「當前啟用」的 Tab
-    const activeTab = document.querySelector('.tab-content.active');
-    if (!activeTab) return;
-
-    // 🔥 關鍵修改 4：只抓取該 Tab 裡面的 info-card-btn，過濾掉隱藏的
-    const cards = activeTab.querySelectorAll('.info-card-btn');
+const cards = document.querySelectorAll('.info-card-btn');
 
     cards.forEach(card => {
       const span = card.querySelector('span');
