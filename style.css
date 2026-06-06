@@ -1467,6 +1467,7 @@ select {
   justify-content: space-between;
   align-items: center;
   flex-direction: column;
+  position: relative;
 
   /* 1. 預設改為浮起狀態：加入位移與較明顯的陰影 */
   transform: translateY(-8px);
@@ -3410,4 +3411,30 @@ select {
 .info-card-btn.jitter {
   animation: microJitter 0.5s ease-in-out; 
   will-change: transform; 
+}
+
+/* 探頭彩蛋的本體 */
+.peekaboo-cat {
+  position: absolute;
+  top: 5px;            /* 預設位置稍微靠上方，躲在按鈕背後 */
+  left: 50%;           
+  transform: translateX(-50%);
+  font-size: 24px;     /* Emoji 的大小，如果是用圖片可以改 width/height */
+  z-index: -1;         /* 關鍵：把自己藏進按鈕背後 */
+  opacity: 0;          /* 平時保持隱形 */
+  pointer-events: none;/* 防呆：避免使用者點按鈕時誤觸到貓咪 */
+  will-change: transform, opacity;
+}
+
+/* 探頭的關鍵影格動畫 */
+@keyframes peekabooAnimation {
+  0%   { transform: translate(-50%, 0); opacity: 0; }
+  15%  { transform: translate(-50%, -26px); opacity: 1; } /* 快速探出頭 */
+  85%  { transform: translate(-50%, -26px); opacity: 1; } /* 停在半空中盯著你看 */
+  100% { transform: translate(-50%, 0); opacity: 0; }     /* 默默縮回去隱形 */
+}
+
+/* 當 JS 賦予 active 時，執行 3 秒的探頭動畫 */
+.peekaboo-cat.active {
+  animation: peekabooAnimation 3s ease-in-out forwards;
 }

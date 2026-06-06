@@ -2622,6 +2622,7 @@ function injectCommonRules() {
   });
   formatButtonText();
   startRandomJitter();
+  startPeekabooEgg();
 }
 
 // 控制隨機微動的專屬函式
@@ -4707,4 +4708,41 @@ function formatButtonText() {
       span.innerHTML = text.substring(0, 2) + '<br>' + text.substring(2);
     }
   });
+}
+
+function startPeekabooEgg() {
+  const buttons = Array.from(document.querySelectorAll('.info-card-btn'));
+  if (buttons.length === 0) return;
+
+  // 1. 創造一隻貓咪元素 (DOM)
+  const cat = document.createElement('div');
+  cat.className = 'peekaboo-cat';
+  
+  // 如果你想換成圖片，可以把 innerHTML 改成 <img src="黑豆的照片網址" style="width:24px;">
+  cat.innerHTML = '🐈‍⬛'; 
+
+  // 先把貓咪隨便塞進第一個按鈕待命
+  buttons[0].appendChild(cat);
+
+  // 2. 設定排程：每隔 8 秒鐘出來巡視一次
+  setInterval(() => {
+    // 為了避免動畫錯亂，如果貓咪還在外面探頭，就先不要動牠
+    if (cat.classList.contains('active')) return;
+
+    // 隨機挑選一個要躲藏的按鈕
+    const randomIndex = Math.floor(Math.random() * buttons.length);
+    const targetBtn = buttons[randomIndex];
+
+    // 把貓咪瞬間移動到新選中的按鈕底下
+    targetBtn.appendChild(cat);
+
+    // 觸發探頭動畫！
+    cat.classList.add('active');
+
+    // 動畫設定是 3 秒，所以 3 秒後把 active 拔掉，讓牠恢復待命狀態
+    setTimeout(() => {
+      cat.classList.remove('active');
+    }, 3000);
+
+  }, 8000); // 8000毫秒 = 8秒 (包含探頭的3秒，等於每躲藏5秒就會出來一次)
 }
