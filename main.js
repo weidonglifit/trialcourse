@@ -4507,7 +4507,7 @@ function toggleQuickMenu() {
       if (!span) return;
 
       const li = document.createElement('li');
-      li.innerText = span.innerText;
+      li.innerText = span.textContent.trim();
 
       li.onclick = () => {
         toggleQuickMenu();
