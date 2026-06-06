@@ -3020,11 +3020,11 @@ select {
     opacity: 1;
   }
   40% {
-    transform: translate(30px, -15px) scale(1) rotate(15deg);
+    transform: translate(60px, -15px) scale(1) rotate(15deg);
     opacity: 0;
   }
   41% {
-    transform: translate(-30px, 15px) scale(1) rotate(-10deg);
+    transform: translate(-60px, 15px) scale(1) rotate(-10deg);
     opacity: 0;
   }
   100% {
@@ -3034,7 +3034,7 @@ select {
 }
 
 .fly-out-svg {
-  animation: flyRightAndFade 1.5s infinite ease-in-out;
+  animation: flyRightAndFade 2s infinite ease-in-out;
 }
 
 @keyframes fireFlicker {
