@@ -22,11 +22,11 @@ var aiStoreConfig = {
 };
 const COMMON_INFO_BTNS = `
   <div class="info-card-btn" onclick="toggleDrawer('rules-content', '教室使用規章')">
-    <span style="font-size: 1.5em;">教室<br>規章</span>
+    <span style="font-size: 1.5em;">教室規章</span>
     <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
   </div>
   <div class="info-card-btn" onclick="toggleDrawer('payment-info-content', '匯款帳戶資訊')">
-    <span style="font-size: 1.5em;">匯款<br>資訊</span>
+    <span style="font-size: 1.5em;">匯款資訊</span>
     <small style="color:#f089a1; margin-top: 8px;">查看帳號 ➔</small>
   </div>
 `;
@@ -2620,6 +2620,37 @@ function injectCommonRules() {
   containers.forEach(container => {
     container.innerHTML = COMMON_INFO_BTNS;
   });
+  formatButtonText();
+  startRandomJitter();
+}
+
+// 控制隨機微動的專屬函式
+function startRandomJitter() {
+  const buttons = Array.from(document.querySelectorAll('.info-card-btn'));
+  if (buttons.length === 0) return;
+
+  // 設定每 2000 毫秒 (2秒) 執行一次循環
+  // (扣掉動畫本身的 0.6 秒，等於每次抖完會安靜休息 1.4 秒)
+  setInterval(() => {
+    
+    // 1. 先把所有按鈕的抖動 class 清除，讓它們歸零
+    buttons.forEach(btn => btn.classList.remove('jitter'));
+
+    // 2. 利用 setTimeout 製造一點極短的延遲，強迫瀏覽器重新載入動畫
+    setTimeout(() => {
+      // 隨機決定這次要抖幾個？ (1 或 2 個)
+      const jitterCount = Math.floor(Math.random() * 2) + 1; 
+
+      // 把按鈕陣列「洗牌打亂」，然後取出前 1~2 個
+      const shuffled = buttons.sort(() => 0.5 - Math.random());
+      const selectedButtons = shuffled.slice(0, jitterCount);
+
+      // 幫這幾個幸運兒加上抖動 class
+      selectedButtons.forEach(btn => btn.classList.add('jitter'));
+      
+    }, 50); // 50 毫秒的緩衝
+
+  }, 2000); 
 }
 
 // 確保在頁面載入後執行
@@ -2638,7 +2669,7 @@ window.addEventListener('load', () => {
     }
   }
   injectCommonRules();
-
+  
   // 尋找所有的文字、電話、信箱輸入框
   const textInputs = document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]');
 
@@ -4669,9 +4700,11 @@ function startNewsAutoPlay() {
   }, 5000);
 }
 
-document.querySelectorAll('.info-card-btn span').forEach(span => {
-  const text = span.textContent.trim(); // 取得文字，例如 "最新活動"
-  if (text.length === 4) {
-    span.innerHTML = text.substring(0, 2) + '<br>' + text.substring(2);
-  }
-});
+function formatButtonText() {
+  document.querySelectorAll('.info-card-btn span').forEach(span => {
+    const text = span.textContent.trim();
+    if (text.length === 4) {
+      span.innerHTML = text.substring(0, 2) + '<br>' + text.substring(2);
+    }
+  });
+}
