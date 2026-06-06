@@ -3438,3 +3438,9 @@ select {
 .peekaboo-cat.active {
   animation: peekabooAnimation 3s ease-in-out forwards;
 }
+
+.peekaboo-cat svg {
+  width: 28px;
+  height: 28px;
+  display: block; /* 避免底部出現神祕的留白間隙 */
+}
