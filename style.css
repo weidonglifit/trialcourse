@@ -1448,7 +1448,7 @@ select {
 .drawer-trigger-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 10px;
+  gap: 15px;
   margin: 15px 0;
 }
 
