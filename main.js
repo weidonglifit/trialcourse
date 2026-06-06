@@ -2142,6 +2142,8 @@ function openTab(evt, tabName) {
     // 找不到幽靈按鈕時的保底機制
     executeTabSwitch(targetBtn, parent, tabName);
   }
+  startRandomJitter();
+  startPeekabooEgg();
 }
 
 /**
@@ -3021,8 +3023,6 @@ function openSubTab(evt, tabName) {
   } else {
     executeSubTabSwitch(targetBtn, parentNode, tabName);
   }
-  startRandomJitter();
-  startPeekabooEgg();
 }
 
 /**
