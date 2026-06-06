@@ -22,11 +22,11 @@ var aiStoreConfig = {
 };
 const COMMON_INFO_BTNS = `
   <div class="info-card-btn" onclick="toggleDrawer('rules-content', '教室使用規章')">
-    <span style="font-size: 1.5em;">教室規章</span>
+    <span style="font-size: 1.5em;">教室<br>規章</span>
     <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
   </div>
   <div class="info-card-btn" onclick="toggleDrawer('payment-info-content', '匯款帳戶資訊')">
-    <span style="font-size: 1.5em;">匯款資訊</span>
+    <span style="font-size: 1.5em;">匯款<br>資訊</span>
     <small style="color:#f089a1; margin-top: 8px;">查看帳號 ➔</small>
   </div>
 `;
