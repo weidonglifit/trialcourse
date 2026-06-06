@@ -3021,6 +3021,8 @@ function openSubTab(evt, tabName) {
   } else {
     executeSubTabSwitch(targetBtn, parentNode, tabName);
   }
+  startRandomJitter();
+  startPeekabooEgg();
 }
 
 /**
