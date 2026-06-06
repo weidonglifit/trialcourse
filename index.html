@@ -94,71 +94,87 @@
     <div class="news-board-container">
       <div id="news-board-content" class="news-board-text">最新消息載入中...</div>
     </div>
-    <div id="courseTab" class="tab-content active">
-      <div class="info-box" id="ifb-course">
-        <div class="drawer-trigger-list">
 
-          <div class="info-card-btn" onclick="toggleDrawer('pic-content', '活動照片')">
-            <span style="font-size: 1.5em;">活動照片</span>
-            <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
-          </div>
+    <div class="info-box">
+      <div class="drawer-trigger-list">
 
-          <div class="info-card-btn" onclick="toggleDrawer('news-content', '千萬不能錯過')"
-            style="background: linear-gradient(135deg, #fff9fa 0%, #ffeef1 100%); border-color: #E87A90; position: relative;">
-            <span class="badge-text-heartbeat" style="font-size: 1.5em; font-weight: bold; color: #E87A90;">
-              好康報報
-            </span>
-            <small style="color:#E87A90; margin-top: 8px; font-weight: bold;">查看詳情 ➔</small>
-          </div>
-
-          <div class="info-card-btn" onclick="toggleDrawer('notice-content', '報名注意事項')">
-            <span style="font-size: 1.5em;">報名須知</span>
-            <small style="color:#f089a1; margin-top: 8px;">閱讀條款 ➔</small>
-          </div>
-
-          <div class="info-card-btn" onclick="toggleDrawer('price-content', '課程費用說明')">
-            <span style="font-size: 1.5em;">課程費用</span>
-            <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
-          </div>
-
-          <div class="info-card-btn" onclick="toggleDrawer('policy-content', '退費與轉課規定')">
-            <span style="font-size: 1.5em;">取消政策</span>
-            <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
-          </div>
-
-
-          <!-- 行前通知提醒卡片 -->
-          <div class="info-card-btn" onclick="toggleDrawer('remind-content', '行前通知提醒')">
-            <span style="font-size: 1.5em;">行前通知</span>
-            <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
-          </div>
-
-          <div class="rules-container"></div>
-
-          <div class="info-card-btn" onclick="toggleDrawer('course-content', '課程簡介')">
-            <span style="font-size: 1.5em;">課程簡介</span>
-            <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
-          </div>
-
-          <div class="info-card-btn" onclick="toggleDrawer('teacher-content', '師資介紹')">
-            <span style="font-size: 1.5em;">師資介紹</span>
-            <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
-          </div>
-
-          <div class="info-card-btn" onclick="toggleDrawer('schedule-content', '期課課程課表')">
-            <span style="font-size: 1.5em;">期課課表</span>
-            <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
-          </div>
-          <div class="info-card-btn" onclick="toggleDrawer('schedule-content-past', '本月課程課表')">
-            <span style="font-size: 1.5em;">本月課表</span>
-            <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
-          </div>
-
+        <div class="info-card-btn" onclick="toggleDrawer('pic-content', '活動照片')">
+          <span style="font-size: 1.5em;">活動照片</span>
+          <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
         </div>
+
+        <div class="info-card-btn" onclick="toggleDrawer('news-content', '千萬不能錯過')"
+          style="background: linear-gradient(135deg, #fff9fa 0%, #ffeef1 100%); border-color: #E87A90; position: relative;">
+          <span class="badge-text-heartbeat" style="font-size: 1.5em; font-weight: bold; color: #E87A90;">
+            好康報報
+          </span>
+          <small style="color:#E87A90; margin-top: 8px; font-weight: bold;">查看詳情 ➔</small>
+        </div>
+
+        <div class="info-card-btn" onclick="toggleDrawer('notice-content', '報名注意事項')">
+          <span style="font-size: 1.5em;">報名須知</span>
+          <small style="color:#f089a1; margin-top: 8px;">閱讀條款 ➔</small>
+        </div>
+
+        <div class="info-card-btn" onclick="toggleDrawer('price-content', '課程費用說明')">
+          <span style="font-size: 1.5em;">課程費用</span>
+          <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
+        </div>
+
+        <div class="info-card-btn" onclick="toggleDrawer('policy-content', '退費與轉課規定')">
+          <span style="font-size: 1.5em;">取消政策</span>
+          <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
+        </div>
+
+
+        <!-- 行前通知提醒卡片 -->
+        <div class="info-card-btn" onclick="toggleDrawer('remind-content', '行前通知提醒')">
+          <span style="font-size: 1.5em;">行前通知</span>
+          <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
+        </div>
+
+        <div class="info-card-btn" onclick="toggleDrawer('rules-content', '教室使用規章')">
+          <span style="font-size: 1.5em;">教室規章</span>
+          <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
+        </div>
+        <div class="info-card-btn" onclick="toggleDrawer('payment-info-content', '匯款帳戶資訊')">
+          <span style="font-size: 1.5em;">匯款資訊</span>
+          <small style="color:#f089a1; margin-top: 8px;">查看帳號 ➔</small>
+        </div>
+
+        <div class="info-card-btn" onclick="toggleDrawer('course-content', '課程簡介')">
+          <span style="font-size: 1.5em;">課程簡介</span>
+          <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
+        </div>
+
+        <div class="info-card-btn" onclick="toggleDrawer('teacher-content', '師資介紹')">
+          <span style="font-size: 1.5em;">師資介紹</span>
+          <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
+        </div>
+
+        <div class="info-card-btn" onclick="toggleDrawer('schedule-content', '期課課程課表')">
+          <span style="font-size: 1.5em;">期課課表</span>
+          <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
+        </div>
+        <div class="info-card-btn" onclick="toggleDrawer('schedule-content-past', '本月課程課表')">
+          <span style="font-size: 1.5em;">本月課表</span>
+          <small style="color: #f089a1; margin-top: 8px;">點擊查看 ➔</small>
+        </div>
+
+        <!-- 租借費用入口卡片 -->
+        <div class="info-card-btn" onclick="toggleDrawer('room-content', '場地簡介')">
+          <span style="font-size: 1.5em;">場地介紹</span>
+          <small style="color:#f089a1; margin-top: 8px;">查看介紹 ➔</small>
+        </div>
+        <div class="info-card-btn" onclick="toggleDrawer('room-price-content', '場地租借費用')">
+          <span style="font-size: 1.5em;">租借費用</span>
+          <small style="color:#f089a1; margin-top: 8px;">查看價目 ➔</small>
+        </div>
+
       </div>
+    </div>
 
-
-
+    <div id="courseTab" class="tab-content active">
 
       <div id="courseEnrollmentSystem">
         <div class="tabs child-tabs" style="margin-top: 20px;">
@@ -452,21 +468,6 @@
 
 
     <div id="roomTab" class="tab-content">
-      <div class="info-box" id="ifb-room">
-
-        <!-- 租借費用入口卡片 -->
-        <div class="drawer-trigger-list">
-          <div class="info-card-btn" onclick="toggleDrawer('room-content', '場地簡介')">
-            <span style="font-size: 1.5em;">場地介紹</span>
-            <small style="color:#f089a1; margin-top: 8px;">查看介紹 ➔</small>
-          </div>
-          <div class="info-card-btn" onclick="toggleDrawer('room-price-content', '場地租借費用')">
-            <span style="font-size: 1.5em;">租借費用</span>
-            <small style="color:#f089a1; margin-top: 8px;">查看價目 ➔</small>
-          </div>
-          <div class="rules-container"></div>
-        </div>
-      </div>
       <div class="popular-booking-wall" id="popularBookingWall" style="display:none;">
         <div class="popular-booking-title">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"

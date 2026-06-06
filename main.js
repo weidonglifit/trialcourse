@@ -20,16 +20,7 @@ var aiStoreConfig = {
   "官方LINE": "@843qpnet",
   "外部課程": "6月20/21/27/28共四天有「用 AI 打造你的全自動化數位商店」課程，報名方式請洽官LINE"
 };
-const COMMON_INFO_BTNS = `
-  <div class="info-card-btn" onclick="toggleDrawer('rules-content', '教室使用規章')">
-    <span style="font-size: 1.5em;">教室規章</span>
-    <small style="color:#f089a1; margin-top: 8px;">查看詳情 ➔</small>
-  </div>
-  <div class="info-card-btn" onclick="toggleDrawer('payment-info-content', '匯款帳戶資訊')">
-    <span style="font-size: 1.5em;">匯款資訊</span>
-    <small style="color:#f089a1; margin-top: 8px;">查看帳號 ➔</small>
-  </div>
-`;
+
 let aiStime = 0;
 let aiEtime = 0;
 let textTimer;
@@ -2616,10 +2607,6 @@ function validateNumber(obj) {
 }
 
 function injectCommonRules() {
-  const containers = document.querySelectorAll('.rules-container');
-  containers.forEach(container => {
-    container.innerHTML = COMMON_INFO_BTNS;
-  });
   formatButtonText();
   startRandomJitter();
   startPeekabooEgg();
