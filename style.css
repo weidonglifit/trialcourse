@@ -3424,14 +3424,31 @@ select {
   opacity: 0;          /* 平時保持隱形 */
   pointer-events: none;/* 防呆：避免使用者點按鈕時誤觸到貓咪 */
   will-change: transform, opacity;
+  transform-origin: bottom center;
 }
 
 /* 探頭的關鍵影格動畫 */
 @keyframes peekabooAnimation {
-  0%   { transform: translate(-50%, 0); opacity: 0; }
-  15%  { transform: translate(-50%, -11px); opacity: 1; } /* 快速探出頭 */
-  85%  { transform: translate(-50%, -11px); opacity: 1; } /* 停在半空中盯著你看 */
-  100% { transform: translate(-50%, 0); opacity: 0; }     /* 默默縮回去隱形 */
+  0% { 
+    /* 保持水平置中，加上透視感(perspective)讓翻轉更自然，並向後躺平(90度) */
+    transform: perspective(400px) translate(-50%, 0) rotateX(90deg); 
+    opacity: 0; 
+  }
+  15% { 
+    /* 向上翻起，站直(0度) */
+    transform: perspective(400px) translate(-50%, 0) rotateX(0deg); 
+    opacity: 1; 
+  }
+  85% { 
+    /* 停在半空中盯著你看 */
+    transform: perspective(400px) translate(-50%, 0) rotateX(0deg); 
+    opacity: 1; 
+  }
+  100% { 
+    /* 向下翻回，再次躺平隱形 */
+    transform: perspective(400px) translate(-50%, 0) rotateX(90deg); 
+    opacity: 0; 
+  }
 }
 
 /* 當 JS 賦予 active 時，執行 3 秒的探頭動畫 */
