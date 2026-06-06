@@ -1154,17 +1154,14 @@ select {
     opacity: 1;
     transform: translateY(0);
   }
-
   to {
     opacity: 0;
-    transform: translateY(-10px);
-    /* 稍微往上浮動消失，看你喜歡哪種效果 */
+    transform: translateY(-10px); /* 稍微往上浮動消失，看你喜歡哪種效果 */
   }
 }
 
 /* 加上這個 class 時，執行淡出動畫 */
-#teacherDisplayArea.fade-out,
-#introDisplayArea.fade-out {
+#teacherDisplayArea.fade-out, #introDisplayArea.fade-out{
   animation: teacherFadeOut 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
 }
 
@@ -1499,7 +1496,7 @@ select {
 }
 
 .info-card-btn small {
-  display: none;
+  display: none; 
 }
 
 /* 飛出替身小卡的專屬外觀與動畫 */
@@ -1977,22 +1974,20 @@ select {
   border-radius: 6px;
   border: 1px solid #F4A7B9;
   min-width: 32px;
-  display: inline-flex;
+  display: inline-flex; 
   justify-content: center;
   align-items: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  overflow: hidden; 
 }
 
 .countdown-timer i.num-inner {
-  font-style: normal;
-  /* 讓 i 標籤維持正常字體不傾斜 */
+  font-style: normal; /* 讓 i 標籤維持正常字體不傾斜 */
   display: inline-block;
   transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease;
   opacity: 1;
   transform: translateY(0);
 }
-
 /*
 .countdown-timer i.num-inner.exit {
   opacity: 0;
@@ -2015,7 +2010,6 @@ select {
   transform: perspective(100px) rotateX(-90deg);
   transition: none;
 }
-
 .countdown-timer small {
   font-size: 0.85rem;
   color: #d14d72;
@@ -2087,13 +2081,12 @@ select {
   border-radius: 20px !important;
   margin: 0 !important;
   padding: 0 !important;
-  z-index: 99999 !important;
-  /* 在遮罩之上 */
+  z-index: 99999 !important; /* 在遮罩之上 */
   overflow: hidden !important;
-
+  
   /* ✨ 核心修改：移除 100vw 超大陰影，只保留卡片本身的立體浮空陰影 */
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3) !important;
-
+  
   background: #ffffff !important;
   display: flex !important;
   flex-direction: column !important;
@@ -2113,10 +2106,8 @@ select {
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  /* 支援 iOS 毛玻璃 */
-  z-index: 99998;
-  /* 確保在翻轉卡片之下 */
+  -webkit-backdrop-filter: blur(4px); /* 支援 iOS 毛玻璃 */
+  z-index: 99998; /* 確保在翻轉卡片之下 */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -2248,12 +2239,10 @@ select {
   opacity: 1;
   transform: translateY(0);
 }
-
 .wd-dropdown-container.open {
   position: relative;
   z-index: 10002;
 }
-
 /* 每個下拉選項的單元格保持原樣 */
 .wd-dropdown-item {
   padding: 12px 15px;
@@ -2465,11 +2454,9 @@ select {
 /* --- 輪播容器設定 --- */
 .popular-wall-container {
   position: relative;
-  height: 185px;
-  /* 容納 3 個卡片(55px) + 2 個間距(10px) = 185px */
-  overflow: hidden;
-  /* 隱藏超出範圍的卡片 */
-  padding-right: 0px;
+  height: 185px; /* 容納 3 個卡片(55px) + 2 個間距(10px) = 185px */
+  overflow: hidden; /* 隱藏超出範圍的卡片 */
+  padding-right: 0px; 
 }
 
 .booking-wall-item {
@@ -2485,56 +2472,46 @@ select {
   position: absolute;
   width: calc(100% - 10px);
   left: 5px;
-  height: 55px;
-  /* 固定高度，讓動畫軌跡精準 */
+  height: 55px; /* 固定高度，讓動畫軌跡精準 */
   margin-bottom: 0;
   box-sizing: border-box;
-
+  
   /* 預設狀態 (準備進場，藏在最下方) */
-  transform: translateY(195px);
+  transform: translateY(195px); 
   opacity: 0;
   pointer-events: none;
-
+  
   transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
 }
 
 /* 動畫專用的狀態類別 */
 .wall-pos-exit {
-  transform: translateY(-70px);
-  /* 往上滑出並淡出 */
+  transform: translateY(-70px); /* 往上滑出並淡出 */
   opacity: 0;
 }
-
 .wall-pos-0 {
-  transform: translateY(0px);
-  /* 第一個位置 */
+  transform: translateY(0px); /* 第一個位置 */
   opacity: 1;
   pointer-events: auto;
 }
-
 .wall-pos-1 {
-  transform: translateY(65px);
-  /* 第二個位置 (55高度 + 10間距) */
+  transform: translateY(65px); /* 第二個位置 (55高度 + 10間距) */
   opacity: 1;
   pointer-events: auto;
 }
-
 .wall-pos-2 {
-  transform: translateY(130px);
-  /* 第三個位置 (65 + 65) */
+  transform: translateY(130px); /* 第三個位置 (65 + 65) */
   opacity: 1;
   pointer-events: auto;
 }
-
 .wall-pos-enter {
-  transform: translateY(195px);
-  /* 準備進場的位置 (130 + 65) */
+  transform: translateY(195px); /* 準備進場的位置 (130 + 65) */
   opacity: 0;
 }
 
 /* 核心防呆：未參與動畫的卡片瞬間歸位，不顯示滑動痕跡 */
 .booking-wall-item:not(.wall-pos-0):not(.wall-pos-1):not(.wall-pos-2):not(.wall-pos-exit):not(.wall-pos-enter) {
-  transition: none;
+  transition: none; 
 }
 
 .wall-date {
@@ -3026,13 +3003,6 @@ select {
     top: 50%;
     transform: translateY(-50%);
   }
-
-  .quick-menu-list>* {
-    /* 告訴瀏覽器這個元素會頻繁移動，請動用 GPU 加速 */
-    will-change: transform;
-    /* 預設維持在原位 */
-    transform: translateY(0);
-  }
 }
 
 /* 桌面版隱藏 */
@@ -3049,17 +3019,14 @@ select {
     transform: translate(0, 0) scale(1.3) rotate(0deg);
     opacity: 1;
   }
-
   40% {
     transform: translate(80px, -15px) scale(1) rotate(15deg);
     opacity: 0;
   }
-
   41% {
     transform: translate(-80px, 15px) scale(1) rotate(-10deg);
     opacity: 0;
   }
-
   100% {
     transform: translate(0, 0) scale(1.3) rotate(0deg);
     opacity: 1;
@@ -3071,41 +3038,36 @@ select {
 }
 
 @keyframes fireFlicker {
-  0% {
-    opacity: 1;
-    transform: scale(1);
+  0% { 
+    opacity: 1; 
+    transform: scale(1); 
   }
-
-  25% {
-    opacity: 0.7;
-    transform: scale(0.95);
+  25% { 
+    opacity: 0.7; 
+    transform: scale(0.95); 
   }
-
-  50% {
-    opacity: 0.9;
-    transform: scale(1.05);
+  50% { 
+    opacity: 0.9; 
+    transform: scale(1.05); 
   }
-
-  75% {
-    opacity: 0.6;
-    transform: scale(0.92);
+  75% { 
+    opacity: 0.6; 
+    transform: scale(0.92); 
   }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
+  100% { 
+    opacity: 1; 
+    transform: scale(1); 
   }
 }
 
 .flicker-svg {
-  transform-origin: center;
-  animation: fireFlicker 0.8s infinite alternate ease-in-out;
+  transform-origin: center; 
+  animation: fireFlicker 0.8s infinite alternate ease-in-out; 
 }
 
 .walking-circle {
-  width: 24px;
-  /* 圖案本身的大小 */
-  height: 24px;
+  width: 24px;   /* 圖案本身的大小 */
+  height: 24px;  
   animation: circleRun 2s linear infinite;
 }
 
@@ -3113,15 +3075,13 @@ select {
   from {
     transform: rotate(0deg) translate(8px) rotate(0deg);
   }
-
   to {
     transform: rotate(360deg) translate(8px) rotate(-360deg);
   }
 }
 
 .hourglass-spin {
-  width: 20px;
-  /* 可以依據字體大小自行調整沙漏寬高 */
+  width: 20px;          /* 可以依據字體大小自行調整沙漏寬高 */
   height: 20px;
   transform-origin: center;
   animation: flipStep 2.5s cubic-bezier(0.68, -0.6, 0.32, 1.6) infinite;
@@ -3131,27 +3091,22 @@ select {
   0% {
     transform: rotate(0deg);
   }
-
   15% {
     transform: rotate(180deg);
   }
-
   50% {
     transform: rotate(180deg);
   }
-
   65% {
     transform: rotate(360deg);
   }
-
   100% {
     transform: rotate(360deg);
   }
 }
 
 #roomstatusmsg {
-  text-align: center;
-  /* 讓內部的 SVG 和 <span> 文字像段落一樣水平置中 */
+  text-align: center; /* 讓內部的 SVG 和 <span> 文字像段落一樣水平置中 */
   width: 100%;
 }
 
@@ -3170,10 +3125,8 @@ select {
 /* 控制整張圖在螢幕中間的大小 */
 #svg1 {
   flex-shrink: 0 !important;
-  width: 60%;
-  /* 在大螢幕佔 60% 空間 */
-  max-width: 750px;
-  /* 電腦上最大不要超過這個數值，以免太巨無霸 */
+  width: 60%;         /* 在大螢幕佔 60% 空間 */
+  max-width: 750px;   /* 電腦上最大不要超過這個數值，以免太巨無霸 */
   height: auto;
 }
 
@@ -3182,9 +3135,9 @@ select {
    ========================================= */
 @media (max-width: 600px) {
   #svg1 {
-    width: 100vw !important;
+    width: 100vw !important; 
     max-width: none !important;
-    transform: scale(1.1) !important;
+    transform: scale(1.1) !important; 
     transform-origin: center center !important;
   }
 }
@@ -3194,11 +3147,11 @@ select {
    ========================================= */
 .anim-wrapper {
   opacity: 0;
-
+  
   /* 讓縮放完美鎖定在碎片的正中心 */
   transform-origin: center;
-  transform-box: fill-box;
-
+  transform-box: fill-box; 
+  
   /* 綁定雙重動畫 */
   animation-name: partDropIn, partBreathe;
   animation-fill-mode: forwards, forwards;
@@ -3208,15 +3161,14 @@ select {
 
 /* 動畫 A：1.5倍降落拼合 */
 @keyframes partDropIn {
-  from {
-    opacity: 0;
-    transform: perspective(500px) scale(2) translateX(var(--random-x, 0px)) translateY(var(--random-y, 0px)) rotate(var(--random-rot, 0deg)) rotateX(var(--random-rx, 0deg)) rotateY(var(--random-ry, 0deg));
+  from { 
+    opacity: 0; 
+    transform: perspective(500px) scale(2) translateX(var(--random-x, 0px)) translateY(var(--random-y, 0px)) rotate(var(--random-rot, 0deg)) rotateX(var(--random-rx, 0deg)) rotateY(var(--random-ry, 0deg)); 
     filter: drop-shadow(0px 10px 20px rgba(226, 125, 152, 0.6));
   }
-
-  to {
-    opacity: 1;
-    transform: perspective(500px) scale(1) translateX(0px) translateY(0px) rotate(0deg) rotateX(0deg) rotateY(0deg);
+  to { 
+    opacity: 1; 
+    transform: perspective(500px) scale(1) translateX(0px) translateY(0px) rotate(0deg) rotateX(0deg) rotateY(0deg); 
     filter: drop-shadow(0px 0px 0px rgba(255, 255, 255, 0));
   }
 }
@@ -3226,15 +3178,12 @@ select {
    動畫 B：品牌能量光暈呼吸 (不再變透明)
    ========================================= */
 @keyframes partBreathe {
-
-  0%,
-  100% {
+  0%, 100% { 
     opacity: 1;
     filter: drop-shadow(0px 10px 20px rgba(226, 125, 152, 0));
   }
-
-  50% {
-    opacity: 0.5;
+  50% { 
+    opacity: 0.5; 
     filter: drop-shadow(0px 10px 20px rgba(226, 125, 152, 0.6));
   }
 }
@@ -3245,18 +3194,15 @@ select {
 .bottom-loading-group {
   position: absolute;
   /* 與上方的 calc(7% + 75px) 形成完美的上下對稱 */
-  bottom: calc(7% + 65px);
+  bottom: calc(7% + 65px); 
   left: 50%;
   transform: translateX(-50%);
-  z-index: 10001;
-  /* 確保在遮罩之上 */
+  z-index: 10001; /* 確保在遮罩之上 */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  /* 進度條與文字的間距 */
-  width: 200px;
-  /* 控制進度條的長度 */
+  gap: 12px; /* 進度條與文字的間距 */
+  width: 200px; /* 控制進度條的長度 */
 }
 
 /* 進度條軌道 (半透明白底) */
@@ -3274,37 +3220,30 @@ select {
   width: 0%;
   background: #ffffff;
   border-radius: 4px;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
-  /* 自帶微微發光效果 */
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); /* 自帶微微發光效果 */
   /* 1.5秒從0跑到100%，無限循環 */
   animation: loadingRun 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* 跑條的動畫軌跡 */
 @keyframes loadingRun {
-  0% {
-    width: 0%;
-  }
-
-  100% {
-    width: 100%;
-  }
+  0% { width: 0%; }
+  100% { width: 100%; }
 }
 
 /* 底部的 LOADING 文字 */
 .bottom-loading-text {
   font-size: 1.1rem;
-  letter-spacing: 5px;
-  /* 字距拉開更有質感 */
+  letter-spacing: 5px; /* 字距拉開更有質感 */
   color: #ffffff;
   font-weight: bold;
   /* 直接重複利用你已經寫好的 breathText 呼吸動畫 */
-  animation: breathText 0.5s infinite ease-in-out;
+  animation: breathText 0.5s infinite ease-in-out; 
 }
 
-#courseEnrollmentSystem,
-#querySystemContainer,
-#roomEnrollmentSystem,
+#courseEnrollmentSystem, 
+#querySystemContainer, 
+#roomEnrollmentSystem, 
 #queryRoomContainer {
   scroll-margin-top: 55px;
 }
@@ -3317,40 +3256,28 @@ select {
     transform: scale(1);
     opacity: 1;
   }
-
   15% {
-    transform: scale(1.15);
-    /* 第一次心跳放大 */
-    opacity: 0.75;
-    /* 放大時同步微淡出 */
+    transform: scale(1.15); /* 第一次心跳放大 */
+    opacity: 0.75;          /* 放大時同步微淡出 */
   }
-
   30% {
     transform: scale(1);
     opacity: 1;
   }
-
   45% {
-    transform: scale(1.15);
-    /* 第二次連擊放大 */
+    transform: scale(1.15); /* 第二次連擊放大 */
     opacity: 0.75;
   }
-
-  60%,
-  100% {
-    transform: scale(1);
-    /* 回歸原狀並稍作停頓，模擬真實心跳節奏 */
+  60%, 100% {
+    transform: scale(1);    /* 回歸原狀並稍作停頓，模擬真實心跳節奏 */
     opacity: 1;
   }
 }
 
 .badge-text-heartbeat {
-  display: inline-block;
-  /* 🌟 關鍵：必須是 inline-block，transform 縮放才會生效 */
-  transform-origin: center;
-  /* 確保從文字正中心放大 */
-  animation: badgeTextHeartbeat 1.8s infinite ease-in-out;
-  /* 無限循環重複 */
+  display: inline-block;    /* 🌟 關鍵：必須是 inline-block，transform 縮放才會生效 */
+  transform-origin: center; /* 確保從文字正中心放大 */
+  animation: badgeTextHeartbeat 1.8s infinite ease-in-out; /* 無限循環重複 */
 }
 
 /* 老師小卡容器：使用 Flex 排列 */
@@ -3388,18 +3315,15 @@ select {
 }
 
 .teacher-small-card.reselect-card-style {
-  background: #FFF5F7;
-  /* 淡淡的粉底底色做出區隔 */
-  border: 2px dashed #E87A90;
-  /* 改用虛線邊框，更有功能按鈕的感覺 */
+  background: #FFF5F7;      /* 淡淡的粉底底色做出區隔 */
+  border: 2px dashed #E87A90; /* 改用虛線邊框，更有功能按鈕的感覺 */
   color: #E87A90;
   /* 關鍵：利用 CSS Order 讓它強制排在所有小卡的「最左邊」 */
-  order: -1;
-  display: inline-flex;
-  align-items: center;
+  order: -1; 
+  display: inline-flex; 
+  align-items: center; 
   gap: 6px;
 }
-
 .teacher-small-card.reselect-card-style:hover {
   background: #E87A90;
   color: #ffffff;
@@ -3408,19 +3332,17 @@ select {
 
 /* 最新活動：主圖片 */
 .news-carousel-layer {
-  position: absolute;
-  /* 絕對定位，讓兩張圖疊在一起 */
+  position: absolute; /* 絕對定位，讓兩張圖疊在一起 */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   cursor: pointer;
-
+  
   /* 🌟 核心魔法：透明度 0.5 秒滑順漸變 */
-  transition: opacity 1s ease-in-out;
-  opacity: 0;
-  /* 預設為全透明 */
+  transition: opacity 1s ease-in-out; 
+  opacity: 0; /* 預設為全透明 */
   z-index: 1;
 }
 
@@ -3435,16 +3357,13 @@ select {
   display: flex;
   gap: 10px;
   margin-top: 15px;
-  overflow-x: auto;
-  /* 若縮圖太多，允許橫向滑動 */
-  padding-bottom: 8px;
-  /* 留一點空間給捲軸跟陰影 */
+  overflow-x: auto; /* 若縮圖太多，允許橫向滑動 */
+  padding-bottom: 8px; /* 留一點空間給捲軸跟陰影 */
   padding: 5px 4px 5px 4px;
-  scrollbar-width: none;
+  scrollbar-width: none; 
 }
-
 .news-thumbnails-container::-webkit-scrollbar {
-  display: none;
+  display: none; 
 }
 
 /* 最新活動：單一縮圖 */
@@ -3457,93 +3376,62 @@ select {
   border: 2px solid transparent;
   opacity: 0.5;
   transition: all 0.3s ease;
-  flex-shrink: 0;
-  /* 防止縮圖被擠壓變形 */
+  flex-shrink: 0; /* 防止縮圖被擠壓變形 */
 }
 
 /* 縮圖被選中時的狀態 */
 .news-thumbnail.active {
-  border-color: #E87A90;
-  /* 你的主品牌色 */
+  border-color: #E87A90; /* 你的主品牌色 */
   opacity: 1;
-  transform: scale(1.05);
-  /* 微微放大 */
+  transform: scale(1.05); /* 微微放大 */
 }
 
 /* 微動動畫：保持非常微小的旋轉和位移 */
 @keyframes microJitter {
-  0% {
-    transform: translate(0, -8px) rotate(0deg);
+  0% { 
+    transform: translate(0, -8px) rotate(0deg); 
   }
-
-  25% {
+  25% { 
     /* 原本是往上彈 0.5px，所以 -8px + 0.5px = -7.5px */
-    transform: translate(1px, -7.5px) rotate(2deg);
+    transform: translate(1px, -7.5px) rotate(2deg); 
   }
-
-  50% {
-    transform: translate(0, -8px) rotate(0deg);
+  50% { 
+    transform: translate(0, -8px) rotate(0deg); 
   }
-
-  75% {
+  75% { 
     /* 原本是往上彈 0.5px，所以 -8px + 0.5px = -7.5px */
-    transform: translate(-1px, -7.5px) rotate(-2deg);
+    transform: translate(-1px, -7.5px) rotate(-2deg); 
   }
-
-  100% {
-    transform: translate(0, -8px) rotate(0deg);
+  100% { 
+    transform: translate(0, -8px) rotate(0deg); 
   }
 }
 
 /* 加上這個 class 時才會抖動，且只播放一次 */
 .info-card-btn.jitter {
-  animation: microJitter 0.5s ease-in-out;
-  will-change: transform;
+  animation: microJitter 0.5s ease-in-out; 
+  will-change: transform; 
 }
 
 /* 探頭彩蛋的本體 */
 .peekaboo-cat {
   position: absolute;
-  top: 5px;
-  /* 預設位置稍微靠上方，躲在按鈕背後 */
-  left: 50%;
+  top: 5px;            /* 預設位置稍微靠上方，躲在按鈕背後 */
+  left: 50%;           
   transform: translateX(-50%);
-  font-size: 24px;
-  /* Emoji 的大小，如果是用圖片可以改 width/height */
-  z-index: 1;
-  /* 關鍵：把自己藏進按鈕背後 */
-  opacity: 0;
-  /* 平時保持隱形 */
-  pointer-events: none;
-  /* 防呆：避免使用者點按鈕時誤觸到貓咪 */
+  font-size: 24px;     /* Emoji 的大小，如果是用圖片可以改 width/height */
+  z-index: 1;         /* 關鍵：把自己藏進按鈕背後 */
+  opacity: 0;          /* 平時保持隱形 */
+  pointer-events: none;/* 防呆：避免使用者點按鈕時誤觸到貓咪 */
   will-change: transform, opacity;
 }
 
 /* 探頭的關鍵影格動畫 */
 @keyframes peekabooAnimation {
-  0% {
-    transform: translate(-50%, 0);
-    opacity: 0;
-  }
-
-  15% {
-    transform: translate(-50%, -11px);
-    opacity: 1;
-  }
-
-  /* 快速探出頭 */
-  85% {
-    transform: translate(-50%, -11px);
-    opacity: 1;
-  }
-
-  /* 停在半空中盯著你看 */
-  100% {
-    transform: translate(-50%, 0);
-    opacity: 0;
-  }
-
-  /* 默默縮回去隱形 */
+  0%   { transform: translate(-50%, 0); opacity: 0; }
+  15%  { transform: translate(-50%, -11px); opacity: 1; } /* 快速探出頭 */
+  85%  { transform: translate(-50%, -11px); opacity: 1; } /* 停在半空中盯著你看 */
+  100% { transform: translate(-50%, 0); opacity: 0; }     /* 默默縮回去隱形 */
 }
 
 /* 當 JS 賦予 active 時，執行 3 秒的探頭動畫 */
@@ -3554,6 +3442,5 @@ select {
 .peekaboo-cat svg {
   width: 22px;
   height: 22px;
-  display: block;
-  /* 避免底部出現神祕的留白間隙 */
+  display: block; /* 避免底部出現神祕的留白間隙 */
 }
