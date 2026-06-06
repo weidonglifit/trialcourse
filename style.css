@@ -3387,11 +3387,23 @@ select {
 
 /* 微動動畫：保持非常微小的旋轉和位移 */
 @keyframes microJitter {
-  0% { transform: rotate(0deg) translate(0, 0); }
-  25% { transform: rotate(2deg) translate(1px, 0.5px); }
-  50% { transform: rotate(0deg) translate(0, 0); }
-  75% { transform: rotate(-2deg) translate(-1px, 0.5px); }
-  100% { transform: rotate(0deg) translate(0, 0); }
+  0% { 
+    transform: translate(0, -8px) rotate(0deg); 
+  }
+  25% { 
+    /* 原本是往上彈 0.5px，所以 -8px + 0.5px = -7.5px */
+    transform: translate(1px, -7.5px) rotate(2deg); 
+  }
+  50% { 
+    transform: translate(0, -8px) rotate(0deg); 
+  }
+  75% { 
+    /* 原本是往上彈 0.5px，所以 -8px + 0.5px = -7.5px */
+    transform: translate(-1px, -7.5px) rotate(-2deg); 
+  }
+  100% { 
+    transform: translate(0, -8px) rotate(0deg); 
+  }
 }
 
 /* 加上這個 class 時才會抖動，且只播放一次 */
