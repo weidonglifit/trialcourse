@@ -3408,6 +3408,6 @@ select {
 
 /* 加上這個 class 時才會抖動，且只播放一次 */
 .info-card-btn.jitter {
-  animation: microJitter 0.6s ease-in-out; 
+  animation: microJitter 0.5s ease-in-out; 
   will-change: transform; 
 }
