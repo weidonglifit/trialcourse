@@ -4668,3 +4668,10 @@ function startNewsAutoPlay() {
     changeNewsMainImage(nextIndex, false);
   }, 5000);
 }
+
+document.querySelectorAll('.info-card-btn span').forEach(span => {
+  const text = span.textContent.trim(); // 取得文字，例如 "最新活動"
+  if (text.length === 4) {
+    span.innerHTML = text.substring(0, 2) + '<br>' + text.substring(2);
+  }
+});
