@@ -3429,8 +3429,8 @@ select {
 /* 探頭的關鍵影格動畫 */
 @keyframes peekabooAnimation {
   0%   { transform: translate(-50%, 0); opacity: 0; }
-  15%  { transform: translate(-50%, -30px); opacity: 1; } /* 快速探出頭 */
-  85%  { transform: translate(-50%, -30px); opacity: 1; } /* 停在半空中盯著你看 */
+  15%  { transform: translate(-50%, -29px); opacity: 1; } /* 快速探出頭 */
+  85%  { transform: translate(-50%, -29px); opacity: 1; } /* 停在半空中盯著你看 */
   100% { transform: translate(-50%, 0); opacity: 0; }     /* 默默縮回去隱形 */
 }
 
