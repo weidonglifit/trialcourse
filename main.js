@@ -3287,15 +3287,43 @@ function resetCourseSelection() {
     reselectBtn.style.display = 'none'; // 徹底退出空間
 
     // 讓原本所有被隱藏的課程小卡重新回到畫面上並淡入
+    // 先取得課程的專屬外層容器，作為發牌起點
+    const container = document.getElementById('courseCardsContainer');
+    const containerRect = container.getBoundingClientRect();
     const allCards = document.querySelectorAll('#courseCardsContainer .teacher-small-card:not(#reselectCourseBtn)');
-    allCards.forEach(card => {
-      card.classList.remove('selected-card');
-      card.style.display = 'block';
 
-      // 延遲 10ms 觸發 CSS opacity 淡入
+    allCards.forEach((card, index) => {
+      card.classList.remove('selected-card'); // 移除選取狀態
+      card.style.display = 'block';           // 恢復顯示佔位，讓瀏覽器計算位置
+
+      // 1. 取得卡片「最終目標位置」的座標
+      const cardRect = card.getBoundingClientRect();
+
+      // 2. 計算從「容器左上角」到「卡片目標位置」的距離差
+      const startX = containerRect.left - cardRect.left;
+      const startY = containerRect.top - cardRect.top;
+
+      // 3. 瞬間將卡片收回左上角，並加上縮小與傾斜 (發牌起點)
+      card.style.transition = 'none';
+      card.style.transform = `translate(${startX}px, ${startY}px) scale(0.5) rotate(-10deg)`;
+      card.style.opacity = '0';
+
+      // 4. 強制瀏覽器重繪 (Reflow)，確保卡片已就定位
+      void card.offsetWidth;
+
+      // 5. 設定發牌的交錯延遲時間 (每張間隔 60 毫秒)
+      const delay = index * 60;
+      card.style.transition = `transform 0.5s cubic-bezier(0.25, 1, 0.5, 1) ${delay}ms, opacity 0.4s ease ${delay}ms`;
+
+      // 6. 解除位移，讓卡片優雅地飛回原本的位置
+      card.style.transform = 'translate(0, 0) scale(1) rotate(0deg)';
+      card.style.opacity = '1';
+
+      // 7. 動畫結束後清空行內樣式，避免影響下次的操作
       setTimeout(() => {
-        card.style.opacity = '1';
-      }, 10);
+        card.style.transition = '';
+        card.style.transform = '';
+      }, delay + 500);
     });
   }, 500);
 }
