@@ -2620,14 +2620,14 @@ function startRandomJitter() {
   // 設定每 2000 毫秒 (2秒) 執行一次循環
   // (扣掉動畫本身的 0.6 秒，等於每次抖完會安靜休息 1.4 秒)
   setInterval(() => {
-    
+
     // 1. 先把所有按鈕的抖動 class 清除，讓它們歸零
     buttons.forEach(btn => btn.classList.remove('jitter'));
 
     // 2. 利用 setTimeout 製造一點極短的延遲，強迫瀏覽器重新載入動畫
     setTimeout(() => {
       // 隨機決定這次要抖幾個？ (1 或 2 個)
-      const jitterCount = Math.floor(Math.random() * 2) + 1; 
+      const jitterCount = Math.floor(Math.random() * 2) + 1;
 
       // 把按鈕陣列「洗牌打亂」，然後取出前 1~2 個
       const shuffled = buttons.sort(() => 0.5 - Math.random());
@@ -2635,10 +2635,10 @@ function startRandomJitter() {
 
       // 幫這幾個幸運兒加上抖動 class
       selectedButtons.forEach(btn => btn.classList.add('jitter'));
-      
+
     }, 50); // 50 毫秒的緩衝
 
-  }, 2000); 
+  }, 2000);
 }
 
 // 確保在頁面載入後執行
@@ -2657,7 +2657,7 @@ window.addEventListener('load', () => {
     }
   }
   injectCommonRules();
-  
+
   // 尋找所有的文字、電話、信箱輸入框
   const textInputs = document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]');
 
@@ -3471,15 +3471,43 @@ function resetTeacherSelection() {
     reselectBtn.style.display = 'none'; // 徹底退出空間
 
     // 讓原本所有被隱藏的老師小卡重新回到畫面上並淡入
+    // 先取得外層容器，用來定位「左上角」的發牌起點
+    const container = document.getElementById('teacherCardsContainer');
+    const containerRect = container.getBoundingClientRect();
     const allTeacherCards = document.querySelectorAll('.teacher-small-card:not(#reselectTeacherBtn)');
-    allTeacherCards.forEach(card => {
-      card.classList.remove('selected-card'); // 移除選取狀態
-      card.style.display = 'block';           // 恢復顯示佔位
 
-      // 延遲 10ms 觸發 CSS opacity 淡入
+    allTeacherCards.forEach((card, index) => {
+      card.classList.remove('selected-card'); // 移除選取狀態
+      card.style.display = 'block';           // 恢復顯示，讓瀏覽器計算最終位置
+
+      // 1. 取得卡片「最終目標位置」的座標
+      const cardRect = card.getBoundingClientRect();
+
+      // 2. 計算從「容器左上角」到「卡片目標位置」的 X/Y 距離差 (反向推算起始點)
+      const startX = containerRect.left - cardRect.left;
+      const startY = containerRect.top - cardRect.top;
+
+      // 3. 瞬間把卡片移到左上角，並縮小、透明 (發牌起點，取消漸變)
+      card.style.transition = 'none';
+      card.style.transform = `translate(${startX}px, ${startY}px) scale(0.5) rotate(-10deg)`;
+      card.style.opacity = '0';
+
+      // 4. ✨ 魔法指令：強制瀏覽器重繪 (Reflow)，確認卡片已在左上角準備好
+      void card.offsetWidth;
+
+      // 5. 設定發牌的動畫與交錯延遲時間
+      const delay = index * 60; // 每張卡片晚 60 毫秒發出 (可依喜好調整快慢)
+      card.style.transition = `transform 0.5s cubic-bezier(0.25, 1, 0.5, 1) ${delay}ms, opacity 0.4s ease ${delay}ms`;
+
+      // 6. 拔除位移，讓卡片飛回原本的位置並浮現
+      card.style.transform = 'translate(0, 0) scale(1) rotate(0deg)';
+      card.style.opacity = '1';
+
+      // 7. 動畫結束後清空 inline style，避免影響你後續再次點擊小卡的 FLIP 動畫
       setTimeout(() => {
-        card.style.opacity = '1';
-      }, 10);
+        card.style.transition = '';
+        card.style.transform = '';
+      }, delay + 500);
     });
   }, 500); // 這裡的 500 對應 CSS transition 的 0.5s
 }
@@ -3516,7 +3544,7 @@ function displayTeacherIntro() {
       console.log("老師圖片載入失敗，直接顯示區塊");
       displayArea.style.display = 'block';
     };
-    imgEl.src = teacher.url; 
+    imgEl.src = teacher.url;
   }
 }
 
@@ -4664,11 +4692,11 @@ function startNewsAutoPlay() {
   if (newsCarouselTimer) {
     clearInterval(newsCarouselTimer);
   }
-  
+
   // 設定每 3000 毫秒 (3秒) 自動切換下一張
   newsCarouselTimer = setInterval(() => {
     let nextIndex = currentNewsIndex + 1;
-    
+
     // 如果播到最後一張了，就從 0 (第一張) 重新開始
     if (nextIndex >= globalNewsPhotos.length) {
       nextIndex = 0;
@@ -4694,7 +4722,7 @@ function startPeekabooEgg() {
   // 1. 創造一隻貓咪元素 (DOM)
   const cat = document.createElement('div');
   cat.className = 'peekaboo-cat';
-  
+
   // 如果你想換成圖片，可以把 innerHTML 改成 <img src="黑豆的照片網址" style="width:24px;">
   cat.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#E87A90">
