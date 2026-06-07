@@ -4784,6 +4784,8 @@ function startPeekabooEgg() {
 
     // 把貓咪瞬間移動到新選中的按鈕底下
     targetBtn.appendChild(cat);
+    const randomX = Math.floor(Math.random() * 51) - 80;
+    cat.style.setProperty('--random-x', `${randomX}%`);
 
     // 觸發探頭動畫！
     cat.classList.add('active');
