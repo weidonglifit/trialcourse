@@ -72,7 +72,23 @@ window.addEventListener('load', function () {
       renderAllRules();
       // 2. 處理網頁與表單標題
       //document.getElementById('main-title').innerText = globalSettings.title[0] + "\n課程報名｜教室預約";
-      document.getElementById('main-title').innerText = "課程報名｜教室預約";
+      document.getElementById('main-title').innerHTML = `
+  課程報名
+  <svg xmlns="http://www.w3.org/2000/svg" 
+       width="0.75em" 
+       height="0.75em" 
+       viewBox="0 0 24 24" 
+       fill="none" 
+       stroke="currentColor" 
+       stroke-width="3" 
+       stroke-linecap="round" 
+       stroke-linejoin="round" 
+       style="vertical-align: middle; margin: 0 12px; opacity: 0.8;">
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+  教室預約
+`;
       document.getElementById('all-course-title').innerHTML = `
       <span style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="width: 24px; height: 24px; fill: #D05A6E;">
