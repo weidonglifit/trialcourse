@@ -3539,11 +3539,12 @@ select {
 
 /* 1. 首字放大加粗 */
 .brand-story-p::first-letter {
-  font-size: 1.8em;       /* 放大 1.8 倍 */
-  font-weight: 900;       /* 極粗體 */
-  color: #D05A6E;         /* 品牌深粉色 */
-  margin-right: 2px;      /* 與後方文字保留一點呼吸空間 */
-  vertical-align: -2px;   /* 稍微下沉，讓重心更穩 */
+  font-size: 1.8em;         /* 維持放大 1.8 倍 */
+  font-weight: 900;         /* 極粗體 */
+  color: #D05A6E;           /* 品牌深粉色 */
+  margin-right: 2px;        /* 與後方文字保留呼吸空間 */
+  vertical-align: baseline; /* 讓字體底部完美貼齊基準線 */
+  line-height: 0.8;         /* 壓低首字行高，絕對不撐開第一行間距 */
 }
 
 /* 2. 向右淡出底線 (半透明螢光筆效果) */
@@ -3559,7 +3560,7 @@ select {
   left: 0;
   bottom: 2px;            /* 決定底線要貼多低，可自行微調 */
   width: 100%;            /* 寬度自動貼合你包住的文字長度 */
-  height: 8px;            /* 底線粗細，8px 會有點像螢光筆畫過去 */
+  height: 5px;            /* 底線粗細，8px 會有點像螢光筆畫過去 */
   /* 漸層色：從主色 (不透明度 0.5) 漸變到完全透明 (0) */
   background: linear-gradient(to right, rgba(232, 122, 144, 0.5) 0%, rgba(232, 122, 144, 0) 100%);
   z-index: -1;            /* 把底線墊在文字正後方 */
