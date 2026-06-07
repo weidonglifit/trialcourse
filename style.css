@@ -3416,7 +3416,7 @@ select {
 /* 探頭彩蛋的本體 */
 .peekaboo-cat {
   position: absolute;
-  top: 5px;            /* 預設位置稍微靠上方，躲在按鈕背後 */
+  bottom: 100%;
   left: 50%;           
   transform: translateX(-50%);
   font-size: 24px;     /* Emoji 的大小，如果是用圖片可以改 width/height */
@@ -3431,22 +3431,22 @@ select {
 @keyframes peekabooAnimation {
   0% { 
     /* 保持水平置中，加上透視感(perspective)讓翻轉更自然，並向後躺平(90度) */
-    transform: perspective(400px) translate(-50%, -28px) rotateX(90deg); 
+    transform: perspective(400px) translate(-50%) rotateX(90deg); 
     opacity: 0; 
   }
   15% { 
     /* 向上翻起，站直(0度) */
-    transform: perspective(400px) translate(-50%, -28px) rotateX(0deg); 
+    transform: perspective(400px) translate(-50%) rotateX(0deg); 
     opacity: 1; 
   }
   85% { 
     /* 停在半空中盯著你看 */
-    transform: perspective(400px) translate(-50%, -28px) rotateX(0deg); 
+    transform: perspective(400px) translate(-50%) rotateX(0deg); 
     opacity: 1; 
   }
   100% { 
     /* 向下翻回，再次躺平隱形 */
-    transform: perspective(400px) translate(-50%, -28px) rotateX(90deg); 
+    transform: perspective(400px) translate(-50%) rotateX(90deg); 
     opacity: 0; 
   }
 }
