@@ -73,7 +73,7 @@ window.addEventListener('load', function () {
       // 2. 處理網頁與表單標題
       //document.getElementById('main-title').innerText = globalSettings.title[0] + "\n課程報名｜教室預約";
       document.getElementById('main-title').innerHTML = `
-  <span style="font-size: 0.85em; font-weight: 600; letter-spacing: 4px;">
+  <span style="font-size: 0.95em; font-weight: 300; letter-spacing: 4px;">
     微微的動
   </span>
   <svg xmlns="http://www.w3.org/2000/svg" 
@@ -82,14 +82,14 @@ window.addEventListener('load', function () {
        viewBox="0 0 24 24" 
        fill="none" 
        stroke="currentColor" 
-       stroke-width="3" 
+       stroke-width="1" 
        stroke-linecap="round" 
        stroke-linejoin="round" 
        style="vertical-align: middle; margin: 0 12px; opacity: 0.8;">
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg>
-  <span style="font-size: 0.85em; font-weight: 300; letter-spacing: 4px;">
+  <span style="font-size: 0.95em; font-weight: 300; letter-spacing: 4px;">
     慢慢身活
   </span>
 `;
