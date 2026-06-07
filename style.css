@@ -3459,3 +3459,74 @@ select {
   height: 22px;
   display: block; /* 避免底部出現神祕的留白間隙 */
 }
+
+/* =========================================
+   聯絡資訊與地圖專屬佈局 (雙欄式)
+   ========================================= */
+
+/* 外層卡片容器 */
+.contact-section {
+  display: flex;
+  flex-wrap: wrap; /* 允許在手機等窄螢幕自動往下折行 */
+  gap: 25px;
+  margin: 35px 0;
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 15px;
+  border: 1px solid #F4A7B9;
+  box-shadow: 0 4px 15px rgba(232, 122, 144, 0.15); /* 融入整體的粉色陰影 */
+}
+
+/* 左側：地圖區塊 */
+.contact-map {
+  flex: 1 1 300px; /* 基礎寬度 300px，剩餘空間自動平分 */
+  min-height: 250px;
+  border-radius: 12px;
+  overflow: hidden; /* 防止 iframe 的直角蓋住圓角 */
+  border: 1px solid #eee;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.05); /* 增加地圖框內的微立體感 */
+}
+
+/* 右側：文字與按鈕區塊 */
+.contact-info {
+  flex: 1 1 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 讓文字在右半邊垂直置中 */
+}
+
+/* 聯絡資訊標題 */
+.contact-title {
+  color: #d14d72;
+  font-size: 1.35rem;
+  margin: 0 0 15px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #F4A7B9; /* 底線延伸效果 */
+  text-align: left;
+}
+
+/* 店名 */
+.contact-name {
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 1.15rem;
+  margin: 0 0 8px 0;
+}
+
+/* 地址 */
+.contact-address {
+  color: #666;
+  font-size: 1.05rem;
+  margin: 0 0 20px 0;
+}
+
+/* 覆寫原本的社群按鈕群組：靠左、間距微調 */
+.social-btn-group.new-layout {
+  margin: 0; /* 清除原本上下超大的 margin */
+  display: flex;
+  flex-direction: row; /* 強制橫排 */
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start; /* 確保四個按鈕靠左對齊 */
+  gap: 12px;
+}
