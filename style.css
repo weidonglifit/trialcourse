@@ -2741,7 +2741,6 @@ select {
 /* --- 社群按鈕群組容器 --- */
 .social-btn-group {
   display: flex;
-  flex-direction: column;
   /* 關鍵：這行讓原本的橫排變成由上到下直排 */
   align-items: center;
   /* 讓按鈕群組保持在畫面正中央 */
@@ -2770,7 +2769,6 @@ select {
   -webkit-tap-highlight-color: transparent;
 
   /* 🌟 新增：鎖定按鈕寬度，讓直排時邊緣對齊，看起來更整齊專業 */
-  width: 220px;
   box-sizing: border-box;
 }
 
