@@ -3473,8 +3473,6 @@ select {
   background: #ffffff;
   padding: 25px;
   border-radius: 15px;
-  border: 1px solid #F4A7B9;
-  box-shadow: 0 4px 15px rgba(232, 122, 144, 0.15); /* 融入整體的粉色陰影 */
 }
 
 /* 左側：地圖區塊 */
