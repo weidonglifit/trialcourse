@@ -4966,8 +4966,8 @@ function closeOverlayAndAnimateLogo() {
   
   requestAnimationFrame(() => {
     // 【核心修正】：飛向加入了落差值的靶心
-    logo.style.left = (targetRect.left - correctionX) + 'px';
-    logo.style.top = (targetRect.top - correctionY) + 'px';
+    logo.style.left = (targetRect.left + correctionX) + 'px';
+    logo.style.top = (targetRect.top + correctionY) + 'px';
     logo.style.width = targetRect.width + 'px';
     logo.style.height = targetRect.height + 'px';
   });
