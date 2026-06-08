@@ -4886,26 +4886,17 @@ function closeOverlayAndAnimateLogo() {
   const minY = Math.min(targetY, box1.y);
   const maxY = Math.max(targetY + box0.height * finalScale, box1.y + box1.height);
 
-  const contentW = (maxX - minX) * 1.04;
-  const contentH = (maxY - minY) * 1.04;
-  const padX = 0;
-  const padY = (contentH - (maxY - minY)) / 2;
+  // ==========================================
+  // ✨ 【核心修改】：徹底拔除比例膨脹與假白邊 ✨
+  // ==========================================
+  
+  // 1. 取得最真實、最緊繃的內容寬高 (拿掉原本的 * 1.04)
+  const contentW = maxX - minX;
+  const contentH = maxY - minY;
 
-  const targetAR = targetRect.width / targetRect.height;
-  const contentAR = contentW / contentH;
-
-  let vbW, vbH;
-  if (contentAR > targetAR) {
-    vbW = contentW;
-    vbH = vbW / targetAR;
-  } else {
-    vbH = contentH;
-    vbW = vbH * targetAR;
-  }
-
-  const vbX = minX - padX - (vbW - contentW) / 2;
-  const vbY = minY - padY - (vbH - contentH) / 2;
-  const endVB = [vbX, vbY, vbW, vbH];
+  // 2. 直接將 viewBox 鎖死在這個真實邊界上！
+  // (拿掉所有的 targetAR、padX、padY 與 if/else 判斷)
+  const endVB = [minX, minY, contentW, contentH];
 
   // ==========================================
   // ✨ 4. 啟動電影級飛行 (不動) ✨
