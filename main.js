@@ -4872,6 +4872,12 @@ function closeOverlayAndAnimateLogo() {
   innerSvg.style.width = '100%';
   innerSvg.style.height = '100%';
   innerSvg.style.overflow = 'visible';
+  innerSvg.style.display = 'block';
+  innerSvg.style.transformBox = 'fill-box'; // 關鍵：告訴 WebKit 變形框只需參考填滿內容
+  innerSvg.style.transformOrigin = 'center';
+  
+  // 加上這段 SVG 特有的屬性，移除 WebKit 可能的內建緩衝
+  innerSvg.setAttribute('overflow', 'visible');
 
   // 2. 清除所有干擾的舊動畫與保護衣
   logo.classList.remove('svg-intro-container');
