@@ -3566,3 +3566,51 @@ select {
   z-index: -1;            /* 把底線墊在文字正後方 */
   border-radius: 4px;     /* 讓線條邊緣圓潤一點 */
 }
+
+/* 讓圖案在 Loading 區域完美置中 */
+.custom-loader-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+}
+
+/* 1. 整體動畫：讓整個 SVG 不斷平滑旋轉 */
+.custom-spinner {
+  width: 40px;  /* 大小可以自由調整 */
+  height: 40px;
+  animation: spinner-rotate 2s linear infinite;
+  transform-origin: center;
+}
+
+/* 2. 外圈動畫：線條從無到有畫出來，再縮回去 */
+.outer-circle {
+  /* 圓的半徑(r)是 14，周長約為 2 * π * 14 = 88 */
+  stroke-dasharray: 88;
+  stroke-dashoffset: 88; /* 初始狀態把線藏起來 */
+  animation: spinner-draw 1.5s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+/* 3. 內部圖案：加上微小的呼吸縮放感 */
+.inner-icon {
+  transform-origin: center;
+  animation: spinner-pulse 1.5s ease-in-out infinite alternate;
+}
+
+/* ===== 下面是定義動畫的軌跡 ===== */
+
+@keyframes spinner-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spinner-draw {
+  0% { stroke-dashoffset: 88; }
+  100% { stroke-dashoffset: 15; } /* 不要完全畫滿，留一點缺口會更有轉動的感覺 */
+}
+
+@keyframes spinner-pulse {
+  0% { transform: scale(0.95); }
+  100% { transform: scale(1.05); }
+}
