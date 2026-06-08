@@ -4836,7 +4836,7 @@ function closeOverlayAndAnimateLogo() {
     return;
   }
 
-  // 1. 準備起飛，設定外層容器初始狀態
+  // 1. 準備起飛
   document.body.appendChild(logo);
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
@@ -4851,7 +4851,7 @@ function closeOverlayAndAnimateLogo() {
   innerSvg.style.height = '100%';
   innerSvg.style.overflow = 'visible';
 
-  // 2. 清除所有干擾的舊動畫與保護衣
+  // 2. 清除舊動畫
   logo.classList.remove('svg-intro-container');
   logo.style.animation = 'none';
   logo.querySelectorAll('.anim-wrapper').forEach(w => {
@@ -4861,70 +4861,90 @@ function closeOverlayAndAnimateLogo() {
   });
 
   // ==========================================
-  // ✨ 3. 大師級數學：重組圖層與「畫布裁切」運算 ✨
+  // ✨ 3. 真實視覺測量法 (破解 Transform 偏右偏移 Bug) ✨
   // ==========================================
   const mc0 = logo.querySelector('#layer-MC0');
   const mc1 = logo.querySelector('#layer-MC1');
   if (!mc0 || !mc1) return;
 
-  const box0 = mc0.getBBox();
-  const box1 = mc1.getBBox();
-
-  // 抓取原本 SVG 的 viewBox，若無則預設 32x32
+  // 抓取 SVG 原本的 viewBox 屬性
   let startVB = [0, 0, 32, 32];
   const vbAttr = innerSvg.getAttribute('viewBox');
   if (vbAttr) startVB = vbAttr.trim().split(/[\s,]+/).map(Number);
 
-  // 【步驟 A】計算 L0 排到 L1 左側的目標參數
-  const finalScale = box1.height / box0.height; // 縮小到跟 L1 一樣高
-  const gap = box1.height * 0.15; // L0 與 L1 之間的間距
-  const targetX = box1.x - gap - (box0.width * finalScale);
-  const targetY = box1.y + (box1.height - box0.height * finalScale) / 2; // 垂直置中
+  // 利用 getBoundingClientRect 抓取包含變形的「真實螢幕像素框」
+  const svgRect = innerSvg.getBoundingClientRect();
+  const rect0 = mc0.getBoundingClientRect();
+  const rect1 = mc1.getBoundingClientRect();
 
-  // 換算成 L0 需要的位移量
+  // 計算像素轉換比例，將螢幕真實尺寸反推回 SVG 內部座標系
+  const scaleX = startVB[2] / svgRect.width;
+  const scaleY = startVB[3] / svgRect.height;
+
+  // 這才是它們在畫布上「真正的視覺邊界 (Visual Box)」！
+  const box0 = {
+    x: startVB[0] + (rect0.left - svgRect.left) * scaleX,
+    y: startVB[1] + (rect0.top - svgRect.top) * scaleY,
+    width: rect0.width * scaleX,
+    height: rect0.height * scaleY
+  };
+  const box1 = {
+    x: startVB[0] + (rect1.left - svgRect.left) * scaleX,
+    y: startVB[1] + (rect1.top - svgRect.top) * scaleY,
+    width: rect1.width * scaleX,
+    height: rect1.height * scaleY
+  };
+
+  // 為了安全縮放，幫 MC0 穿上專屬移動外套，避免蓋掉它本身的旋轉屬性
+  let mc0Mover = document.getElementById('mc0-mover');
+  if (!mc0Mover) {
+    mc0Mover = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    mc0Mover.id = 'mc0-mover';
+    mc0.parentNode.insertBefore(mc0Mover, mc0);
+    mc0Mover.appendChild(mc0);
+  }
+
+  // 算出 L0 目標座標與縮放率
+  const finalScale = box1.height / box0.height;
+  const gap = box1.height * 0.15; 
+  const targetX = box1.x - gap - (box0.width * finalScale);
+  const targetY = box1.y + (box1.height - box0.height * finalScale) / 2;
+
+  // 換算向量
   const endTx = targetX - (box0.x * finalScale);
   const endTy = targetY - (box0.y * finalScale);
 
-  // 【步驟 B】計算新排版的「緊湊邊界 (Bounding Box)」
+  // 計算完美貼合的緊湊邊界
   const minX = targetX;
   const maxX = box1.x + box1.width;
   const minY = Math.min(targetY, box1.y);
   const maxY = Math.max(targetY + box0.height * finalScale, box1.y + box1.height);
 
-  // 留一點點安全邊距 (2%) 避免筆畫太粗被切到
-  const contentW = (maxX - minX) * 1.04;
+  const contentW = (maxX - minX) * 1.04; // 留 2% 防裁切邊緣
   const contentH = (maxY - minY) * 1.04;
   const padX = (contentW - (maxX - minX)) / 2;
   const padY = (contentH - (maxY - minY)) / 2;
 
-  // 【步驟 C】計算完美貼合目標圖片的「新 viewBox」
-  // 為了完全沒有空白，新的 viewBox 必須跟目標圖片的「長寬比」一模一樣！
+  // 計算新 viewBox (強制貼合目標長寬比，消滅留白)
   const targetAR = targetRect.width / targetRect.height;
   const contentAR = contentW / contentH;
 
   let vbW, vbH;
   if (contentAR > targetAR) {
-    // 內容較寬：以內容寬度為基準，擴充高度
     vbW = contentW;
     vbH = vbW / targetAR;
   } else {
-    // 目標較寬：以內容高度為基準，擴充左右寬度
     vbH = contentH;
     vbW = vbH * targetAR;
   }
 
-  // 算出置中裁切的新座標
   const vbX = minX - padX - (vbW - contentW) / 2;
   const vbY = minY - padY - (vbH - contentH) / 2;
-  
-  // 這就是我們最終要飛往的神級裁切畫布！
   const endVB = [vbX, vbY, vbW, vbH];
 
   // ==========================================
-  // ✨ 4. 啟動電影級飛行與裁切動畫 ✨
+  // ✨ 4. 動畫引擎 (保證零誤差) ✨
   // ==========================================
-  
-  // 外層容器：透過 CSS 飛向目標位置與尺寸
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
   requestAnimationFrame(() => {
     logo.style.left = targetRect.left + 'px';
@@ -4933,73 +4953,63 @@ function closeOverlayAndAnimateLogo() {
     logo.style.height = targetRect.height + 'px';
   });
 
-  // 內層 SVG：透過 JS requestAnimationFrame 讓畫布跟著縮放
   const duration = 800;
   const startTime = performance.now();
 
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
-    let progress = elapsed / duration;
-    
-    // 確保進度最多只到 100%
-    if (progress > 1) progress = 1;
-
-    // 匹配 CSS 的 cubic-bezier(0.25, 1, 0.5, 1) 滑順減速曲線
+    let progress = Math.min(elapsed / duration, 1);
     const ease = 1 - Math.pow(1 - progress, 4); 
 
-    // 動態更新 viewBox：把原本 2/3 的空白處平滑地裁切掉
+    // 動態裁切畫布
     const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
     innerSvg.setAttribute('viewBox', currentVB.join(' '));
 
-    // 動態更新 L0 的位置與大小
+    // 移動 MC0 (操作外層 Wrapper 保證安全)
     const currentTx = endTx * ease;
     const currentTy = endTy * ease;
     const currentS = 1 + (finalScale - 1) * ease;
-    mc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
+    mc0Mover.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
 
-    // 如果還沒跑完，繼續呼叫下一格
     if (progress < 1) {
       requestAnimationFrame(tween);
-    } 
-    // ✨ 核心修復：如果跑到最後一格了，在「同一個瞬間」執行替換，保證絕對零延遲！
-    else {
+    } else {
+      // ==========================================
+      // ✨ 5. 終極父層鎖死置中 (解決手機偏右) ✨
+      // ==========================================
       const targetWrapper = targetImg.parentElement;
       
-      // 拔除飛行絕對定位狀態
+      // 1. 直接給父層上最強 Flexbox 置中，免疫所有 text-align 失效狀況
+      targetWrapper.style.display = 'flex';
+      targetWrapper.style.justifyContent = 'center';
+      targetWrapper.style.alignItems = 'center';
+      targetWrapper.style.width = '100%';
+
+      // 2. 解除 logo 的飛行絕對定位
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
-      // ==========================================
-      // ✨ 終極置中與響應式鎖定 (解決手機偏右問題) ✨
-      // ==========================================
-      
-      // 1. 放棄 inline-block，改用 block + margin auto 強制物理置中！
+      // 3. 響應式配置：最大不超過原尺寸，寬度自適應
       logo.style.display = 'block';
       logo.style.margin = '0 auto';
-
-      // 2. 寬度設定為 100%，但最大不超過原始圖片的寬度
       logo.style.width = '100%';
       logo.style.maxWidth = targetRect.width + 'px';
-      
-      // 3. 鎖定長寬比例，讓高度跟著寬度一起縮放，絕對不變形
       logo.style.height = 'auto';
-      logo.style.aspectRatio = `${targetRect.width} / ${targetRect.height}`;
 
-      // 4. 清除內部 SVG 可能干擾的預設屬性，強迫它 100% 聽外層的話
+      // 4. SVG 強制聽從外部高度，並自動透過 viewBox 計算比例
       innerSvg.removeAttribute('width');
       innerSvg.removeAttribute('height');
       innerSvg.style.width = '100%';
-      innerSvg.style.height = '100%';
+      innerSvg.style.height = 'auto';
       innerSvg.style.display = 'block';
+      innerSvg.style.overflow = 'hidden'; // 防止內部殘影溢出
 
-      // 完美替換
       targetWrapper.replaceChild(logo, targetImg);
     }
   }
   
-  // 啟動引擎
   requestAnimationFrame(tween);
 }
