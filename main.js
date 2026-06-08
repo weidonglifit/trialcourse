@@ -4945,13 +4945,13 @@ function closeOverlayAndAnimateLogo() {
 
       // 3. 計算物理尺寸
       const finalRatio = endVB[2] / endVB[3];
-      const physicalWidth = 85 * finalRatio;
+      const physicalWidth = 75 * finalRatio;
 
       // 4. 設定 Logo 容器尺寸 (強制覆蓋)
       logo.style.cssText = `
         display: block !important;
         width: ${physicalWidth}px !important;
-        height: 85px !important;
+        height: 75px !important;
         flex-shrink: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -4963,7 +4963,7 @@ function closeOverlayAndAnimateLogo() {
       innerSvg.style.cssText = `
         display: block !important;
         width: ${physicalWidth}px !important;
-        height: 85px !important;
+        height: 75px !important;
         max-width: none !important;
         min-width: ${physicalWidth}px !important;
         overflow: visible !important;
@@ -4972,7 +4972,7 @@ function closeOverlayAndAnimateLogo() {
       // 移除可能導致比例衝突的屬性
       innerSvg.removeAttribute('preserveAspectRatio');
       innerSvg.setAttribute('width', Math.round(physicalWidth));
-      innerSvg.setAttribute('height', 85);
+      innerSvg.setAttribute('height', 75);
       
       // 6. 清除舊圖並放入
       const oldImg = targetWrapper.querySelector('img');
