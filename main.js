@@ -4818,62 +4818,146 @@ function startPeekabooEgg() {
 
   }, 8000); // 8000毫秒 = 8秒 (包含探頭的3秒，等於每躲藏5秒就會出來一次)
 }
+
 function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
-  const targetWrapper = document.getElementById('final-logo-wrapper'); // 目標容器
+  // 直接抓取預留的容器，不再依賴圖片標籤
+  const targetWrapper = document.getElementById('final-logo-wrapper');
   
   if (!logo || !targetWrapper) return;
 
-  // 1. 設定初始狀態 (fixed)
-  const startRect = logo.getBoundingClientRect();
+  const innerSvg = logo.querySelector('svg');
+  if (!innerSvg) return;
+
+  const startRect = innerSvg.getBoundingClientRect();
+  // 直接計算容器的位置，這比計算圖片更準確
+  const targetRect = targetWrapper.getBoundingClientRect();
+
+  if (startRect.width === 0) return;
+
+  // 1. 準備起飛，設定外層容器初始狀態
   document.body.appendChild(logo);
-  
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
   logo.style.top = startRect.top + 'px';
   logo.style.width = startRect.width + 'px';
   logo.style.height = startRect.height + 'px';
+  logo.style.margin = '0';
+  logo.style.padding = '0';
   logo.style.zIndex = '999999';
 
-  // 2. 清除所有動畫與變形
+  innerSvg.style.width = '100%';
+  innerSvg.style.height = '100%';
+  innerSvg.style.overflow = 'visible';
+
+  // 2. 清除所有干擾的舊動畫與保護衣 (不動)
   logo.classList.remove('svg-intro-container');
   logo.style.animation = 'none';
   logo.querySelectorAll('.anim-wrapper').forEach(w => {
     w.style.animation = 'none';
     w.style.transform = 'none';
+    w.style.opacity = '1';
   });
 
-  // 3. 設定飛行過渡 (CSS 負責動態)
-  logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+  // ==========================================
+  // ✨ 3. 大師級數學 (不動) ✨
+  // ==========================================
+  const mc0 = logo.querySelector('#layer-MC0');
+  const mc1 = logo.querySelector('#layer-MC1');
+  if (!mc0 || !mc1) return;
 
-  // 4. 等待一下，讓瀏覽器繪製出 fixed 位置，再觸發飛行
+  const box0 = mc0.getBBox();
+  const box1 = mc1.getBBox();
+
+  let startVB = [0, 0, 32, 32];
+  const vbAttr = innerSvg.getAttribute('viewBox');
+  if (vbAttr) startVB = vbAttr.trim().split(/[\s,]+/).map(Number);
+
+  const finalScale = box1.height / box0.height;
+  const gap = box1.height * 0.15;
+  const targetX = box1.x - gap - (box0.width * finalScale);
+  const targetY = box1.y + (box1.height - box0.height * finalScale) / 2;
+
+  const endTx = targetX - (box0.x * finalScale);
+  const endTy = targetY - (box0.y * finalScale);
+
+  const minX = targetX;
+  const maxX = box1.x + box1.width;
+  const minY = Math.min(targetY, box1.y);
+  const maxY = Math.max(targetY + box0.height * finalScale, box1.y + box1.height);
+
+  const contentW = (maxX - minX) * 1.04;
+  const contentH = (maxY - minY) * 1.04;
+  const padX = (contentW - (maxX - minX)) / 2;
+  const padY = (contentH - (maxY - minY)) / 2;
+
+  const targetAR = targetRect.width / targetRect.height;
+  const contentAR = contentW / contentH;
+
+  let vbW, vbH;
+  if (contentAR > targetAR) {
+    vbW = contentW;
+    vbH = vbW / targetAR;
+  } else {
+    vbH = contentH;
+    vbW = vbH * targetAR;
+  }
+
+  const vbX = minX - padX - (vbW - contentW) / 2;
+  const vbY = minY - padY - (vbH - contentH) / 2;
+  const endVB = [vbX, vbY, vbW, vbH];
+
+  // ==========================================
+  // ✨ 4. 啟動電影級飛行 (不動) ✨
+  // ==========================================
+  logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
   requestAnimationFrame(() => {
-    // 這裡我們不算座標，直接讓瀏覽器計算 targetWrapper 的位置
-    // 我們將 logo 移動到目標位置
-    const targetRect = targetWrapper.getBoundingClientRect();
-    
     logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
-    logo.style.width = targetRect.width + 'px'; // 讓它縮小
+    logo.style.width = targetRect.width + 'px';
     logo.style.height = targetRect.height + 'px';
   });
 
-  // 5. 800ms 後落地，改用 CSS 定位
-  setTimeout(() => {
-    logo.style.position = 'static'; // 變回一般排版
-    logo.style.transition = 'none';
-    logo.style.width = '100%';
-    logo.style.maxWidth = '300px'; 
-    logo.style.height = '105px';
-    logo.style.margin = '0 auto'; // 強制置中
-    
-    // 確保 SVG 滿版
-    const innerSvg = logo.querySelector('svg');
-    if(innerSvg) {
-        innerSvg.style.width = '100%';
-        innerSvg.style.height = '100%';
-    }
+  const duration = 800;
+  const startTime = performance.now();
 
-    targetWrapper.appendChild(logo);
-  }, 800);
+  function tween(currentTime) {
+    const elapsed = currentTime - startTime;
+    let progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 4); 
+
+    const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
+    innerSvg.setAttribute('viewBox', currentVB.join(' '));
+
+    const currentTx = endTx * ease;
+    const currentTy = endTy * ease;
+    const currentS = 1 + (finalScale - 1) * ease;
+    mc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
+
+    if (progress < 1) {
+      requestAnimationFrame(tween);
+    } else {
+      // 5. 終極修正：直接插入容器，並由容器本身管理置中
+      logo.style.position = 'relative';
+      logo.style.left = 'auto';
+      logo.style.top = 'auto';
+      logo.style.zIndex = 'auto';
+      logo.style.transition = 'none';
+
+      logo.style.display = 'block';
+      logo.style.width = '100%';
+      logo.style.height = '105px'; // 強制鎖定高度
+      
+      innerSvg.style.width = '100%';
+      innerSvg.style.height = '100%';
+      innerSvg.style.display = 'block';
+
+      // 如果原本有舊圖片，先移除
+      const oldImg = targetWrapper.querySelector('img');
+      if (oldImg) oldImg.remove();
+      
+      targetWrapper.appendChild(logo);
+    }
+  }
+  requestAnimationFrame(tween);
 }
