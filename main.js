@@ -4901,6 +4901,8 @@ function closeOverlayAndAnimateLogo() {
   // ==========================================
   // ✨ 4. 啟動電影級飛行 (不動) ✨
   // ==========================================
+  innerSvg.setAttribute('viewBox', endVB.join(' '));
+
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
   requestAnimationFrame(() => {
     logo.style.left = targetRect.left + 'px';
@@ -4911,20 +4913,23 @@ function closeOverlayAndAnimateLogo() {
 
   const duration = 800;
   const startTime = performance.now();
-  console.log("DEBUG: Target Wrapper Rect:", targetRect);
-  console.log("DEBUG: Final viewBox Target:", endVB);
   
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
     let progress = Math.min(elapsed / duration, 1);
+    // 使用 Cubic Bezier 的 ease 函數
     const ease = 1 - Math.pow(1 - progress, 4); 
 
-    const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
-    innerSvg.setAttribute('viewBox', currentVB.join(' '));
+    // 【修正 2】：移除掉隨時間變化的 currentVB 計算
+    // 讓 viewBox 在動畫期間完全靜止，這是消除抖動的關鍵
 
+    // 【修正 3】：軌跡精準對齊
+    // 我們直接讓 MC0 從 0 位移到 endTx/endTy
     const currentTx = endTx * ease;
     const currentTy = endTy * ease;
     const currentS = 1 + (finalScale - 1) * ease;
+    
+    // 使用 translate 對齊計算出的最終座標
     mc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
 
     if (progress < 1) {
