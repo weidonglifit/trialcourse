@@ -4866,54 +4866,73 @@ function closeOverlayAndAnimateLogo() {
   const mc1 = logo.querySelector('#layer-MC1');
   if (!mc0 || !mc1) return;
 
-  // 1. 取得各自的原始 BBox
-  const b0 = mc0.getBBox();
-  const b1 = mc1.getBBox();
+  const box0 = mc0.getBBox();
+  const box1 = mc1.getBBox();
 
-  // 2. 定義動畫結束後的狀態 (MC0 在 MC1 左側)
-  const targetHeight = b1.height; // 與 MC1 同高
-  const scale0 = targetHeight / b0.height;
-  
-  // 計算 MC1 的目標位置 (相對於 SVG 的座標系)
-  const targetPos1 = { x: b1.x, y: b1.y };
-  // 計算 MC0 的目標位置 (左側，等高，留一點間距)
-  const gap = 10; 
-  const targetPos0 = { 
-    x: targetPos1.x - (b0.width * scale0) - gap, 
-    y: targetPos1.y 
-  };
+  let startVB = [0, 0, 32, 32];
+  const vbAttr = innerSvg.getAttribute('viewBox');
+  if (vbAttr) startVB = vbAttr.trim().split(/[\s,]+/).map(Number);
 
-  // 3. 設定固定的 ViewBox (確保能同時框住移動後的 MC0 和 MC1)
-  const allMinX = Math.min(targetPos0.x, targetPos1.x);
-  const allMaxX = Math.max(targetPos0.x + b0.width * scale0, targetPos1.x + b1.width);
-  const vbW = (allMaxX - allMinX) * 1.1; // 留 10% 緩衝
-  const vbH = targetHeight * 1.5;
-  const vbX = allMinX - (vbW - (allMaxX - allMinX)) / 2;
-  const vbY = targetPos1.y - vbH / 2 + targetHeight / 2;
-  
-  innerSvg.setAttribute('viewBox', `${vbX} ${vbY} ${vbW} ${vbH}`);
+  const finalScale = box1.height / box0.height;
+  const gap = box1.height * 0.15;
+  const targetX = box1.x - gap - (box0.width * finalScale);
+  const targetY = box1.y + (box1.height - box0.height * finalScale) / 2;
 
-  // 4. 計算動畫起始與終點轉換 (各自獨立)
-  // 此處略過冗長的矩陣計算，直接應用於 tween
-  const startTransform0 = mc0.getAttribute('transform') || '';
-  const startTransform1 = mc1.getAttribute('transform') || '';
+  const endTx = targetX - (box0.x * finalScale);
+  const endTy = targetY - (box0.y * finalScale);
+
+  const minX = targetX;
+  const maxX = box1.x + box1.width;
+  const minY = Math.min(targetY, box1.y);
+  const maxY = Math.max(targetY + box0.height * finalScale, box1.y + box1.height);
+
+  const contentW = (maxX - minX) * 1.04;
+  const contentH = (maxY - minY) * 1.04;
+  const padX = (contentW - (maxX - minX)) / 2;
+  const padY = (contentH - (maxY - minY)) / 2;
+
+  const targetAR = targetRect.width / targetRect.height;
+  const contentAR = contentW / contentH;
+
+  let vbW, vbH;
+  if (contentAR > targetAR) {
+    vbW = contentW;
+    vbH = vbW / targetAR;
+  } else {
+    vbH = contentH;
+    vbW = vbH * targetAR;
+  }
+
+  const vbX = minX - padX - (vbW - contentW) / 2;
+  const vbY = minY - padY - (vbH - contentH) / 2;
+  const endVB = [vbX, vbY, vbW, vbH];
 
   // ==========================================
-  // ✨ 4. 動畫引擎 (分別處理) ✨
+  // ✨ 4. 啟動電影級飛行 (不動) ✨
   // ==========================================
+  logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+  requestAnimationFrame(() => {
+    logo.style.left = targetRect.left + 'px';
+    logo.style.top = targetRect.top + 'px';
+    logo.style.width = targetRect.width + 'px';
+    logo.style.height = targetRect.height + 'px';
+  });
+
+  const duration = 800;
+  const startTime = performance.now();
+console.log("DEBUG: Target Wrapper Rect:", targetRect);
+  console.log("DEBUG: Final viewBox Target:", endVB);
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
     let progress = Math.min(elapsed / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 4);
+    const ease = 1 - Math.pow(1 - progress, 4); 
 
-    // 分別為 MC0 和 MC1 套用動畫
-    // MC1 位移到目標位置
-    mc1.setAttribute('transform', `translate(${(targetPos1.x - b1.x)*ease}, ${(targetPos1.y - b1.y)*ease})`);
-    
-    // MC0 位移到左側並縮放
-    const currentS = 1 + (scale0 - 1) * ease;
-    const currentTx = (targetPos0.x - b0.x) * ease;
-    const currentTy = (targetPos0.y - b0.y) * ease;
+    const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
+    innerSvg.setAttribute('viewBox', currentVB.join(' '));
+
+    const currentTx = endTx * ease;
+    const currentTy = endTy * ease;
+    const currentS = 1 + (finalScale - 1) * ease;
     mc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
 
     if (progress < 1) {
