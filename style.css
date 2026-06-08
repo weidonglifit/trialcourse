@@ -3565,9 +3565,6 @@ select {
 /* 2. 內部波浪線動畫（總長度 19） */
 .inner-wave {
   stroke-dasharray: 19;
-  /* 關鍵：透過 scaleX(-1) 讓路徑水平翻轉，使線條變成從右邊開始畫、右邊消失 */
-  transform: scaleX(-1);
-  transform-origin: 12px 13px; /* 以波浪線的中心點進行翻轉 */
   animation: sync-draw-inner 2s ease-in-out infinite;
 }
 
@@ -3589,12 +3586,12 @@ select {
 /* 內圈波浪線的 0 -> 19 -> 0 軌跡 */
 @keyframes sync-draw-inner {
   0% {
-    stroke-dashoffset: 19; /* 空的 */
+    stroke-dashoffset: -19; /* 改成從負的開始：線條準備從右邊進入 */
   }
   50% {
     stroke-dashoffset: 0;  /* 畫滿（剛好落在動畫 50% 處，與外圈同時滿） */
   }
   100% {
-    stroke-dashoffset: -19; /* 往前推移，與外圈同時空掉 */
+    stroke-dashoffset: 19; /* 改成正的結尾：線條從右邊開始往左被推出去（消失） */
   }
 }
