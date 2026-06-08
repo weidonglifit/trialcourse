@@ -4938,45 +4938,41 @@ console.log("DEBUG: Target Wrapper Rect:", targetRect);
     if (progress < 1) {
       requestAnimationFrame(tween);
     } else {
-      // 1. 確保容器本身具有置中屬性 (這是最基本的防護)
-      targetWrapper.style.display = 'flex';
-      targetWrapper.style.justifyContent = 'center';
-      targetWrapper.style.alignItems = 'center';
-
-      // 2. 拔除飛行狀態
-      logo.style.position = 'relative';
-      logo.style.left = 'auto';
-      logo.style.top = 'auto';
-      logo.style.zIndex = 'auto';
-      logo.style.transition = 'none';
-
-      // 3. 設定 Logo 容器
+      // 1. 強制讓 Logo 變成嚴格的區塊
       logo.style.display = 'block';
+      
+      // 2. 這是解決偏右/偏左的關鍵：
+      // 設定寬度為 100%，並使用 box-sizing 確保不會因為 border/padding 撐開
+      logo.style.boxSizing = 'border-box';
       logo.style.width = '100%';
-      logo.style.height = '105px'; 
-      logo.style.margin = '0 auto'; // 強制物理置中
-
-      // 4. 清除 svg 寬高限制，讓它聽從 container
+      
+      // 3. 重要：強制讓它最大寬度等於容器寬度
+      // 這樣它就不會大於 377px，絕對不會溢出
+      logo.style.maxWidth = '100%'; 
+      
+      // 4. 強制置中
+      logo.style.margin = '0 auto';
+      logo.style.height = '105px';
+      
+      // 5. 確保 SVG 內部內容物也受到容器限制
+      innerSvg.style.display = 'block';
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
-      innerSvg.style.display = 'block';
+      
+      // 【防禦性設定】：讓容器內部強制居中，對付所有奇怪的變形
+      logo.style.display = 'flex';
+      logo.style.justifyContent = 'center';
+      logo.style.alignItems = 'center';
 
-      // 5. 【關鍵 Debug 點】：檢查對齊基準
-      const logoRect = logo.getBoundingClientRect();
-      const wrapperRect = targetWrapper.getBoundingClientRect();
-      
-      console.log("--- 偵測排版異常 ---");
-      console.log("Logo 寬度:", logoRect.width, "容器寬度:", wrapperRect.width);
-      console.log("Logo 左邊界距螢幕:", logoRect.left);
-      console.log("容器左邊界距螢幕:", wrapperRect.left);
-      
-      // 如果 logoRect.left 不等於 wrapperRect.left，代表有東西在把它推向右邊！
-      if (Math.abs(logoRect.left - wrapperRect.left) > 1) {
-          console.warn("偵測到偏移！請檢查是否 Logo 內部的 SVG 內容物含有未清除的 transform 偏移");
-      }
+      // 6. 移除所有剩餘的定位屬性
+      logo.style.position = 'relative';
+      logo.style.left = '0';
+      logo.style.top = '0';
+      logo.style.transform = 'none'; // 拔掉最後的變形殘影
 
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
+      
       targetWrapper.appendChild(logo);
       innerSvg.style.border = "1px solid red";
     }
