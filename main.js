@@ -4974,46 +4974,40 @@ function closeOverlayAndAnimateLogo() {
     if (progress < 1) {
       requestAnimationFrame(tween);
     } 
-    // ✨ 終極修正版：在最後一格執行「強制結構置中」
     else {
       const targetWrapper = targetImg.parentElement;
-
-      // 1. 強制設定目標容器為 Flex 容器 (徹底解決對齊基準點的問題)
+      
+      // 【修正 D】替父元素加上強制 Flexbox 置中，免疫手機版一切漂移！
       targetWrapper.style.display = 'flex';
-      targetWrapper.style.justifyContent = 'center'; // 水平絕對置中
-      targetWrapper.style.alignItems = 'center';     // 垂直絕對置中
-      targetWrapper.style.flexDirection = 'row';
+      targetWrapper.style.justifyContent = 'center';
+      targetWrapper.style.alignItems = 'center';
 
-      // 2. 拔除所有絕對定位干擾
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
-      logo.style.margin = '0'; // 移除 margin，因為 flex 會處理置中
 
-      // 3. 設定寬度，但絕對不寫死，讓瀏覽器自己算
+      logo.style.display = 'block';
+      logo.style.margin = '0 auto';
+
       logo.style.width = '100%';
-      logo.style.maxWidth = targetRect.width + 'px'; // 限制最大寬度
-      logo.style.aspectRatio = `${targetRect.width} / ${targetRect.height}`;
+      logo.style.maxWidth = targetRect.width + 'px';
+      
       logo.style.height = 'auto';
+      logo.style.aspectRatio = `${targetRect.width} / ${targetRect.height}`;
 
-      // 4. 確保 SVG 填滿容器，不留任何隱形邊界
       innerSvg.removeAttribute('width');
       innerSvg.removeAttribute('height');
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
       innerSvg.style.display = 'block';
-      innerSvg.style.overflow = 'hidden';
+      // 確保最後關閉溢出，不留任何橫向滾動條
+      innerSvg.style.overflow = 'hidden'; 
 
-      // 5. 替換掉原本的舊圖片
-      if (targetImg.parentNode) {
-          targetWrapper.replaceChild(logo, targetImg);
-      }
-      
-      // ✨ 關鍵：確保父容器的寬度是正確的
-      targetWrapper.style.width = '100%';
+      targetWrapper.replaceChild(logo, targetImg);
     }
+  }
   
   requestAnimationFrame(tween);
 }
