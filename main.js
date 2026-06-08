@@ -4909,7 +4909,7 @@ function closeOverlayAndAnimateLogo() {
     logo.style.height = targetRect.height + 'px';
   });
 
-  const duration = 800;
+  const duration = 100;
   const startTime = performance.now();
   console.log("DEBUG: Target Wrapper Rect:", targetRect);
   console.log("DEBUG: Final viewBox Target:", endVB);
