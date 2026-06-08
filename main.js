@@ -4920,10 +4920,9 @@ function closeOverlayAndAnimateLogo() {
     logo.style.height = '75px';
   });
 
-  const duration = 3000;
+  const duration = 1500;
   const startTime = performance.now();
-  innerSvg.style.border = "1px solid red"; 
-  
+    
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
     let progress = Math.min(elapsed / duration, 1);
