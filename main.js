@@ -4869,42 +4869,32 @@ function closeOverlayAndAnimateLogo() {
   const box0 = mc0.getBBox();
   const box1 = mc1.getBBox();
 
-  let startVB = [0, 0, 32, 32];
-  const vbAttr = innerSvg.getAttribute('viewBox');
-  if (vbAttr) startVB = vbAttr.trim().split(/[\s,]+/).map(Number);
+  // 計算內容物的實際緊湊邊界
+  const minX = Math.min(box0.x, box1.x); // 取最左
+  const maxX = Math.max(box0.x + box0.width, box1.x + box1.width); // 取最右
+  const minY = Math.min(box0.y, box1.y);
+  const maxY = Math.max(box0.y + box0.height, box1.y + box1.height);
 
-  const finalScale = box1.height / box0.height;
-  const gap = box1.height * 0.15;
-  const targetX = box1.x - gap - (box0.width * finalScale);
-  const targetY = box1.y + (box1.height - box0.height * finalScale) / 2;
+  const contentW = (maxX - minX) * 1.05; // 留 5% 安全邊距
+  const contentH = (maxY - minY) * 1.05;
 
-  const endTx = targetX - (box0.x * finalScale);
-  const endTy = targetY - (box0.y * finalScale);
+  // 【重點】：算出在 105px 高度下，應該要有的 viewBox 寬度
+  // 我們強制固定 viewBox 的高度，並根據容器長寬比算出寬度
+  const targetH = 105; 
+  const targetW = targetRect.width; // 容器真實寬度
+  const ratio = targetW / targetH;
+  
+  // 決定 viewBox 的最終大小
+  const vbH = contentH; 
+  const vbW = vbH * ratio; // 強制讓 viewBox 比例與容器一致
 
-  const minX = targetX;
-  const maxX = box1.x + box1.width;
-  const minY = Math.min(targetY, box1.y);
-  const maxY = Math.max(targetY + box0.height * finalScale, box1.y + box1.height);
-
-  const contentW = (maxX - minX) * 1.04;
-  const contentH = (maxY - minY) * 1.04;
-  const padX = (contentW - (maxX - minX)) / 2;
-  const padY = (contentH - (maxY - minY)) / 2;
-
-  const targetAR = targetRect.width / targetRect.height;
-  const contentAR = contentW / contentH;
-
-  let vbW, vbH;
-  if (contentAR > targetAR) {
-    vbW = contentW;
-    vbH = vbW / targetAR;
-  } else {
-    vbH = contentH;
-    vbW = vbH * targetAR;
-  }
-
-  const vbX = minX - padX - (vbW - contentW) / 2;
-  const vbY = minY - padY - (vbH - contentH) / 2;
+  // 計算置中偏移
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  
+  const vbX = centerX - vbW / 2;
+  const vbY = centerY - vbH / 2;
+  
   const endVB = [vbX, vbY, vbW, vbH];
 
   // ==========================================
