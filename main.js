@@ -4888,7 +4888,7 @@ function closeOverlayAndAnimateLogo() {
 
   const contentW = (maxX - minX) * 1.04;
   const contentH = (maxY - minY) * 1.04;
-  const padX = (contentW - (maxX - minX)) / 2;
+  const padX = 0;
   const padY = (contentH - (maxY - minY)) / 2;
 
   const targetAR = targetRect.width / targetRect.height;
@@ -4939,58 +4939,42 @@ function closeOverlayAndAnimateLogo() {
     if (progress < 1) {
       requestAnimationFrame(tween);
     } else {
-      // ==========================================
-      // ✨ 5. 終點防護 (解決寬度溢出的雙邊置中) ✨
-      // ==========================================
-      
-      // 1. 強制目標容器作為絕對定位基準，並隱藏超出螢幕的捲軸
-      targetWrapper.style.position = 'relative';
-      targetWrapper.style.display = 'block'; 
-      targetWrapper.style.overflow = 'hidden'; 
+      // 1. 確保容器具有 Flex 置中屬性，並且【絕對不加】overflow: hidden，讓它不會被切掉
+      targetWrapper.style.display = 'flex';
+      targetWrapper.style.justifyContent = 'center';
+      targetWrapper.style.alignItems = 'center';
+      targetWrapper.style.overflow = 'visible'; 
 
-      // 2. 拔除飛行狀態，改用絕對定位
-      logo.style.position = 'absolute';
-      logo.style.top = '0';
+      // 2. 拔除飛行狀態，回歸相對定位
+      logo.style.position = 'relative';
+      logo.style.left = 'auto';
+      logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
-      // 3. 【核心修正】：算出這塊 viewBox 在 105px 高度下的真實物理像素寬度
+      // 3. 【核心修正】：推算這塊 viewBox 在 105px 高度下的「真實物理寬度」
       const finalRatio = endVB[2] / endVB[3]; // vbW / vbH
       const physicalWidth = 105 * finalRatio;
 
+      // 4. 設定 Logo 容器
       logo.style.display = 'block';
-      logo.style.height = '105px';
-      logo.style.width = physicalWidth + 'px'; // 賦予真實寬度，不限制 100%
-      
-      // 絕對置中魔法：放棄 margin: auto
-      // 使用 left 50% + translateX(-50%)，這會強制無論實體多寬，一律雙邊對稱溢出
-      logo.style.left = '50%';
-      logo.style.transform = 'translateX(-50%)';
-      logo.style.margin = '0'; 
+      logo.style.width = physicalWidth + 'px'; // 強制賦予真實寬度 (即使大於螢幕)
+      logo.style.height = '105px'; 
+      logo.style.flexShrink = '0'; // 【魔法關鍵】：嚴禁 Flexbox 壓縮它！這保證它能超出邊界
+      logo.style.margin = '0';     // 【移除 margin auto】：讓父容器的 justify-content: center 發揮雙邊溢出作用
 
-      // 4. 清除 svg 寬高限制，讓它完全撐滿物理容器
+      // 5. 讓 SVG 乖乖填滿我們設定好真實寬度的 Logo 容器
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
       innerSvg.style.display = 'block';
+      innerSvg.style.overflow = 'visible'; // 保證內容不被 SVG 標籤自己切掉
 
-      // 5. 【關鍵 Debug 點】：檢查對齊基準
-      const logoRect = logo.getBoundingClientRect();
-      const wrapperRect = targetWrapper.getBoundingClientRect();
-      
-      console.log("--- 偵測排版異常 ---");
-      console.log("Logo 真實物理寬度:", physicalWidth, "容器寬度:", wrapperRect.width);
-      console.log("Logo 左邊界距螢幕:", logoRect.left);
-      console.log("容器左邊界距螢幕:", wrapperRect.left);
-      
-      // 如果寬度大於容器，logoRect.left 必定為負數，這代表左邊成功溢出了
-      if (physicalWidth > wrapperRect.width) {
-         console.log("✅ 檢測到 SVG 大於容器，已強迫雙邊對稱溢出！");
-      }
-
+      // 6. 清除舊圖並放入
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       targetWrapper.appendChild(logo);
-      innerSvg.style.border = "1px solid red";
+      
+      innerSvg.style.border = "1px solid red"; // 你用來 Debug 的紅框
     }
   }
   requestAnimationFrame(tween);
