@@ -4930,7 +4930,7 @@ function closeOverlayAndAnimateLogo() {
     if (progress < 1) {
       requestAnimationFrame(tween);
     } else {
-      // 1. 設置容器環境
+      // 1. 容器設定
       targetWrapper.style.display = 'flex';
       targetWrapper.style.justifyContent = 'center';
       targetWrapper.style.alignItems = 'center';
@@ -4943,49 +4943,45 @@ function closeOverlayAndAnimateLogo() {
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
-      // 3. 執行 Debug 與強制修正
+      // 3. 計算物理尺寸
       const finalRatio = endVB[2] / endVB[3];
       const physicalWidth = 85 * finalRatio;
 
-      // --- LOG 區：請檢查瀏覽器 Console ---
-      console.log("--- 偵測排版異常 ---");
-      console.log("ViewBox 寬高比:", finalRatio);
-      console.log("計算出的物理寬度:", physicalWidth);
-      
-      // 4. 強制設定
-      logo.style.display = 'block';
-      logo.style.width = physicalWidth + 'px'; 
-      logo.style.height = '85px'; 
-      logo.style.flexShrink = '0';
-      logo.style.margin = '0'; 
+      // 4. 設定 Logo 容器尺寸 (強制覆蓋)
+      logo.style.cssText = `
+        display: block !important;
+        width: ${physicalWidth}px !important;
+        height: 85px !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: none !important;
+        min-width: ${physicalWidth}px !important;
+      `;
 
-      // 5. 【關鍵修正】：SVG 必須完全聽從父容器
-      innerSvg.style.width = '100%';
-      innerSvg.style.height = '100%';
-      innerSvg.style.display = 'block';
-      innerSvg.style.overflow = 'visible';
+      // 5. 【關鍵修正】：直接修改 SVG DOM 屬性，這是最後防線
+      innerSvg.style.cssText = `
+        display: block !important;
+        width: ${physicalWidth}px !important;
+        height: 85px !important;
+        max-width: none !important;
+        min-width: ${physicalWidth}px !important;
+        overflow: visible !important;
+      `;
       
-      // ✨ 強制關閉所有 SVG 縮放屬性
-      innerSvg.setAttribute('preserveAspectRatio', 'none');
-
-      // 6. 放入後再次確認真實寬度
+      // 移除可能導致比例衝突的屬性
+      innerSvg.removeAttribute('preserveAspectRatio');
+      innerSvg.setAttribute('width', Math.round(physicalWidth));
+      innerSvg.setAttribute('height', 85);
+      
+      // 6. 清除舊圖並放入
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       targetWrapper.appendChild(logo);
       
       innerSvg.style.border = "1px solid red"; 
-
-      // 7. 延遲 50ms 再次取值，確保 DOM 渲染完畢
-      setTimeout(() => {
-        const svgRect = innerSvg.getBoundingClientRect();
-        const logoRect = logo.getBoundingClientRect();
-        console.log("SVG 實際渲染寬度 (getBoundingClientRect):", svgRect.width);
-        console.log("Logo 容器實際渲染寬度:", logoRect.width);
-        
-        if (Math.abs(svgRect.width - physicalWidth) > 1) {
-            console.warn("⚠️ 發現差異！SVG 渲染寬度不等於計算值，請檢查是否有 CSS 覆蓋了 innerSvg 的 width");
-        }
-      }, 50);
+      
+      console.log("✅ 強制寬度已寫入:", physicalWidth);
     }
   }
   requestAnimationFrame(tween);
