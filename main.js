@@ -4821,7 +4821,6 @@ function startPeekabooEgg() {
 
 function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
-  // 直接抓取預留的容器，不再依賴圖片標籤
   const targetWrapper = document.getElementById('final-logo-wrapper');
   
   if (!logo || !targetWrapper) {
@@ -4836,17 +4835,28 @@ function closeOverlayAndAnimateLogo() {
   }
 
   const startRect = innerSvg.getBoundingClientRect();
-  // 直接計算容器的位置，這比計算圖片更準確
   const targetRect = targetWrapper.getBoundingClientRect();
+  const wrapperStyle = window.getComputedStyle(targetWrapper);
 
   if (startRect.width === 0) {
     console.warn("⚠️ [Error] startRect 寬度為 0，取消動畫");
     return;
   }
 
-  console.log("🚀 [Start] 啟動 Logo 飛行任務");
-  console.log("📊 [Data] 起點座標:", startRect);
-  console.log("📊 [Data] 目標容器座標:", targetRect);
+  console.group("🚀 [Phase 1: 環境與起點數據偵測]");
+  console.log("📍 [Start Rect] 原始位置:", { left: startRect.left, top: startRect.top, width: startRect.width, height: startRect.height });
+  console.log("🎯 [Target Rect] 目標容器:", { left: targetRect.left, top: targetRect.top, width: targetRect.width, height: targetRect.height });
+  console.log("🎯 [Target Center] 目標容器螢幕絕對中心點:", { 
+    x: targetRect.left + targetRect.width / 2, 
+    y: targetRect.top + targetRect.height / 2 
+  });
+  console.log("📦 [Target CSS] 容器內部樣式 (檢查是否有 padding/border 擠壓):", {
+    paddingLeft: wrapperStyle.paddingLeft,
+    paddingRight: wrapperStyle.paddingRight,
+    borderLeftWidth: wrapperStyle.borderLeftWidth,
+    boxSizing: wrapperStyle.boxSizing
+  });
+  console.groupEnd();
 
   // 1. 準備起飛，設定外層容器初始狀態
   document.body.appendChild(logo);
@@ -4899,26 +4909,34 @@ function closeOverlayAndAnimateLogo() {
   const minY = Math.min(targetY, box1.y);
   const maxY = Math.max(targetY + box0.height * finalScale, box1.y + box1.height);
 
-  // 取得最真實、最緊繃的內容寬高
   const contentW = maxX - minX;
   const contentH = maxY - minY;
   const endVB = [minX, minY, contentW, contentH];
 
-  console.log("🧮 [Math] 最終 viewBox 目標:", endVB);
+  console.group("🧮 [Phase 2: 大師級數學計算結果]");
+  console.log("📐 [BBox] MC0:", box0);
+  console.log("📐 [BBox] MC1:", box1);
+  console.log("⚙️ [Transform] endTx:", endTx, "endTy:", endTy, "finalScale:", finalScale);
+  console.log("🖼️ [ViewBox] Start:", startVB, "-> End:", endVB);
+  console.groupEnd();
 
   // ==========================================
   // ✨ 4. 核心物理尺寸與 Flex 置中數學模擬 ✨
   // ==========================================
-  // 提前計算物理寬度
   const finalRatio = endVB[2] / endVB[3];
   const physicalWidth = 75 * finalRatio;
 
-  // 💡 關鍵突破：直接用數學模擬 Flexbox 的置中邏輯
   const finalLeft = targetRect.left + (targetRect.width - physicalWidth) / 2;
   const finalTop = targetRect.top + (targetRect.height - 75) / 2;
 
-  console.log("📏 [Math] 算出實體寬度 physicalWidth:", physicalWidth);
-  console.log(`🎯 [Target] 絕對置中靶心鎖定: Left=${finalLeft}, Top=${finalTop}`);
+  console.group("📏 [Phase 3: 物理尺寸與模擬靶心]");
+  console.log("📐 [Size] 計算出的實體寬度 physicalWidth:", physicalWidth);
+  console.log("🎯 [Target] 數學算出的絕對置中座標: Left =", finalLeft, "Top =", finalTop);
+  console.log("🎯 [Target Center] 預計飛行落點的中心點:", {
+    x: finalLeft + physicalWidth / 2,
+    y: finalTop + 75 / 2
+  });
+  console.groupEnd();
 
   // ==========================================
   // ✨ 5. 啟動電影級飛行 ✨
@@ -4926,12 +4944,11 @@ function closeOverlayAndAnimateLogo() {
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
   
   requestAnimationFrame(() => {
-    // 💡 讓它直接飛向算好的置中絕對點，同時把尺寸精準收縮到 physicalWidth
     logo.style.left = finalLeft + 'px';
     logo.style.top = finalTop + 'px';
     logo.style.width = physicalWidth + 'px';
     logo.style.height = '75px';
-    console.log("✈️ [Anim] 飛行轉場已觸發，正在前往靶心...");
+    console.log("✈️ [Anim] 飛行轉場已觸發...");
   });
 
   const duration = 800;
@@ -4954,24 +4971,25 @@ function closeOverlayAndAnimateLogo() {
       requestAnimationFrame(tween);
     } else {
       // ==========================================
-      // ✨ 6. 完美落地接軌 ✨
+      // ✨ 6. 完美落地接軌與數據核對 ✨
       // ==========================================
-      console.log("🛬 [Land] 動畫抵達終點，執行 DOM 移交...");
+      console.group("🛬 [Phase 4: 落地數據核對]");
+      
+      // 【核對 A：記錄飛行結束瞬間、尚未交接給 Flex 的絕對座標】
+      const preLandRect = logo.getBoundingClientRect();
+      console.log("🛑 [Pre-Land] 飛行結束瞬間，Logo 停在的絕對座標:", preLandRect);
 
-      // 容器設定
       targetWrapper.style.display = 'flex';
       targetWrapper.style.justifyContent = 'center';
       targetWrapper.style.alignItems = 'center';
       targetWrapper.style.overflow = 'visible'; 
 
-      // 拔除飛行狀態
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
-      // 設定 Logo 容器尺寸 (強制覆蓋，保持與飛行終點寬度一致)
       logo.style.cssText = `
         display: block !important;
         width: ${physicalWidth}px !important;
@@ -4983,7 +5001,6 @@ function closeOverlayAndAnimateLogo() {
         min-width: ${physicalWidth}px !important;
       `;
 
-      // 直接修改 SVG DOM 屬性
       innerSvg.style.cssText = `
         display: block !important;
         width: ${physicalWidth}px !important;
@@ -4997,14 +5014,31 @@ function closeOverlayAndAnimateLogo() {
       innerSvg.setAttribute('width', Math.round(physicalWidth));
       innerSvg.setAttribute('height', 75);
       
-      // 清除舊圖並放入
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       targetWrapper.appendChild(logo);
       
       innerSvg.style.border = "1px solid red"; 
       
-      console.log("✅ [Success] 完美落地！紅框寬度已鎖死，零誤差對齊完成。");
+      // 【核對 B：記錄交接給 Flex 之後，瀏覽器實際渲染的絕對座標】
+      // 需要包在 rAF 確保 DOM 更新完畢
+      requestAnimationFrame(() => {
+        const postLandRect = logo.getBoundingClientRect();
+        console.log("✅ [Post-Land] 交給 Flex 排版後，實際渲染的絕對座標:", postLandRect);
+        
+        // 【核對 C：計算瞬移誤差】
+        const diffX = postLandRect.left - preLandRect.left;
+        const diffY = postLandRect.top - preLandRect.top;
+        
+        console.log(`🔎 [Diff] 落地前後座標誤差 -> X偏移: ${diffX}px, Y偏移: ${diffY}px`);
+        
+        if (Math.abs(diffX) > 1 || Math.abs(diffY) > 1) {
+          console.warn("⚠️ [Warning] 發現顯著的舜移跳動！請檢查上面的 [Target CSS] 是否有 padding干擾，或是目標容器在 800ms 內尺寸發生了改變。");
+        } else {
+          console.log("🎉 [Success] 誤差在 1px 內，完美對齊！");
+        }
+        console.groupEnd();
+      });
     }
   }
   requestAnimationFrame(tween);
