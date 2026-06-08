@@ -3552,8 +3552,8 @@ select {
 }
 
 #final-logo-wrapper {
-    height: 80px;
-    width: 100%;
+    height: 50px;
+    width: auto;
     display: flex;
     justify-content: center;
     align-items: center;
