@@ -4938,36 +4938,47 @@ console.log("DEBUG: Target Wrapper Rect:", targetRect);
     if (progress < 1) {
       requestAnimationFrame(tween);
     } else {
+      // 1. 確保容器本身具有置中屬性 (這是最基本的防護)
+      targetWrapper.style.display = 'flex';
+      targetWrapper.style.justifyContent = 'center';
+      targetWrapper.style.alignItems = 'center';
+
+      // 2. 拔除飛行狀態
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
-      // 2. 徹底解決對齊的關鍵：強制修正 SVG 的 viewBox 偏移
-      // 將 ViewBox 強制設為原本的計算結果，但強制中心點歸位
-      // 這裡直接取我們計算好的 endVB 的寬高，但強制 x, y 歸零對齊
-      const fixedVB = [0, 0, endVB[2], endVB[3]]; 
-      innerSvg.setAttribute('viewBox', fixedVB.join(' '));
-      innerSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-
-      // 3. CSS 暴力置中
+      // 3. 設定 Logo 容器
       logo.style.display = 'block';
-      logo.style.margin = '0 auto';
       logo.style.width = '100%';
-      logo.style.maxWidth = '300px'; // 確保不要超出容器
-      logo.style.height = '105px';
+      logo.style.height = '105px'; 
+      logo.style.margin = '0 auto'; // 強制物理置中
 
-      // 4. 清除可能殘留的殘影
+      // 4. 清除 svg 寬高限制，讓它聽從 container
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
+      innerSvg.style.display = 'block';
+
+      // 5. 【關鍵 Debug 點】：檢查對齊基準
+      const logoRect = logo.getBoundingClientRect();
+      const wrapperRect = targetWrapper.getBoundingClientRect();
       
+      console.log("--- 偵測排版異常 ---");
+      console.log("Logo 寬度:", logoRect.width, "容器寬度:", wrapperRect.width);
+      console.log("Logo 左邊界距螢幕:", logoRect.left);
+      console.log("容器左邊界距螢幕:", wrapperRect.left);
+      
+      // 如果 logoRect.left 不等於 wrapperRect.left，代表有東西在把它推向右邊！
+      if (Math.abs(logoRect.left - wrapperRect.left) > 1) {
+          console.warn("偵測到偏移！請檢查是否 Logo 內部的 SVG 內容物含有未清除的 transform 偏移");
+      }
+
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
-      
       targetWrapper.appendChild(logo);
-      
-      console.log("最終修復後的 viewBox:", innerSvg.getAttribute('viewBox'));
+      innerSvg.style.border = "1px solid red";
     }
   }
   requestAnimationFrame(tween);
