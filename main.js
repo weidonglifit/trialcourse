@@ -4964,8 +4964,8 @@ function closeOverlayAndAnimateLogo() {
       logo.style.margin = '0';     // 【移除 margin auto】：讓父容器的 justify-content: center 發揮雙邊溢出作用
 
       // 5. 讓 SVG 乖乖填滿我們設定好真實寬度的 Logo 容器
-      innerSvg.style.width = '100%';
-      innerSvg.style.height = '100%';
+      innerSvg.style.width = physicalWidth + 'px';
+      innerSvg.style.height = '85px';
       innerSvg.style.display = 'block';
       innerSvg.style.overflow = 'visible'; // 保證內容不被 SVG 標籤自己切掉
 
