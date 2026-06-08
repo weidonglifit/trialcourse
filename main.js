@@ -4824,55 +4824,66 @@ function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
   const targetImg = document.getElementById('target-title-img');
 
-  // 防呆：如果找不到元素就直接關閉 overlay 退出
+  // 防呆：確保元素都存在
   if (!logo || !targetImg) {
     if(overlay) overlay.style.display = 'none';
     return;
   }
 
-  // 1. 取得 Logo 現在的位置與大小 (起點)
+  // 取得起點與終點的座標大小
   const startRect = logo.getBoundingClientRect();
-  
-  // 2. 取得目標圖片的位置與大小 (終點)
   const targetRect = targetImg.getBoundingClientRect();
 
-  // 3. 將 Logo 移出 overlay，直接掛在 body 上
+  // 【致命錯誤防呆】如果算出寬度是 0，代表 Overlay 在這之前已經被其他程式關掉了
+  if (startRect.width === 0 || targetRect.width === 0) {
+    console.warn("抓不到座標，直接替換圖片");
+    targetImg.parentElement.replaceChild(logo, targetImg);
+    if(overlay) overlay.style.display = 'none';
+    return;
+  }
+
+  // 【修正 1】強制內部 SVG 填滿容器，這樣飛到一半才不會因為外框縮小而被裁切或消失
+  const innerSvg = logo.querySelector('svg');
+  if (innerSvg) {
+    innerSvg.style.width = '100%';
+    innerSvg.style.height = '100%';
+    innerSvg.style.animation = 'none';
+  }
+
+  // 移出 overlay，準備起飛
   document.body.appendChild(logo);
 
-  // 4. 設定 Logo 的初始固定位置
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
   logo.style.top = startRect.top + 'px';
   logo.style.width = startRect.width + 'px';
   logo.style.height = startRect.height + 'px';
   logo.style.margin = '0';
-  logo.style.zIndex = '99999';
+  logo.style.zIndex = '999999';
 
-  // ==========================================
-  // ✨ 5. 停止所有碎片保護衣的動畫 (更新這裡) ✨
-  // ==========================================
+  // 停止外層動畫
   logo.classList.remove('svg-intro-container'); 
-  logo.style.animation = 'none'; // 停掉外層可能有的動畫
+  logo.style.animation = 'none'; 
   
-  // 抓出所有你剛剛動態產生的 <g class="anim-wrapper"> 並且把動畫關掉
+  // 【修正 2】停止所有碎片的動畫，並「強制歸零」變形與透明度，確保完整現身！
   const animWrappers = logo.querySelectorAll('.anim-wrapper');
   animWrappers.forEach(wrapper => {
     wrapper.style.animation = 'none'; 
-    // 停掉動畫後，它們會瞬間回歸到原始 SVG 的正確座標，變成一個完整的 Logo！
+    wrapper.style.transform = 'none'; // 避免碎片卡在半空中的某個變形角度
+    wrapper.style.opacity = '1';      // 確保碎片不是透明狀態
   });
-  // ==========================================
 
-  // 6. 漸隱關閉 Overlay
+  // 關閉黑色背景
   if (overlay) {
-    overlay.style.transition = 'opacity 0.5s ease';
+    overlay.style.transition = 'opacity 0.4s ease';
     overlay.style.opacity = '0';
-    setTimeout(() => overlay.style.display = 'none', 500);
+    setTimeout(() => overlay.style.display = 'none', 400);
   }
 
-  // 7. 設定 CSS 過渡動畫，準備起飛
+  // 啟動飛行過渡動畫
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)'; 
 
-  // 8. 延遲一小段時間讓瀏覽器重繪，然後飛向終點
+  // 設定目標位置，觸發飛行
   requestAnimationFrame(() => {
     logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
@@ -4880,20 +4891,19 @@ function closeOverlayAndAnimateLogo() {
     logo.style.height = targetRect.height + 'px';
   });
 
-  // 9. 0.8 秒飛行結束後，塞進目標容器並刪除原本的 img
+  // 飛行結束後，正式替換 DOM 節點
   setTimeout(() => {
     const targetWrapper = targetImg.parentElement;
     
-    // 將 fixed 定位拔除，回歸正常排版
     logo.style.position = 'relative';
     logo.style.left = 'auto';
     logo.style.top = 'auto';
     logo.style.zIndex = 'auto';
     logo.style.transition = 'none';
     
-    // 設定最終大小
-    logo.style.height = '105px';
-    logo.style.width = 'auto'; 
+    // 【修正 3】不能用 auto！DIV 遇到 auto 會坍塌成 0px，直接寫死目標圖片的確切寬度
+    logo.style.height = targetRect.height + 'px';
+    logo.style.width = targetRect.width + 'px'; 
     logo.style.display = 'inline-block';
     logo.style.verticalAlign = 'middle';
 
