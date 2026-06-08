@@ -4978,7 +4978,7 @@ console.log("DEBUG: Target Wrapper Rect:", targetRect);
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       targetWrapper.appendChild(logo);
-      
+      innerSvg.style.border = "1px solid red";
     }
   }
   requestAnimationFrame(tween);
