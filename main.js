@@ -4836,7 +4836,7 @@ function closeOverlayAndAnimateLogo() {
     return;
   }
 
-  // 1. 外層起飛準備
+  // 1. 準備起飛：把外層容器設定為絕對定位
   document.body.appendChild(logo);
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
@@ -4850,9 +4850,11 @@ function closeOverlayAndAnimateLogo() {
 
   innerSvg.style.width = '100%';
   innerSvg.style.height = '100%';
+  
+  // 【關鍵修正】：因為內部圖案會往外擴張，必須設定 visible 避免被原本的 viewBox 裁切掉！
   innerSvg.style.overflow = 'visible'; 
 
-  // 2. 拔除舊動畫
+  // 2. 拔除舊動畫與碎片保護衣
   logo.classList.remove('svg-intro-container'); 
   logo.style.animation = 'none'; 
   const animWrappers = logo.querySelectorAll('.anim-wrapper');
@@ -4863,107 +4865,86 @@ function closeOverlayAndAnimateLogo() {
   });
 
   // ==========================================
-  // ✨ 3. 大師級幾何計算：以「新排版中心」為錨點 ✨
+  // ✨ 3. 核心魔法：內部圖層的排版重組計算 ✨
   // ==========================================
   const mc0 = logo.querySelector('#layer-MC0');
   const mc1 = logo.querySelector('#layer-MC1');
   
-  let tx0 = 0, ty0 = 0, finalScale0 = 1;
-  let tx1 = 0, ty1 = 0, finalScale1 = 1;
+  // 宣告內部變形變數
+  let translateX0 = 0, translateY0 = 0, scale0 = 1;
+  let translateX1 = 0; // 用來讓整體圖案微調置中的變數
 
   if (mc0 && mc1) {
+    // 取得在 SVG 內部座標系中的真實尺寸與位置
     const box0 = mc0.getBBox();
     const box1 = mc1.getBBox();
 
-    // 取得 L0, L1 原始的絕對中心點
-    const cx0 = box0.x + box0.width / 2;
-    const cy0 = box0.y + box0.height / 2;
-    const cx1 = box1.x + box1.width / 2;
-    const cy1 = box1.y + box1.height / 2;
+    // 將變形中心點設定為「圖層自己的正中心」
+    mc0.style.transformOrigin = `${box0.x + box0.width/2}px ${box0.y + box0.height/2}px`;
+    mc1.style.transformOrigin = `${box1.x + box1.width/2}px ${box1.y + box1.height/2}px`;
 
-    mc0.style.transformOrigin = `${cx0}px ${cy0}px`;
-    mc1.style.transformOrigin = `${cx1}px ${cy1}px`;
+    // 數學計算：讓 MC0 的高度縮小到跟 MC1 一樣高
+    scale0 = box1.height / box0.height;
 
-    // 步驟 A：計算 L0 縮小到跟 L1 一樣高的比例
-    const scale0_base = box1.height / box0.height;
-
-    // 步驟 B：模擬 L0 排到 L1 左側後的新座標 (L1 暫時當作原地不動)
-    const gap = 3; // L0 與 L1 之間的微小間距
-    const scaledWidth0 = box0.width * scale0_base;
-    const cx0_new = cx1 - (box1.width / 2) - gap - (scaledWidth0 / 2);
-    const cy0_new = cy1; // 垂直對齊
-
-    // 步驟 C：【核心】算出這個新排版 (L0 + L1) 的「共同中心點」
-    const minX = cx0_new - (scaledWidth0 / 2);
-    const maxX = cx1 + (box1.width / 2);
-    const combinedCx = (minX + maxX) / 2;
-    const combinedCy = cy1; // 垂直重心依然在 L1 的高度上
-    const combinedHeight = box1.height; // 因為兩者一樣高了
-
-    // 步驟 D：計算撐滿 viewBox 高度的全局放大倍率
-    // 設定放大到 31.5 (滿版 32 留下一點點防裁切邊緣)
-    const globalScale = 31.5 / combinedHeight;
-
-    // 步驟 E：將這個「新中心點」精準推移到 viewBox 的正中心 (16, 16)
-    // 這樣外層容器飛向目標圖片時，新排版的中心就會剛好落在圖片中心！
+    // 數學計算：讓縮小後的 MC0 排到 MC1 的左側
+    const gap = 20; // 兩個圖案重組後的間距 (可以依照視覺喜好微調這個數字)
+    const scaledWidth0 = box0.width * scale0;
     
-    // L1 的最終中心點：
-    const finalCx1 = 16 + (cx1 - combinedCx) * globalScale;
-    const finalCy1 = 16 + (cy1 - combinedCy) * globalScale;
-    
-    // L0 的最終中心點：
-    const finalCx0 = 16 + (cx0_new - combinedCx) * globalScale;
-    const finalCy0 = 16 + (cy0_new - combinedCy) * globalScale;
+    // MC0 目標 X 座標：MC1 的左邊界 - 間距 - MC0縮小後寬度的一半
+    const targetCenterX0 = box1.x - gap - (scaledWidth0 / 2);
+    const currentCenterX0 = box0.x + box0.width / 2;
+    translateX0 = targetCenterX0 - currentCenterX0;
 
-    // 換算成 CSS Translate (目標中心 - 原始中心)
-    tx1 = finalCx1 - cx1;
-    ty1 = finalCy1 - cy1;
-    finalScale1 = globalScale;
+    // MC0 目標 Y 座標：對齊 MC1 的垂直中心
+    const targetCenterY0 = box1.y + box1.height / 2;
+    const currentCenterY0 = box0.y + box0.height / 2;
+    translateY0 = targetCenterY0 - currentCenterY0;
 
-    tx0 = finalCx0 - cx0;
-    ty0 = finalCy0 - cy0;
-    finalScale0 = scale0_base * globalScale;
+    // (選用) 讓 MC1 也往右移動一點點，確保「組合後」的圖形視覺重心依然保持在中間
+    translateX1 = (box0.width - scaledWidth0) / 4; 
 
-    // 套用 0.8s 過渡動畫
+    // 賦予內部圖層滑順的變形動畫 (時間對齊外層的 0.8s)
     mc0.style.transition = 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
     mc1.style.transition = 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
   }
+  // ==========================================
 
-  // ==========================================
-  // ✨ 4. 外層：放心地飛向目標長方形，完美貼合 ✨
-  // ==========================================
+  // 4. 設定外層容器的飛行過渡動畫
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)'; 
 
+  // 5. 觸發動畫：外層飛向目標，內層改變排版
   requestAnimationFrame(() => {
-    // 容器直接變成目標長方形的大小
+    // 外層飛向目標圖片的位置與縮小
     logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
     logo.style.width = targetRect.width + 'px';
     logo.style.height = targetRect.height + 'px';
 
-    // 內部元素各自執行變形與排版重組
+    // 內層圖層各自飛向重組的位置
     if (mc0 && mc1) {
-      mc0.style.transform = `translate(${tx0}px, ${ty0}px) scale(${finalScale0})`;
-      mc1.style.transform = `translate(${tx1}px, ${ty1}px) scale(${finalScale1})`; 
+      mc0.style.transform = `translate(${translateX0}px, ${translateY0}px) scale(${scale0})`;
+      mc1.style.transform = `translateX(${translateX1}px)`; 
     }
   });
 
-  // 5. 動畫結束，無縫嵌入
+  // 6. 飛行結束後 (800ms)，正式落地嵌入網頁排版中
   setTimeout(() => {
     const targetWrapper = targetImg.parentElement;
     
+    // 清除絕對定位，回歸正常排版流
     logo.style.position = 'relative';
     logo.style.left = 'auto';
     logo.style.top = 'auto';
     logo.style.zIndex = 'auto';
     logo.style.transition = 'none';
     
-    // 完美繼承目標長方形的尺寸
-    logo.style.width = targetRect.width + 'px'; 
+    // 設定最終大小
     logo.style.height = targetRect.height + 'px';
+    logo.style.width = 'auto'; // 這裡改回 auto，因為內部排版變寬了，需要讓它自由伸展
     logo.style.display = 'inline-block';
     logo.style.verticalAlign = 'middle';
 
+    // 完美替換
     targetWrapper.replaceChild(logo, targetImg);
   }, 800);
 }
