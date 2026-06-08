@@ -4933,17 +4933,21 @@ function closeOverlayAndAnimateLogo() {
     logo.style.height = targetRect.height + 'px';
   });
 
-  // 內層 SVG：透過 JS requestAnimationFrame 讓畫布跟著縮放、L0 飛向 L1 旁邊
+  // 內層 SVG：透過 JS requestAnimationFrame 讓畫布跟著縮放
   const duration = 800;
   const startTime = performance.now();
 
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    // 匹配 css 的 cubic-bezier 滑順減速曲線
+    let progress = elapsed / duration;
+    
+    // 確保進度最多只到 100%
+    if (progress > 1) progress = 1;
+
+    // 匹配 CSS 的 cubic-bezier(0.25, 1, 0.5, 1) 滑順減速曲線
     const ease = 1 - Math.pow(1 - progress, 4); 
 
-    // 動態更新 viewBox：把原本 2/3 的空白處平滑地裁切掉！
+    // 動態更新 viewBox：把原本 2/3 的空白處平滑地裁切掉
     const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
     innerSvg.setAttribute('viewBox', currentVB.join(' '));
 
@@ -4953,44 +4957,41 @@ function closeOverlayAndAnimateLogo() {
     const currentS = 1 + (finalScale - 1) * ease;
     mc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
 
+    // 如果還沒跑完，繼續呼叫下一格
     if (progress < 1) {
       requestAnimationFrame(tween);
+    } 
+    // ✨ 核心修復：如果跑到最後一格了，在「同一個瞬間」執行替換，保證絕對零延遲！
+    else {
+      const targetWrapper = targetImg.parentElement;
+      
+      // 拔除飛行狀態
+      logo.style.position = 'relative';
+      logo.style.left = 'auto';
+      logo.style.top = 'auto';
+      logo.style.zIndex = 'auto';
+      logo.style.transition = 'none';
+
+      // 【終極響應式鎖定】完全鎖死它的物理佔位空間與比例，不讓瀏覽器亂猜
+      logo.style.width = targetRect.width + 'px';
+      logo.style.height = targetRect.height + 'px';
+      logo.style.maxWidth = '100%';
+      logo.style.aspectRatio = `${targetRect.width} / ${targetRect.height}`;
+      logo.style.display = 'inline-block';
+      logo.style.verticalAlign = 'middle';
+
+      // 強迫 SVG 100% 聽從外層容器的話，拔除任何會干擾的 auto 屬性
+      innerSvg.removeAttribute('width');
+      innerSvg.removeAttribute('height');
+      innerSvg.style.width = '100%';
+      innerSvg.style.height = '100%';
+      innerSvg.style.display = 'block';
+
+      // 完美替換
+      targetWrapper.replaceChild(logo, targetImg);
     }
   }
+  
+  // 啟動引擎
   requestAnimationFrame(tween);
-
-  // 5. 動畫結束，無縫嵌入
-  setTimeout(() => {
-    const targetWrapper = targetImg.parentElement;
-    
-    // 1. 外層容器回歸最單純的狀態，拔除死硬的像素寬高，交給內部 SVG 去撐開
-    logo.style.position = 'relative';
-    logo.style.left = 'auto';
-    logo.style.top = 'auto';
-    logo.style.zIndex = 'auto';
-    logo.style.transition = 'none';
-    
-    logo.style.display = 'inline-block';
-    logo.style.verticalAlign = 'middle';
-    logo.style.width = 'auto';
-    logo.style.height = 'auto';
-    logo.style.maxWidth = '100%'; // 外層最高防線
-
-    // 2. ✨ RWD 終極魔法：把屬性直接下在 SVG 本身 ✨
-    // 賦予 SVG 物理尺寸基準 (對齊目標圖片)
-    innerSvg.setAttribute('width', targetRect.width);
-    innerSvg.setAttribute('height', targetRect.height);
-    
-    // 套用完美響應式圖片 CSS (跟 img max-width: 100% 同理)
-    innerSvg.style.display = 'block';
-    innerSvg.style.width = '100%';
-    innerSvg.style.height = 'auto';
-    innerSvg.style.maxWidth = targetRect.width + 'px';
-    
-    // 【關鍵修復】關閉 overflow，防止 SVG 內部的隱形路徑撐破手機螢幕！
-    innerSvg.style.overflow = 'hidden';
-
-    // 完美替換
-    targetWrapper.replaceChild(logo, targetImg);
-  }, 800);
 }
