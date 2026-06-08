@@ -4930,42 +4930,54 @@ function closeOverlayAndAnimateLogo() {
     if (progress < 1) {
       requestAnimationFrame(tween);
     } else {
-      // 1. 確保容器具有 Flex 置中屬性，並且【絕對不加】overflow: hidden，讓它不會被切掉
+      // 1. 容器設定 (保持 Flex 與溢出可見)
       targetWrapper.style.display = 'flex';
       targetWrapper.style.justifyContent = 'center';
       targetWrapper.style.alignItems = 'center';
       targetWrapper.style.overflow = 'visible'; 
 
-      // 2. 拔除飛行狀態，回歸相對定位
+      // 2. 拔除飛行狀態
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
-      // 3. 【核心修正】：推算這塊 viewBox 在 105px 高度下的「真實物理寬度」
-      const finalRatio = endVB[2] / endVB[3]; // vbW / vbH
-      const physicalWidth = 85 * finalRatio;
+      // 3. 【徹底修正】：無視 viewBox 的膨脹，直接用圖案原始邊界計算比例
+      // 我們重新抓一次 MC0 和 MC1 的實體邊界，這是最原始且正確的比例
+      const b0 = mc0.getBBox();
+      const b1 = mc1.getBBox();
+      const minX = Math.min(targetX, b1.x); // 對應你數學中的定義
+      const maxX = Math.max(targetX + b0.width * finalScale, b1.x + b1.width);
+      const minY = Math.min(targetY, b1.y);
+      const maxY = Math.max(targetY + b0.height * finalScale, b1.y + b1.height);
+      
+      const realContentWidth = maxX - minX;
+      const realContentHeight = maxY - minY;
+      const realRatio = realContentWidth / realContentHeight; // 這是圖案真正的比例
 
-      // 4. 設定 Logo 容器
+      const finalHeight = 85; 
+      const physicalWidth = finalHeight * realRatio;
+
+      // 4. 設定 Logo 容器尺寸
       logo.style.display = 'block';
-      logo.style.width = physicalWidth + 'px'; // 強制賦予真實寬度 (即使大於螢幕)
-      logo.style.height = '85px'; 
-      logo.style.flexShrink = '0'; // 【魔法關鍵】：嚴禁 Flexbox 壓縮它！這保證它能超出邊界
-      logo.style.margin = '0';     // 【移除 margin auto】：讓父容器的 justify-content: center 發揮雙邊溢出作用
+      logo.style.width = physicalWidth + 'px'; 
+      logo.style.height = finalHeight + 'px'; 
+      logo.style.flexShrink = '0'; 
+      logo.style.margin = '0'; 
 
-      // 5. 讓 SVG 乖乖填滿我們設定好真實寬度的 Logo 容器
+      // 5. 設定 SVG 屬性
+      innerSvg.style.display = 'block';
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
-      innerSvg.style.display = 'block';
-      innerSvg.style.overflow = 'visible'; // 保證內容不被 SVG 標籤自己切掉
-
+      innerSvg.style.overflow = 'visible'; 
+      
       // 6. 清除舊圖並放入
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       targetWrapper.appendChild(logo);
       
-      innerSvg.style.border = "1px solid red"; // 你用來 Debug 的紅框
+      innerSvg.style.border = "1px solid red";
     }
   }
   requestAnimationFrame(tween);
