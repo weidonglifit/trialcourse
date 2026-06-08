@@ -4825,57 +4825,52 @@ function closeOverlayAndAnimateLogo() {
   
   if (!logo || !targetWrapper) return;
 
+  // 1. 紀錄動畫前的狀態
   const startRect = logo.getBoundingClientRect();
-  const targetRect = targetWrapper.getBoundingClientRect();
-
-  // 1. 準備起飛
-  document.body.appendChild(logo);
+  
+  // 2. 設定容器為固定定位，讓他「飛過去」
+  // 注意：我們不需要 appendChild，我們直接修改 logo 的 class 或 style
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
   logo.style.top = startRect.top + 'px';
   logo.style.width = startRect.width + 'px';
   logo.style.height = startRect.height + 'px';
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+  logo.style.zIndex = '999999';
 
-  // 2. 觸發飛行與視窗變化
+  // 3. 執行動畫
   requestAnimationFrame(() => {
+    const targetRect = targetWrapper.getBoundingClientRect();
     logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
     logo.style.width = targetRect.width + 'px';
     logo.style.height = targetRect.height + 'px';
   });
 
-  // 3. 落地後的「凍結與移交」
+  // 4. 動畫結束後的狀態歸位
   setTimeout(() => {
-    // 【關鍵修改】：在移交前，我們先將 mc0 的當前 transform 視覺狀態「凍結」
-    const mc0 = logo.querySelector('#layer-MC0');
-    if (mc0) {
-      // 取得當前視覺上的變形矩陣
-      const computedTransform = window.getComputedStyle(mc0).transform;
-      // 強制寫入 style，這樣即使 position 變了，視覺也不會動
-      mc0.style.transform = computedTransform; 
-    }
-
-    // 恢復排版模式
-    logo.style.position = 'relative';
+    // 【核心邏輯】：不要移除它，而是把它變成 inline 的一部分
+    logo.style.position = 'relative'; // 改回 relative
     logo.style.left = 'auto';
     logo.style.top = 'auto';
     logo.style.transition = 'none';
     
-    // 設定目標容器樣式
-    targetWrapper.style.display = 'flex';
-    targetWrapper.style.justifyContent = 'center';
-    targetWrapper.style.alignItems = 'center';
-    
-    // 強制設定 Logo 填滿容器
+    // 讓原本的動畫內容保留，不要重置
+    // 我們只調整容器大小，讓 flex 幫我們置中
     logo.style.width = '100%';
     logo.style.height = '105px';
-    logo.style.margin = '0';
     
-    // 放入
+    // 如果 mc0 跳掉，是因為 transform 被重置了
+    // 我們在 setTimeout 裡，透過直接給予一個不會被清除的 style 來鎖定
+    const mc0 = logo.querySelector('#layer-MC0');
+    if(mc0) {
+        // 直接取得目前 computed 的 style
+        const style = window.getComputedStyle(mc0);
+        mc0.style.transform = style.transform; 
+    }
+    
+    // 這時候再把 logo 放到目標容器內，因為它已經是 relative，
+    // 它會乖乖以「元素」身份進入 flex 容器，不會觸發 layout shift
     targetWrapper.appendChild(logo);
-    
-    // 放入後移除飛行期間的 transition，防止微小的抖動
-    logo.style.transition = 'none';
   }, 800);
 }
