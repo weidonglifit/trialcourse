@@ -4945,8 +4945,8 @@ function closeOverlayAndAnimateLogo() {
       logo.style.transition = 'none';
 
       logo.style.display = 'block';
-      logo.style.width = '100%';
-      logo.style.height = '105px'; // 強制鎖定高度
+      logo.style.width = 'auto'; // 寬度自動
+      logo.style.height = '100%';
       
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
