@@ -4937,18 +4937,10 @@ console.log("DEBUG: Target Wrapper Rect:", targetRect);
 
     if (progress < 1) {
       requestAnimationFrame(tween);
-    } else {
-      const finalLogoRect = logo.getBoundingClientRect();
-      const finalWrapperRect = targetWrapper.getBoundingClientRect();
+    } else {// 1. 拔除變形動畫，將 SVG 內部的變形完全重置
+      mc0.setAttribute('transform', ''); 
       
-      console.log("--- 最終落點分析 ---");
-      console.log("Logo 實際中心點:", finalLogoRect.left + finalLogoRect.width/2);
-      console.log("Wrapper 實際中心點:", finalWrapperRect.left + finalWrapperRect.width/2);
-      console.log("Logo 邊界:", finalLogoRect);
-      console.log("Wrapper 邊界:", finalWrapperRect);
-      console.log("差異 (Delta):", (finalLogoRect.left + finalLogoRect.width/2) - (finalWrapperRect.left + finalWrapperRect.width/2));
-      // ==========================================
-      // 5. 終極修正：直接插入容器，並由容器本身管理置中
+      // 2. 設定 Logo 容器排版
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
@@ -4956,18 +4948,27 @@ console.log("DEBUG: Target Wrapper Rect:", targetRect);
       logo.style.transition = 'none';
 
       logo.style.display = 'block';
+      logo.style.margin = '0 auto';
       logo.style.width = '100%';
-      logo.style.height = '105px'; // 強制鎖定高度
-      
+      logo.style.height = '105px';
+
+      // 3. 【核心修正】強迫 SVG 內容與 viewBox 對齊
+      // 移除所有動態變形，並讓 SVG 內部以 X, Y = 0 重新置中
+      innerSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
       innerSvg.style.display = 'block';
+      
+      // 最後一擊：強制重繪
+      innerSvg.style.overflow = 'hidden';
 
-      // 如果原本有舊圖片，先移除
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       
       targetWrapper.appendChild(logo);
+      
+      // 強制檢查 SVG 是否有被 internal transform 偏移
+      console.log("最終 SVG ViewBox:", innerSvg.getAttribute('viewBox'));
     }
   }
   requestAnimationFrame(tween);
