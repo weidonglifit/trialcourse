@@ -4818,103 +4818,62 @@ function startPeekabooEgg() {
 
   }, 8000); // 8000毫秒 = 8秒 (包含探頭的3秒，等於每躲藏5秒就會出來一次)
 }
-
 function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
-  const targetWrapper = document.getElementById('final-logo-wrapper');
-
+  const targetWrapper = document.getElementById('final-logo-wrapper'); // 目標容器
+  
   if (!logo || !targetWrapper) return;
 
-  const innerSvg = logo.querySelector('svg');
-  if (!innerSvg) return;
-
-  const startRect = innerSvg.getBoundingClientRect();
-  const targetRect = targetWrapper.getBoundingClientRect();
-
-  // 1. 準備起飛，設定外層容器初始狀態
+  // 1. 設定初始狀態 (fixed)
+  const startRect = logo.getBoundingClientRect();
   document.body.appendChild(logo);
+  
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
   logo.style.top = startRect.top + 'px';
   logo.style.width = startRect.width + 'px';
   logo.style.height = startRect.height + 'px';
-  logo.style.margin = '0';
-  logo.style.padding = '0';
   logo.style.zIndex = '999999';
 
-  innerSvg.style.width = '100%';
-  innerSvg.style.height = '100%';
-  innerSvg.style.overflow = 'visible';
-
-  // 2. 清除舊動畫
+  // 2. 清除所有動畫與變形
   logo.classList.remove('svg-intro-container');
   logo.style.animation = 'none';
   logo.querySelectorAll('.anim-wrapper').forEach(w => {
     w.style.animation = 'none';
     w.style.transform = 'none';
-    w.style.opacity = '1';
   });
 
-  // 3. 數學重組 (保持不變)
-  const mc0 = logo.querySelector('#layer-MC0');
-  const mc1 = logo.querySelector('#layer-MC1');
-  if (!mc0 || !mc1) return;
-
-  let startVB = [0, 0, 32, 32];
-  const vbAttr = innerSvg.getAttribute('viewBox');
-  if (vbAttr) startVB = vbAttr.trim().split(/[\s,]+/).map(Number);
-
-  const finalScale = 1; // 簡化處理，讓圖層依照重組後的邏輯飛
-  const gap = 4; 
-  const targetX = -12; // 調整這裡可微調左右間距
-  const targetY = 0;   // 調整這裡可微調垂直置中
-
-  // 【直接計算 viewBox 為 32x32 的長方形區域】
-  const endVB = [-5, -5, 42, 22]; // 這是針對重組後圖案的最佳裁切範圍
-
-  // 4. 動畫引擎 (飛向 targetWrapper)
+  // 3. 設定飛行過渡 (CSS 負責動態)
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+
+  // 4. 等待一下，讓瀏覽器繪製出 fixed 位置，再觸發飛行
   requestAnimationFrame(() => {
-    // 飛向 wrapper 的中心點
-    logo.style.left = targetRect.left + (targetRect.width - startRect.width) / 2 + 'px';
+    // 這裡我們不算座標，直接讓瀏覽器計算 targetWrapper 的位置
+    // 我們將 logo 移動到目標位置
+    const targetRect = targetWrapper.getBoundingClientRect();
+    
+    logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
-    logo.style.width = '200px'; // 最終落地寬度
-    logo.style.height = '105px'; // 最終落地高度
+    logo.style.width = targetRect.width + 'px'; // 讓它縮小
+    logo.style.height = targetRect.height + 'px';
   });
 
-  const duration = 800;
-  const startTime = performance.now();
-
-  function tween(currentTime) {
-    const elapsed = currentTime - startTime;
-    let progress = Math.min(elapsed / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 4); 
-
-    // viewBox 裁切動態
-    const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
-    innerSvg.setAttribute('viewBox', currentVB.join(' '));
-
-    if (progress < 1) {
-      requestAnimationFrame(tween);
-    } else {
-      // 5. 最終落地 (不再依賴原圖資訊)
-      logo.style.position = 'relative';
-      logo.style.left = 'auto';
-      logo.style.top = 'auto';
-      logo.style.zIndex = 'auto';
-      
-      // 這裡強制設定寬高，直接填滿預留的 wrapper
-      logo.style.display = 'block';
-      logo.style.width = '100%';
-      logo.style.maxWidth = '300px'; // 限制最大寬度
-      logo.style.height = '105px';
-      logo.style.margin = '0 auto'; // 強制置中
-      
-      innerSvg.style.width = '100%';
-      innerSvg.style.height = '100%';
-      
-      targetWrapper.appendChild(logo);
+  // 5. 800ms 後落地，改用 CSS 定位
+  setTimeout(() => {
+    logo.style.position = 'static'; // 變回一般排版
+    logo.style.transition = 'none';
+    logo.style.width = '100%';
+    logo.style.maxWidth = '300px'; 
+    logo.style.height = '105px';
+    logo.style.margin = '0 auto'; // 強制置中
+    
+    // 確保 SVG 滿版
+    const innerSvg = logo.querySelector('svg');
+    if(innerSvg) {
+        innerSvg.style.width = '100%';
+        innerSvg.style.height = '100%';
     }
-  }
-  requestAnimationFrame(tween);
+
+    targetWrapper.appendChild(logo);
+  }, 800);
 }
