@@ -4920,7 +4920,7 @@ function closeOverlayAndAnimateLogo() {
     const ease = 1 - Math.pow(1 - progress, 4); 
 
     if (progress) {
-      logo.style.opacity = 1 - progress;
+      logo.style.opacity = progress < 0.5 ? (1 - (progress / 0.5)) : 0;
     }
 
     const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
