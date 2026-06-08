@@ -4959,7 +4959,7 @@ function closeOverlayAndAnimateLogo() {
       const physicalWidth = 105 * finalRatio;
 
       logo.style.display = 'block';
-      logo.style.height = '105px';
+      logo.style.height = '85px';
       logo.style.width = physicalWidth + 'px'; // 賦予真實寬度，不限制 100%
       
       // 絕對置中魔法：放棄 margin: auto
