@@ -4983,8 +4983,8 @@ function closeOverlayAndAnimateLogo() {
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       logo.style.opacity = '0';
-      logo.style.transform = 'translateY(10px)'; // 從下方 10px 開始
-      logo.style.transition = 'opacity 0.4s ease, transform 0.4s ease'; // 給予平滑過渡
+      logo.style.transform = 'translateY(20px)'; // 從下方 10px 開始
+      logo.style.transition = 'opacity 1s ease, transform 1s ease'; // 給予平滑過渡
       
       // 放入 DOM
       targetWrapper.appendChild(logo);
