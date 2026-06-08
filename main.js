@@ -4954,12 +4954,12 @@ function closeOverlayAndAnimateLogo() {
 
       // 3. 【核心修正】：推算這塊 viewBox 在 105px 高度下的「真實物理寬度」
       const finalRatio = endVB[2] / endVB[3]; // vbW / vbH
-      const physicalWidth = 105 * finalRatio;
+      const physicalWidth = 95 * finalRatio;
 
       // 4. 設定 Logo 容器
       logo.style.display = 'block';
       logo.style.width = physicalWidth + 'px'; // 強制賦予真實寬度 (即使大於螢幕)
-      logo.style.height = '105px'; 
+      logo.style.height = '95px'; 
       logo.style.flexShrink = '0'; // 【魔法關鍵】：嚴禁 Flexbox 壓縮它！這保證它能超出邊界
       logo.style.margin = '0';     // 【移除 margin auto】：讓父容器的 justify-content: center 發揮雙邊溢出作用
 
