@@ -3192,7 +3192,7 @@ select {
 .bottom-loading-group {
   position: absolute;
   /* 與上方的 calc(7% + 75px) 形成完美的上下對稱 */
-  bottom: calc(7% + 65px); 
+  bottom: calc(7% + 60px); 
   left: 50%;
   transform: translateX(-50%);
   z-index: 10001; /* 確保在遮罩之上 */
@@ -3549,8 +3549,8 @@ select {
 }
 
 .custom-spinner {
-  width: 45px;
-  height: 45px;
+  width: 50px;
+  height: 50px;
 }
 
 /* 1. 外圈動畫（總長度 88） */
