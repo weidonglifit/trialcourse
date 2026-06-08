@@ -3546,12 +3546,11 @@ select {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 10px 0;
 }
 
 .custom-spinner {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
 }
 
 /* 1. 外圈動畫（總長度 88） */
