@@ -4937,38 +4937,37 @@ console.log("DEBUG: Target Wrapper Rect:", targetRect);
 
     if (progress < 1) {
       requestAnimationFrame(tween);
-    } else {// 1. 拔除變形動畫，將 SVG 內部的變形完全重置
-      mc0.setAttribute('transform', ''); 
-      
-      // 2. 設定 Logo 容器排版
+    } else {
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
+      // 2. 徹底解決對齊的關鍵：強制修正 SVG 的 viewBox 偏移
+      // 將 ViewBox 強制設為原本的計算結果，但強制中心點歸位
+      // 這裡直接取我們計算好的 endVB 的寬高，但強制 x, y 歸零對齊
+      const fixedVB = [0, 0, endVB[2], endVB[3]]; 
+      innerSvg.setAttribute('viewBox', fixedVB.join(' '));
+      innerSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+      // 3. CSS 暴力置中
       logo.style.display = 'block';
       logo.style.margin = '0 auto';
       logo.style.width = '100%';
+      logo.style.maxWidth = '300px'; // 確保不要超出容器
       logo.style.height = '105px';
 
-      // 3. 【核心修正】強迫 SVG 內容與 viewBox 對齊
-      // 移除所有動態變形，並讓 SVG 內部以 X, Y = 0 重新置中
-      innerSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      // 4. 清除可能殘留的殘影
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
-      innerSvg.style.display = 'block';
       
-      // 最後一擊：強制重繪
-      innerSvg.style.overflow = 'hidden';
-
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       
       targetWrapper.appendChild(logo);
       
-      // 強制檢查 SVG 是否有被 internal transform 偏移
-      console.log("最終 SVG ViewBox:", innerSvg.getAttribute('viewBox'));
+      console.log("最終修復後的 viewBox:", innerSvg.getAttribute('viewBox'));
     }
   }
   requestAnimationFrame(tween);
