@@ -4825,45 +4825,57 @@ function closeOverlayAndAnimateLogo() {
   
   if (!logo || !targetWrapper) return;
 
-  // 1. 取得當前真實座標 (相對視窗)
   const startRect = logo.getBoundingClientRect();
   const targetRect = targetWrapper.getBoundingClientRect();
 
-  // 2. 將 logo 變成固定定位，準備開始飛行
+  // 1. 準備起飛
   document.body.appendChild(logo);
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
   logo.style.top = startRect.top + 'px';
   logo.style.width = startRect.width + 'px';
   logo.style.height = startRect.height + 'px';
-  logo.style.zIndex = '999999';
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
 
-  // 3. 觸發位移 (讓 CSS 自動完成動畫)
+  // 2. 觸發飛行與視窗變化
   requestAnimationFrame(() => {
     logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
     logo.style.width = targetRect.width + 'px';
     logo.style.height = targetRect.height + 'px';
-    
-    // 如果要裁切 SVG，這裡只需要調整一次 viewBox 即可，不需要逐格
-    // 瀏覽器會自動處理屬性的過渡 (如果瀏覽器支援)
-    // 或者直接跳過裁切動畫，落地後再切換內容
   });
 
-  // 4. 落地後無縫接軌 (使用 setTimeout 等待 CSS 動畫結束)
+  // 3. 落地後的「凍結與移交」
   setTimeout(() => {
-    // 恢復為標準排版
+    // 【關鍵修改】：在移交前，我們先將 mc0 的當前 transform 視覺狀態「凍結」
+    const mc0 = logo.querySelector('#layer-MC0');
+    if (mc0) {
+      // 取得當前視覺上的變形矩陣
+      const computedTransform = window.getComputedStyle(mc0).transform;
+      // 強制寫入 style，這樣即使 position 變了，視覺也不會動
+      mc0.style.transform = computedTransform; 
+    }
+
+    // 恢復排版模式
     logo.style.position = 'relative';
     logo.style.left = 'auto';
     logo.style.top = 'auto';
     logo.style.transition = 'none';
     
-    // 調整大小以符合容器
+    // 設定目標容器樣式
+    targetWrapper.style.display = 'flex';
+    targetWrapper.style.justifyContent = 'center';
+    targetWrapper.style.alignItems = 'center';
+    
+    // 強制設定 Logo 填滿容器
     logo.style.width = '100%';
     logo.style.height = '105px';
+    logo.style.margin = '0';
     
-    // 放入容器，讓 Flexbox 瞬間對齊
+    // 放入
     targetWrapper.appendChild(logo);
+    
+    // 放入後移除飛行期間的 transition，防止微小的抖動
+    logo.style.transition = 'none';
   }, 800);
 }
