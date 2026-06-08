@@ -4836,23 +4836,31 @@ function closeOverlayAndAnimateLogo() {
   // 2. 取得目標圖片的位置與大小 (終點)
   const targetRect = targetImg.getBoundingClientRect();
 
-  // 3. 將 Logo 移出 overlay，直接掛在 body 上，這樣才不會被 overlay 的隱藏影響
+  // 3. 將 Logo 移出 overlay，直接掛在 body 上
   document.body.appendChild(logo);
 
-  // 4. 設定 Logo 的初始固定位置，確保它不會因為換了 DOM 節點而亂跳
+  // 4. 設定 Logo 的初始固定位置
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
   logo.style.top = startRect.top + 'px';
   logo.style.width = startRect.width + 'px';
   logo.style.height = startRect.height + 'px';
   logo.style.margin = '0';
-  logo.style.zIndex = '99999'; // 確保在最上層
+  logo.style.zIndex = '99999';
 
-  // 5. 停止所有的呼吸或開場動畫
+  // ==========================================
+  // ✨ 5. 停止所有碎片保護衣的動畫 (更新這裡) ✨
+  // ==========================================
   logo.classList.remove('svg-intro-container'); 
-  logo.style.animation = 'none';
-  const innerSvg = logo.querySelector('svg');
-  if (innerSvg) innerSvg.style.animation = 'none';
+  logo.style.animation = 'none'; // 停掉外層可能有的動畫
+  
+  // 抓出所有你剛剛動態產生的 <g class="anim-wrapper"> 並且把動畫關掉
+  const animWrappers = logo.querySelectorAll('.anim-wrapper');
+  animWrappers.forEach(wrapper => {
+    wrapper.style.animation = 'none'; 
+    // 停掉動畫後，它們會瞬間回歸到原始 SVG 的正確座標，變成一個完整的 Logo！
+  });
+  // ==========================================
 
   // 6. 漸隱關閉 Overlay
   if (overlay) {
@@ -4862,9 +4870,9 @@ function closeOverlayAndAnimateLogo() {
   }
 
   // 7. 設定 CSS 過渡動畫，準備起飛
-  logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)'; // 給一個滑順的減速動態
+  logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)'; 
 
-  // 8. 延遲一小段時間 (讓瀏覽器先繪製起點)，然後改變座標讓它飛向終點
+  // 8. 延遲一小段時間讓瀏覽器重繪，然後飛向終點
   requestAnimationFrame(() => {
     logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
@@ -4872,18 +4880,18 @@ function closeOverlayAndAnimateLogo() {
     logo.style.height = targetRect.height + 'px';
   });
 
-  // 9. 當 0.8 秒飛行結束後，把 Logo 正式塞進目標容器，並把原本的 img 刪除
+  // 9. 0.8 秒飛行結束後，塞進目標容器並刪除原本的 img
   setTimeout(() => {
     const targetWrapper = targetImg.parentElement;
     
-    // 將 fixed 定位拔除，回歸正常的網頁排版流
+    // 將 fixed 定位拔除，回歸正常排版
     logo.style.position = 'relative';
     logo.style.left = 'auto';
     logo.style.top = 'auto';
     logo.style.zIndex = 'auto';
     logo.style.transition = 'none';
     
-    // 設定最終大小以符合原本圖片的高度
+    // 設定最終大小
     logo.style.height = '105px';
     logo.style.width = 'auto'; 
     logo.style.display = 'inline-block';
