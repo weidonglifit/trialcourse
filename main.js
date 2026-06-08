@@ -4886,8 +4886,22 @@ function closeOverlayAndAnimateLogo() {
   const minY = Math.min(targetY, box1.y);
   const maxY = Math.max(targetY + box0.height * finalScale, box1.y + box1.height);
 
-  const contentW = maxX - minX;
-  const contentH = maxY - minY;
+  const contentW = (maxX - minX) * 1.04;
+  const contentH = (maxY - minY) * 1.04;
+  const padX = 0;
+  const padY = (contentH - (maxY - minY)) / 2;
+
+  const targetAR = targetRect.width / targetRect.height;
+  const contentAR = contentW / contentH;
+
+  let vbW, vbH;
+  if (contentAR > targetAR) {
+    vbW = contentW;
+    vbH = vbW / targetAR;
+  } else {
+    vbH = contentH;
+    vbW = vbH * targetAR;
+  }
 
   const vbX = minX - padX - (vbW - contentW) / 2;
   const vbY = minY - padY - (vbH - contentH) / 2;
