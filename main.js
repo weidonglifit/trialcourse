@@ -4919,6 +4919,11 @@ function closeOverlayAndAnimateLogo() {
     let progress = Math.min(elapsed / duration, 1);
     const ease = 1 - Math.pow(1 - progress, 4); 
 
+    if (progress > 0.8) {
+      const fadeOutProgress = (progress - 0.8) / 0.15; // 0.8~0.95 之間過渡
+      logo.style.opacity = Math.max(0, 1 - fadeOutProgress);
+    }
+
     const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
     innerSvg.setAttribute('viewBox', currentVB.join(' '));
 
@@ -4977,11 +4982,21 @@ function closeOverlayAndAnimateLogo() {
       // 6. 清除舊圖並放入
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
+      logo.style.opacity = '0';
+      logo.style.transform = 'translateY(10px)'; // 從下方 10px 開始
+      logo.style.transition = 'opacity 0.4s ease, transform 0.4s ease'; // 給予平滑過渡
+      
+      // 放入 DOM
       targetWrapper.appendChild(logo);
       
-      innerSvg.style.border = "1px solid red"; 
+      // 觸發重繪後讓它浮現
+      requestAnimationFrame(() => {
+        logo.style.opacity = '1';
+        logo.style.transform = 'translateY(0)';
+      });
       
-      console.log("✅ 強制寬度已寫入:", physicalWidth);
+      innerSvg.style.border = "1px solid red"; 
+      console.log("✅ 障眼法已執行：位移與尺寸已重設。");
     }
   }
   requestAnimationFrame(tween);
