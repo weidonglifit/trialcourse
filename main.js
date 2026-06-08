@@ -4920,7 +4920,8 @@ function closeOverlayAndAnimateLogo() {
 
   const duration = 800;
   const startTime = performance.now();
-
+console.log("DEBUG: Target Wrapper Rect:", targetRect);
+  console.log("DEBUG: Final viewBox Target:", endVB);
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
     let progress = Math.min(elapsed / duration, 1);
@@ -4937,6 +4938,16 @@ function closeOverlayAndAnimateLogo() {
     if (progress < 1) {
       requestAnimationFrame(tween);
     } else {
+      const finalLogoRect = logo.getBoundingClientRect();
+      const finalWrapperRect = targetWrapper.getBoundingClientRect();
+      
+      console.log("--- 最終落點分析 ---");
+      console.log("Logo 實際中心點:", finalLogoRect.left + finalLogoRect.width/2);
+      console.log("Wrapper 實際中心點:", finalWrapperRect.left + finalWrapperRect.width/2);
+      console.log("Logo 邊界:", finalLogoRect);
+      console.log("Wrapper 邊界:", finalWrapperRect);
+      console.log("差異 (Delta):", (finalLogoRect.left + finalLogoRect.width/2) - (finalWrapperRect.left + finalWrapperRect.width/2));
+      // ==========================================
       // 5. 終極修正：直接插入容器，並由容器本身管理置中
       logo.style.position = 'relative';
       logo.style.left = 'auto';
@@ -4946,7 +4957,7 @@ function closeOverlayAndAnimateLogo() {
 
       logo.style.display = 'block';
       logo.style.width = '100%';
-      logo.style.height = '75px'; // 強制鎖定高度
+      logo.style.height = '105px'; // 強制鎖定高度
       
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
