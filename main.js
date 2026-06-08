@@ -4919,8 +4919,9 @@ function closeOverlayAndAnimateLogo() {
     let progress = Math.min(elapsed / duration, 1);
     const ease = 1 - Math.pow(1 - progress, 4); 
 
-    if (progress >= 0.6 && !logo.classList.contains('fade-out-trigger')) {
-      logo.classList.add('fade-out-trigger');
+    if (progress > 0.4) {
+      const fadeOutProgress = (progress - 0.4) / 0.15; // 0.8~0.95 之間過渡
+      logo.style.opacity = Math.max(0, 1 - fadeOutProgress);
     }
 
     const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
