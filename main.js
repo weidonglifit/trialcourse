@@ -4919,7 +4919,7 @@ function closeOverlayAndAnimateLogo() {
     let progress = Math.min(elapsed / duration, 1);
     const ease = 1 - Math.pow(1 - progress, 4); 
 
-    if (progress >= 0.8 && !logo.classList.contains('fade-out-trigger')) {
+    if (progress >= 0.6 && !logo.classList.contains('fade-out-trigger')) {
       logo.classList.add('fade-out-trigger');
     }
 
