@@ -4972,25 +4972,24 @@ function closeOverlayAndAnimateLogo() {
       requestAnimationFrame(tween);
     } else {
       // ==========================================
-      // ✨ 6. 完美落地接軌與數據核對 ✨
+      // ✨ 6. 極致純淨落地接軌 (不碰任何 SVG 內部屬性) ✨
       // ==========================================
-      console.group("🛬 [Phase 4: 落地數據核對]");
-      
-      // 【核對 A：記錄飛行結束瞬間、尚未交接給 Flex 的絕對座標】
-      const preLandRect = logo.getBoundingClientRect();
-      console.log("🛑 [Pre-Land] 飛行結束瞬間，Logo 停在的絕對座標:", preLandRect);
+      console.log("🛬 [Land] 動畫抵達終點，執行純淨移交...");
 
+      // 1. 設定外層目標容器為 Flex 置中
       targetWrapper.style.display = 'flex';
       targetWrapper.style.justifyContent = 'center';
       targetWrapper.style.alignItems = 'center';
       targetWrapper.style.overflow = 'visible'; 
 
+      // 2. 拔除飛行狀態的 fixed，恢復相對定位讓 Flex 接手
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
+      // 3. 嚴格鎖定外層 DOM 容器的尺寸 (不要用 Math.round，保留小數點精確度)
       logo.style.cssText = `
         display: block !important;
         width: ${physicalWidth}px !important;
@@ -5002,44 +5001,18 @@ function closeOverlayAndAnimateLogo() {
         min-width: ${physicalWidth}px !important;
       `;
 
-      innerSvg.style.cssText = `
-        display: block !important;
-        width: ${physicalWidth}px !important;
-        height: 75px !important;
-        max-width: none !important;
-        min-width: ${physicalWidth}px !important;
-        overflow: visible !important;
-      `;
-      
-      innerSvg.removeAttribute('preserveAspectRatio');
-      innerSvg.setAttribute('width', Math.round(physicalWidth));
-      innerSvg.setAttribute('height', 75);
-      
+      // 🚫 【關鍵排雷】：不要再去覆寫 innerSvg.style.cssText
+      // 🚫 【關鍵排雷】：不要去 removeAttribute('preserveAspectRatio')
+      // 🚫 【關鍵排雷】：不要去 setAttribute('width', Math.round(physicalWidth))
+      // 讓 SVG 保持最後一幀 (progress = 1) 時最完美的狀態！
+
+      // 4. 清除舊圖並放入
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       targetWrapper.appendChild(logo);
       
       innerSvg.style.border = "1px solid red"; 
-      
-      // 【核對 B：記錄交接給 Flex 之後，瀏覽器實際渲染的絕對座標】
-      // 需要包在 rAF 確保 DOM 更新完畢
-      requestAnimationFrame(() => {
-        const postLandRect = logo.getBoundingClientRect();
-        console.log("✅ [Post-Land] 交給 Flex 排版後，實際渲染的絕對座標:", postLandRect);
-        
-        // 【核對 C：計算瞬移誤差】
-        const diffX = postLandRect.left - preLandRect.left;
-        const diffY = postLandRect.top - preLandRect.top;
-        
-        console.log(`🔎 [Diff] 落地前後座標誤差 -> X偏移: ${diffX}px, Y偏移: ${diffY}px`);
-        
-        if (Math.abs(diffX) > 1 || Math.abs(diffY) > 1) {
-          console.warn("⚠️ [Warning] 發現顯著的舜移跳動！請檢查上面的 [Target CSS] 是否有 padding干擾，或是目標容器在 800ms 內尺寸發生了改變。");
-        } else {
-          console.log("🎉 [Success] 誤差在 1px 內，完美對齊！");
-        }
-        console.groupEnd();
-      });
+      console.log("✅ [Success] 移交完成！去除了 SVG 內部屬性干擾。");
     }
   }
   requestAnimationFrame(tween);
