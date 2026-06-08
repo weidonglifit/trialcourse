@@ -2703,6 +2703,7 @@ function closeOverlay() {
   }
   const overlay = document.getElementById('video-overlay');
   if (overlay) {
+    closeOverlayAndAnimateLogo();
     overlay.classList.add('exit-animation'); // 直接套用 CSS 動畫
 
     const aiWidget = document.getElementById('ai-chat-widget');
@@ -4816,4 +4817,79 @@ function startPeekabooEgg() {
     }, 3000);
 
   }, 8000); // 8000毫秒 = 8秒 (包含探頭的3秒，等於每躲藏5秒就會出來一次)
+}
+
+function closeOverlayAndAnimateLogo() {
+  const overlay = document.querySelector('.video-overlay');
+  const logo = document.getElementById('logo-container');
+  const targetImg = document.getElementById('target-title-img');
+
+  // 防呆：如果找不到元素就直接關閉 overlay 退出
+  if (!logo || !targetImg) {
+    if(overlay) overlay.style.display = 'none';
+    return;
+  }
+
+  // 1. 取得 Logo 現在的位置與大小 (起點)
+  const startRect = logo.getBoundingClientRect();
+  
+  // 2. 取得目標圖片的位置與大小 (終點)
+  const targetRect = targetImg.getBoundingClientRect();
+
+  // 3. 將 Logo 移出 overlay，直接掛在 body 上，這樣才不會被 overlay 的隱藏影響
+  document.body.appendChild(logo);
+
+  // 4. 設定 Logo 的初始固定位置，確保它不會因為換了 DOM 節點而亂跳
+  logo.style.position = 'fixed';
+  logo.style.left = startRect.left + 'px';
+  logo.style.top = startRect.top + 'px';
+  logo.style.width = startRect.width + 'px';
+  logo.style.height = startRect.height + 'px';
+  logo.style.margin = '0';
+  logo.style.zIndex = '99999'; // 確保在最上層
+
+  // 5. 停止所有的呼吸或開場動畫
+  logo.classList.remove('svg-intro-container'); 
+  logo.style.animation = 'none';
+  const innerSvg = logo.querySelector('svg');
+  if (innerSvg) innerSvg.style.animation = 'none';
+
+  // 6. 漸隱關閉 Overlay
+  if (overlay) {
+    overlay.style.transition = 'opacity 0.5s ease';
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.style.display = 'none', 500);
+  }
+
+  // 7. 設定 CSS 過渡動畫，準備起飛
+  logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)'; // 給一個滑順的減速動態
+
+  // 8. 延遲一小段時間 (讓瀏覽器先繪製起點)，然後改變座標讓它飛向終點
+  requestAnimationFrame(() => {
+    logo.style.left = targetRect.left + 'px';
+    logo.style.top = targetRect.top + 'px';
+    logo.style.width = targetRect.width + 'px';
+    logo.style.height = targetRect.height + 'px';
+  });
+
+  // 9. 當 0.8 秒飛行結束後，把 Logo 正式塞進目標容器，並把原本的 img 刪除
+  setTimeout(() => {
+    const targetWrapper = targetImg.parentElement;
+    
+    // 將 fixed 定位拔除，回歸正常的網頁排版流
+    logo.style.position = 'relative';
+    logo.style.left = 'auto';
+    logo.style.top = 'auto';
+    logo.style.zIndex = 'auto';
+    logo.style.transition = 'none';
+    
+    // 設定最終大小以符合原本圖片的高度
+    logo.style.height = '105px';
+    logo.style.width = 'auto'; 
+    logo.style.display = 'inline-block';
+    logo.style.verticalAlign = 'middle';
+
+    // 替換掉原本的靜態圖片
+    targetWrapper.replaceChild(logo, targetImg);
+  }, 800);
 }
