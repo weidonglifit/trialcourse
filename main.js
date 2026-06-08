@@ -4820,70 +4820,61 @@ function startPeekabooEgg() {
 }
 
 function closeOverlayAndAnimateLogo() {
-  const overlay = document.querySelector('.video-overlay');
   const logo = document.getElementById('logo-container');
   const targetImg = document.getElementById('target-title-img');
 
-  // 防呆：確保元素都存在
-  if (!logo || !targetImg) {
-    if(overlay) overlay.style.display = 'none';
-    return;
-  }
+  if (!logo || !targetImg) return;
 
-  // 取得起點與終點的座標大小
-  const startRect = logo.getBoundingClientRect();
+  // 【修正 1】我們必須找到裡面真正的 SVG 圖形
+  const innerSvg = logo.querySelector('svg');
+  if (!innerSvg) return;
+
+  // 【修正 2】抓取起點座標：一定要抓 SVG 實體的邊界，而不是外層 div！
+  const startRect = innerSvg.getBoundingClientRect();
   const targetRect = targetImg.getBoundingClientRect();
 
-  // 【致命錯誤防呆】如果算出寬度是 0，代表 Overlay 在這之前已經被其他程式關掉了
   if (startRect.width === 0 || targetRect.width === 0) {
     console.warn("抓不到座標，直接替換圖片");
     targetImg.parentElement.replaceChild(logo, targetImg);
-    if(overlay) overlay.style.display = 'none';
     return;
   }
 
-  // 【修正 1】強制內部 SVG 填滿容器，這樣飛到一半才不會因為外框縮小而被裁切或消失
-  const innerSvg = logo.querySelector('svg');
-  if (innerSvg) {
-    innerSvg.style.width = '100%';
-    innerSvg.style.height = '100%';
-    innerSvg.style.animation = 'none';
-  }
-
-  // 移出 overlay，準備起飛
+  // 移出 overlay，放在 body 的最外層，避免被父層的 CSS 影響
   document.body.appendChild(logo);
 
+  // 【修正 3】把原本可能很大的 div 容器，強迫縮小到跟裡面的 SVG 一模一樣大
+  // 並且對準肉眼看到的位置 (startRect)
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
   logo.style.top = startRect.top + 'px';
   logo.style.width = startRect.width + 'px';
   logo.style.height = startRect.height + 'px';
   logo.style.margin = '0';
+  logo.style.padding = '0';
+  logo.style.transform = 'none'; // 拔除任何可能干擾座標的 CSS 位移
   logo.style.zIndex = '999999';
 
-  // 停止外層動畫
+  // 確保內部 SVG 滿版撐開這個縮小後的容器
+  innerSvg.style.width = '100%';
+  innerSvg.style.height = '100%';
+  innerSvg.style.animation = 'none';
+
+  // 拔除舊有的置中 class 與外層動畫
   logo.classList.remove('svg-intro-container'); 
   logo.style.animation = 'none'; 
-  
-  // 【修正 2】停止所有碎片的動畫，並「強制歸零」變形與透明度，確保完整現身！
+
+  // 關閉碎片保護衣動畫並重置型態
   const animWrappers = logo.querySelectorAll('.anim-wrapper');
   animWrappers.forEach(wrapper => {
     wrapper.style.animation = 'none'; 
-    wrapper.style.transform = 'none'; // 避免碎片卡在半空中的某個變形角度
-    wrapper.style.opacity = '1';      // 確保碎片不是透明狀態
+    wrapper.style.transform = 'none'; 
+    wrapper.style.opacity = '1';      
   });
 
-  // 關閉黑色背景
-  if (overlay) {
-    overlay.style.transition = 'opacity 0.4s ease';
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.style.display = 'none', 400);
-  }
-
-  // 啟動飛行過渡動畫
+  // 設定飛行過渡動畫，時間對齊你外部的 800ms
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)'; 
 
-  // 設定目標位置，觸發飛行
+  // 用 requestAnimationFrame 確保瀏覽器先畫好「起點」，再賦予「終點」觸發飛行
   requestAnimationFrame(() => {
     logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
@@ -4891,23 +4882,24 @@ function closeOverlayAndAnimateLogo() {
     logo.style.height = targetRect.height + 'px';
   });
 
-  // 飛行結束後，正式替換 DOM 節點
+  // 800ms 飛行結束後，正式落地嵌入網頁排版中
   setTimeout(() => {
     const targetWrapper = targetImg.parentElement;
     
+    // 清除絕對定位，回歸正常排版流
     logo.style.position = 'relative';
     logo.style.left = 'auto';
     logo.style.top = 'auto';
     logo.style.zIndex = 'auto';
     logo.style.transition = 'none';
     
-    // 【修正 3】不能用 auto！DIV 遇到 auto 會坍塌成 0px，直接寫死目標圖片的確切寬度
+    // 設定最終大小
     logo.style.height = targetRect.height + 'px';
     logo.style.width = targetRect.width + 'px'; 
     logo.style.display = 'inline-block';
     logo.style.verticalAlign = 'middle';
 
-    // 替換掉原本的靜態圖片
+    // 完美替換
     targetWrapper.replaceChild(logo, targetImg);
   }, 800);
 }
