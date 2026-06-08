@@ -4843,21 +4843,6 @@ function closeOverlayAndAnimateLogo() {
     return;
   }
 
-  console.group("🚀 [Phase 1: 環境與起點數據偵測]");
-  console.log("📍 [Start Rect] 原始位置:", { left: startRect.left, top: startRect.top, width: startRect.width, height: startRect.height });
-  console.log("🎯 [Target Rect] 目標容器:", { left: targetRect.left, top: targetRect.top, width: targetRect.width, height: targetRect.height });
-  console.log("🎯 [Target Center] 目標容器螢幕絕對中心點:", { 
-    x: targetRect.left + targetRect.width / 2, 
-    y: targetRect.top + targetRect.height / 2 
-  });
-  console.log("📦 [Target CSS] 容器內部樣式 (檢查是否有 padding/border 擠壓):", {
-    paddingLeft: wrapperStyle.paddingLeft,
-    paddingRight: wrapperStyle.paddingRight,
-    borderLeftWidth: wrapperStyle.borderLeftWidth,
-    boxSizing: wrapperStyle.boxSizing
-  });
-  console.groupEnd();
-
   // 1. 準備起飛，設定外層容器初始狀態
   document.body.appendChild(logo);
   logo.style.position = 'fixed';
@@ -4914,13 +4899,6 @@ function closeOverlayAndAnimateLogo() {
   const contentH = maxY - minY;
   const endVB = [minX, minY, contentW, contentH];
 
-  console.group("🧮 [Phase 2: 大師級數學計算結果]");
-  console.log("📐 [BBox] MC0:", box0);
-  console.log("📐 [BBox] MC1:", box1);
-  console.log("⚙️ [Transform] endTx:", endTx, "endTy:", endTy, "finalScale:", finalScale);
-  console.log("🖼️ [ViewBox] Start:", startVB, "-> End:", endVB);
-  console.groupEnd();
-
   // ==========================================
   // ✨ 4. 核心物理尺寸與 Flex 置中數學模擬 ✨
   // ==========================================
@@ -4929,15 +4907,6 @@ function closeOverlayAndAnimateLogo() {
 
   const finalLeft = targetRect.left + (targetRect.width - physicalWidth) / 2;
   const finalTop = targetRect.top + (targetRect.height - 75) / 2;
-
-  console.group("📏 [Phase 3: 物理尺寸與模擬靶心]");
-  console.log("📐 [Size] 計算出的實體寬度 physicalWidth:", physicalWidth);
-  console.log("🎯 [Target] 數學算出的絕對置中座標: Left =", finalLeft, "Top =", finalTop);
-  console.log("🎯 [Target Center] 預計飛行落點的中心點:", {
-    x: finalLeft + physicalWidth / 2,
-    y: finalTop + 75 / 2
-  });
-  console.groupEnd();
 
   // ==========================================
   // ✨ 5. 啟動電影級飛行 ✨
@@ -4949,7 +4918,6 @@ function closeOverlayAndAnimateLogo() {
     logo.style.top = finalTop + 'px';
     logo.style.width = physicalWidth + 'px';
     logo.style.height = '75px';
-    console.log("✈️ [Anim] 飛行轉場已觸發...");
   });
 
   const duration = 3000;
@@ -4992,7 +4960,7 @@ function closeOverlayAndAnimateLogo() {
       // ==========================================
       // ✨ 6. 極致純淨落地接軌 (不碰任何 SVG 內部屬性) ✨
       // ==========================================
-      console.log("🛬 [Land] 動畫抵達終點，執行純淨移交...");
+      
 
       // 1. 設定外層目標容器為 Flex 置中
       targetWrapper.style.display = 'flex';
@@ -5030,7 +4998,7 @@ function closeOverlayAndAnimateLogo() {
       targetWrapper.appendChild(logo);
       
       
-      console.log("✅ [Success] 移交完成！去除了 SVG 內部屬性干擾。");
+      
     }
   }
   requestAnimationFrame(tween);
