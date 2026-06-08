@@ -4825,25 +4825,19 @@ function closeOverlayAndAnimateLogo() {
 
   if (!logo || !targetImg) return;
 
-  // 【修正 1】我們必須找到裡面真正的 SVG 圖形
   const innerSvg = logo.querySelector('svg');
   if (!innerSvg) return;
 
-  // 【修正 2】抓取起點座標：一定要抓 SVG 實體的邊界，而不是外層 div！
   const startRect = innerSvg.getBoundingClientRect();
   const targetRect = targetImg.getBoundingClientRect();
 
   if (startRect.width === 0 || targetRect.width === 0) {
-    console.warn("抓不到座標，直接替換圖片");
     targetImg.parentElement.replaceChild(logo, targetImg);
     return;
   }
 
-  // 移出 overlay，放在 body 的最外層，避免被父層的 CSS 影響
+  // 1. 準備起飛：把外層容器設定為絕對定位
   document.body.appendChild(logo);
-
-  // 【修正 3】把原本可能很大的 div 容器，強迫縮小到跟裡面的 SVG 一模一樣大
-  // 並且對準肉眼看到的位置 (startRect)
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
   logo.style.top = startRect.top + 'px';
@@ -4851,19 +4845,18 @@ function closeOverlayAndAnimateLogo() {
   logo.style.height = startRect.height + 'px';
   logo.style.margin = '0';
   logo.style.padding = '0';
-  logo.style.transform = 'none'; // 拔除任何可能干擾座標的 CSS 位移
+  logo.style.transform = 'none'; 
   logo.style.zIndex = '999999';
 
-  // 確保內部 SVG 滿版撐開這個縮小後的容器
   innerSvg.style.width = '100%';
   innerSvg.style.height = '100%';
-  innerSvg.style.animation = 'none';
+  
+  // 【關鍵修正】：因為內部圖案會往外擴張，必須設定 visible 避免被原本的 viewBox 裁切掉！
+  innerSvg.style.overflow = 'visible'; 
 
-  // 拔除舊有的置中 class 與外層動畫
+  // 2. 拔除舊動畫與碎片保護衣
   logo.classList.remove('svg-intro-container'); 
   logo.style.animation = 'none'; 
-
-  // 關閉碎片保護衣動畫並重置型態
   const animWrappers = logo.querySelectorAll('.anim-wrapper');
   animWrappers.forEach(wrapper => {
     wrapper.style.animation = 'none'; 
@@ -4871,18 +4864,70 @@ function closeOverlayAndAnimateLogo() {
     wrapper.style.opacity = '1';      
   });
 
-  // 設定飛行過渡動畫，時間對齊你外部的 800ms
+  // ==========================================
+  // ✨ 3. 核心魔法：內部圖層的排版重組計算 ✨
+  // ==========================================
+  const mc0 = logo.querySelector('#layer-MC0');
+  const mc1 = logo.querySelector('#layer-MC1');
+  
+  // 宣告內部變形變數
+  let translateX0 = 0, translateY0 = 0, scale0 = 1;
+  let translateX1 = 0; // 用來讓整體圖案微調置中的變數
+
+  if (mc0 && mc1) {
+    // 取得在 SVG 內部座標系中的真實尺寸與位置
+    const box0 = mc0.getBBox();
+    const box1 = mc1.getBBox();
+
+    // 將變形中心點設定為「圖層自己的正中心」
+    mc0.style.transformOrigin = `${box0.x + box0.width/2}px ${box0.y + box0.height/2}px`;
+    mc1.style.transformOrigin = `${box1.x + box1.width/2}px ${box1.y + box1.height/2}px`;
+
+    // 數學計算：讓 MC0 的高度縮小到跟 MC1 一樣高
+    scale0 = box1.height / box0.height;
+
+    // 數學計算：讓縮小後的 MC0 排到 MC1 的左側
+    const gap = 20; // 兩個圖案重組後的間距 (可以依照視覺喜好微調這個數字)
+    const scaledWidth0 = box0.width * scale0;
+    
+    // MC0 目標 X 座標：MC1 的左邊界 - 間距 - MC0縮小後寬度的一半
+    const targetCenterX0 = box1.x - gap - (scaledWidth0 / 2);
+    const currentCenterX0 = box0.x + box0.width / 2;
+    translateX0 = targetCenterX0 - currentCenterX0;
+
+    // MC0 目標 Y 座標：對齊 MC1 的垂直中心
+    const targetCenterY0 = box1.y + box1.height / 2;
+    const currentCenterY0 = box0.y + box0.height / 2;
+    translateY0 = targetCenterY0 - currentCenterY0;
+
+    // (選用) 讓 MC1 也往右移動一點點，確保「組合後」的圖形視覺重心依然保持在中間
+    translateX1 = (box0.width - scaledWidth0) / 4; 
+
+    // 賦予內部圖層滑順的變形動畫 (時間對齊外層的 0.8s)
+    mc0.style.transition = 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+    mc1.style.transition = 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+  }
+  // ==========================================
+
+  // 4. 設定外層容器的飛行過渡動畫
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)'; 
 
-  // 用 requestAnimationFrame 確保瀏覽器先畫好「起點」，再賦予「終點」觸發飛行
+  // 5. 觸發動畫：外層飛向目標，內層改變排版
   requestAnimationFrame(() => {
+    // 外層飛向目標圖片的位置與縮小
     logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
     logo.style.width = targetRect.width + 'px';
     logo.style.height = targetRect.height + 'px';
+
+    // 內層圖層各自飛向重組的位置
+    if (mc0 && mc1) {
+      mc0.style.transform = `translate(${translateX0}px, ${translateY0}px) scale(${scale0})`;
+      mc1.style.transform = `translateX(${translateX1}px)`; 
+    }
   });
 
-  // 800ms 飛行結束後，正式落地嵌入網頁排版中
+  // 6. 飛行結束後 (800ms)，正式落地嵌入網頁排版中
   setTimeout(() => {
     const targetWrapper = targetImg.parentElement;
     
@@ -4895,7 +4940,7 @@ function closeOverlayAndAnimateLogo() {
     
     // 設定最終大小
     logo.style.height = targetRect.height + 'px';
-    logo.style.width = targetRect.width + 'px'; 
+    logo.style.width = 'auto'; // 這裡改回 auto，因為內部排版變寬了，需要讓它自由伸展
     logo.style.display = 'inline-block';
     logo.style.verticalAlign = 'middle';
 
