@@ -4953,20 +4953,37 @@ function closeOverlayAndAnimateLogo() {
 
   const duration = 3000;
   const startTime = performance.now();
+  innerSvg.style.border = "1px solid red"; 
   
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
     let progress = Math.min(elapsed / duration, 1);
     const ease = 1 - Math.pow(1 - progress, 4); 
 
+    // 1. 【關鍵】：飛行路徑中的「寬度補間」
+    // 從起點寬度平滑過渡到我們算出來的物理終點寬度
+    const currentWidth = startRect.width + (physicalWidth - startRect.width) * ease;
+    const currentHeight = startRect.height + (75 - startRect.height) * ease;
+
+    // 2. 更新 SVG 內部的 viewBox 與 transform (不動)
     const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
     innerSvg.setAttribute('viewBox', currentVB.join(' '));
-    innerSvg.style.border = "1px solid red";
 
     const currentTx = endTx * ease;
     const currentTy = endTy * ease;
     const currentS = 1 + (finalScale - 1) * ease;
     mc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
+
+    // 3. 【強制應用】：每一幀都更新外層容器寬度，讓它「按正確的路徑縮小」
+    logo.style.width = currentWidth + 'px';
+    logo.style.height = currentHeight + 'px';
+
+    // 4. 動態更新飛行位置 (結合我們剛算好的絕對置中點)
+    // 這裡我們修正為：每一幀都計算目標，確保路徑偏移被消滅
+    const currentLeft = startRect.left + (finalLeft - startRect.left) * ease;
+    const currentTop = startRect.top + (finalTop - startRect.top) * ease;
+    logo.style.left = currentLeft + 'px';
+    logo.style.top = currentTop + 'px';
 
     if (progress < 1) {
       requestAnimationFrame(tween);
@@ -5011,7 +5028,7 @@ function closeOverlayAndAnimateLogo() {
       if (oldImg) oldImg.remove();
       targetWrapper.appendChild(logo);
       
-      innerSvg.style.border = "1px solid red"; 
+      
       console.log("✅ [Success] 移交完成！去除了 SVG 內部屬性干擾。");
     }
   }
