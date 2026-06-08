@@ -4960,17 +4960,24 @@ function closeOverlayAndAnimateLogo() {
   requestAnimationFrame(tween);
 
   // 5. 動畫結束，無縫嵌入
+  // 5. 動畫結束，無縫嵌入
   setTimeout(() => {
     const targetWrapper = targetImg.parentElement;
+    
     logo.style.position = 'relative';
     logo.style.left = 'auto';
     logo.style.top = 'auto';
     logo.style.zIndex = 'auto';
     logo.style.transition = 'none';
+    
+    // ✨ 響應式魔法加在這裡 ✨
+    logo.style.width = '100%'; // 預設填滿父容器
+    logo.style.maxWidth = targetRect.width + 'px'; // 但最大不超過算出來的完美尺寸 (保護電腦版)
+    
+    // 利用 aspect-ratio 鎖定長寬比，這樣高度就會跟著 max-width 自動等比例縮放！
+    logo.style.aspectRatio = `${targetRect.width} / ${targetRect.height}`;
+    logo.style.height = 'auto'; 
 
-    // 完美繼承目標圖片的尺寸
-    logo.style.width = targetRect.width + 'px';
-    logo.style.height = targetRect.height + 'px';
     logo.style.display = 'inline-block';
     logo.style.verticalAlign = 'middle';
 
