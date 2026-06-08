@@ -3203,32 +3203,6 @@ select {
   width: 200px; /* 控制進度條的長度 */
 }
 
-/* 進度條軌道 (半透明白底) */
-.progress-bar-track {
-  width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-/* 進度條填滿動畫 (發光白條) */
-.progress-bar-fill {
-  height: 100%;
-  width: 0%;
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); /* 自帶微微發光效果 */
-  /* 1.5秒從0跑到100%，無限循環 */
-  animation: loadingRun 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-/* 跑條的動畫軌跡 */
-@keyframes loadingRun {
-  0% { width: 0%; }
-  100% { width: 100%; }
-}
-
 /* 底部的 LOADING 文字 */
 .bottom-loading-text {
   font-size: 1.1rem;
@@ -3567,7 +3541,7 @@ select {
   border-radius: 4px;     /* 讓線條邊緣圓潤一點 */
 }
 
-/* 讓圖案在 Loading 區域完美置中 */
+/* 外層容器：負責置中 */
 .custom-loader-wrapper {
   display: flex;
   justify-content: center;
@@ -3575,42 +3549,42 @@ select {
   margin: 10px 0;
 }
 
-/* 1. 整體動畫：讓整個 SVG 不斷平滑旋轉 */
+/* 拿掉整體旋轉，只設定大小 */
 .custom-spinner {
-  width: 40px;  /* 大小可以自由調整 */
+  width: 40px;
   height: 40px;
-  animation: spinner-rotate 2s linear infinite;
-  transform-origin: center;
 }
 
-/* 2. 外圈動畫：線條從無到有畫出來，再縮回去 */
+/* 外圈動畫：負責「畫線」與「擦線」 */
 .outer-circle {
-  /* 圓的半徑(r)是 14，周長約為 2 * π * 14 = 88 */
+  /* 圓的半徑(r)是 14，周長約為 88 */
   stroke-dasharray: 88;
-  stroke-dashoffset: 88; /* 初始狀態把線藏起來 */
-  animation: spinner-draw 1.5s ease-in-out infinite alternate;
+  
+  /* 預設 SVG 畫圓是從 3 點鐘方向開始，轉 -90 度讓它從 12 點鐘方向開始畫會比較自然 */
+  transform: rotate(-90deg);
   transform-origin: center;
+  
+  /* 動畫改為單向無限循環，不要 alternate (不要倒退嚕) */
+  animation: draw-and-erase 2s ease-in-out infinite;
 }
 
-/* 3. 內部圖案：加上微小的呼吸縮放感 */
+/* 內部圖案：保持靜止，不做任何動畫 */
 .inner-icon {
-  transform-origin: center;
-  animation: spinner-pulse 1.5s ease-in-out infinite alternate;
+  /* 留空即可 */
 }
 
-/* ===== 下面是定義動畫的軌跡 ===== */
-
-@keyframes spinner-rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes spinner-draw {
-  0% { stroke-dashoffset: 88; }
-  100% { stroke-dashoffset: 15; } /* 不要完全畫滿，留一點缺口會更有轉動的感覺 */
-}
-
-@keyframes spinner-pulse {
-  0% { transform: scale(0.95); }
-  100% { transform: scale(1.05); }
+/* ===== 核心魔法：追著尾巴跑的動畫軌跡 ===== */
+@keyframes draw-and-erase {
+  0% {
+    /* 狀態 1：線條完全在外面，看起來沒線 */
+    stroke-dashoffset: 88; 
+  }
+  50% {
+    /* 狀態 2：線條剛好蓋滿整個圓圈 (不留缺口) */
+    stroke-dashoffset: 0;  
+  }
+  100% {
+    /* 狀態 3：線條繼續往前推移出圓圈 (從起點開始變成沒線) */
+    stroke-dashoffset: -88; 
+  }
 }
