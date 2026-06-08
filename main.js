@@ -4830,12 +4830,12 @@ function closeOverlayAndAnimateLogo() {
   if (!innerSvg) return;
 
   const startRect = innerSvg.getBoundingClientRect();
-  // 直接計算容器的位置，這比計算圖片更準確
+  // 基準目標容器位置
   const targetRect = targetWrapper.getBoundingClientRect();
 
   if (startRect.width === 0) return;
 
-  // 1. 提前清除干擾，讓接下來的 Clone (替身) 也是絕對乾淨的
+  // 1. 提前清除干擾，確保接下來的 Clone (替身) 狀態乾淨
   logo.classList.remove('svg-intro-container');
   logo.style.animation = 'none';
   logo.querySelectorAll('.anim-wrapper').forEach(w => {
@@ -4845,7 +4845,7 @@ function closeOverlayAndAnimateLogo() {
   });
 
   // ==========================================
-  // ✨ 2. 大師級數學 (不變) ✨
+  // ✨ 2. 大師級數學 (不動) ✨
   // ==========================================
   const mc0 = logo.querySelector('#layer-MC0');
   const mc1 = logo.querySelector('#layer-MC1');
@@ -4879,10 +4879,10 @@ function closeOverlayAndAnimateLogo() {
   const physicalWidth = 75 * finalRatio;
 
   // ==========================================
-  // ✨ 3. 零毫秒瞬間測量 (無轉場延遲的隱形預演) ✨
+  // ✨ 3. 零毫秒瞬間測量 (算出反向校正值) ✨
   // ==========================================
   const clone = logo.cloneNode(true);
-  clone.style.transition = 'none'; // 🚫 絕對禁止動畫，瞬間到位
+  clone.style.transition = 'none'; // 🚫 絕對禁止動畫
   clone.style.animation = 'none';
   
   const cloneSvg = clone.querySelector('svg');
@@ -4893,11 +4893,12 @@ function closeOverlayAndAnimateLogo() {
   clone.style.position = 'fixed';
   clone.style.left = targetRect.left + 'px';
   clone.style.top = targetRect.top + 'px';
-  clone.style.width = targetRect.width + 'px';
-  clone.style.height = targetRect.height + 'px';
+  // 💡 注意這裡：使用物理寬度測量，避免寬度拉伸干擾落點
+  clone.style.width = physicalWidth + 'px'; 
+  clone.style.height = '75px';
   clone.style.margin = '0';
   clone.style.padding = '0';
-  clone.style.opacity = '0'; // 隱形測量，不讓使用者看見
+  clone.style.opacity = '0'; // 隱形測量
   clone.style.pointerEvents = 'none';
 
   cloneSvg.style.width = '100%';
@@ -4905,7 +4906,7 @@ function closeOverlayAndAnimateLogo() {
   cloneSvg.setAttribute('viewBox', endVB.join(' '));
   cloneMc0.setAttribute('transform', `translate(${endTx}, ${endTy}) scale(${finalScale})`);
 
-  // 取得飛行終點的精確坐標
+  // 取得尚未套用 Flex 前的座標 (原本偏右的飛行終點)
   const flightEndRect = cloneSvg.getBoundingClientRect();
 
   // 【測量 B：模擬 Flex 落地後的真實渲染】
@@ -4917,8 +4918,7 @@ function closeOverlayAndAnimateLogo() {
   clone.style.position = 'relative';
   clone.style.left = 'auto';
   clone.style.top = 'auto';
-  clone.style.width = physicalWidth + 'px';
-  clone.style.height = '75px';
+  // clone 的 width 已經是 physicalWidth，這裡保留即可
 
   cloneSvg.style.cssText = `
     display: block !important;
@@ -4934,19 +4934,21 @@ function closeOverlayAndAnimateLogo() {
 
   targetWrapper.appendChild(clone);
 
-  // 取得 Flex 排版後的精確坐標
+  // 取得 Flex 強制置中後的絕對座標 (正確歸宿)
   const landedRect = cloneSvg.getBoundingClientRect();
 
-  // 【算出偏差值】
-  const correctionX = landedRect.left - flightEndRect.left;
-  const correctionY = landedRect.top - flightEndRect.top;
+  // 【🎯 算出偏差值：反向校正】
+  // 如果 flightEnd > landed (飛過頭偏右)，這裡算出正數
+  // 稍後在起飛目標用減法扣回來
+  const correctionX = flightEndRect.left - landedRect.left;
+  const correctionY = flightEndRect.top - landedRect.top;
 
   // 測量完畢，瞬間銷毀替身
   clone.remove();
-  console.log(`🎯 精確校正值 X: ${correctionX}, Y: ${correctionY}`);
+  console.log(`🎯 反向偏移量校正準備就緒 X: -${correctionX}, Y: -${correctionY}`);
 
   // ==========================================
-  // ✨ 4. 正式啟動飛行 (帶入絕對精準的校正值) ✨
+  // ✨ 4. 正式啟動飛行 (帶入反向校正與實體寬度) ✨
   // ==========================================
   document.body.appendChild(logo);
   logo.style.position = 'fixed';
@@ -4965,11 +4967,13 @@ function closeOverlayAndAnimateLogo() {
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
   
   requestAnimationFrame(() => {
-    // 【核心修正】：飛向加入了落差值的靶心
-    logo.style.left = (targetRect.left + correctionX) + 'px';
-    logo.style.top = (targetRect.top + correctionY) + 'px';
-    logo.style.width = targetRect.width + 'px';
-    logo.style.height = targetRect.height + 'px';
+    // 💡 核心修正 1：用「減法」扣除偏差值，將軌跡拉回正確點
+    logo.style.left = (targetRect.left - correctionX) + 'px';
+    logo.style.top = (targetRect.top - correctionY) + 'px';
+    
+    // 💡 核心修正 2：飛向實體寬度，不讓寬度被外層容器撐大
+    logo.style.width = physicalWidth + 'px';
+    logo.style.height = '75px';
   });
 
   const duration = 800;
@@ -4992,7 +4996,7 @@ function closeOverlayAndAnimateLogo() {
       requestAnimationFrame(tween);
     } else {
       // ==========================================
-      // ✨ 5. 落地結算 (零誤差對接) ✨
+      // ✨ 5. 完美落地接軌 ✨
       // ==========================================
       logo.style.position = 'relative';
       logo.style.left = 'auto';
@@ -5029,7 +5033,7 @@ function closeOverlayAndAnimateLogo() {
       targetWrapper.appendChild(logo);
       
       innerSvg.style.border = "1px solid red"; 
-      console.log("✅ 完美落地！誤差已完全消滅。");
+      console.log("✅ 動畫結束！已經以響應式基準點實現零誤差對齊。");
     }
   }
   requestAnimationFrame(tween);
