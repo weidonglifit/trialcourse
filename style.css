@@ -3192,7 +3192,7 @@ select {
 .bottom-loading-group {
   position: absolute;
   /* 與上方的 calc(7% + 75px) 形成完美的上下對稱 */
-  bottom: calc(9% + 75px); 
+  bottom: calc(5% + 75px); 
   left: 50%;
   transform: translateX(-50%);
   z-index: 10001; /* 確保在遮罩之上 */
@@ -3205,7 +3205,7 @@ select {
 
 /* 底部的 LOADING 文字 */
 .bottom-loading-text {
-  font-size: 0.9rem;
+  font-size: 1rem;
   letter-spacing: 5px;
   color: #ffffff;
   font-weight: bold;
