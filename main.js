@@ -4821,7 +4821,6 @@ function startPeekabooEgg() {
 
 function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
-  // 直接抓取預留的容器，不再依賴圖片標籤
   const targetWrapper = document.getElementById('final-logo-wrapper');
   
   if (!logo || !targetWrapper) return;
@@ -4830,27 +4829,11 @@ function closeOverlayAndAnimateLogo() {
   if (!innerSvg) return;
 
   const startRect = innerSvg.getBoundingClientRect();
-  // 直接計算容器的位置，這比計算圖片更準確
   const targetRect = targetWrapper.getBoundingClientRect();
 
   if (startRect.width === 0) return;
 
-  // 1. 準備起飛，設定外層容器初始狀態
-  document.body.appendChild(logo);
-  logo.style.position = 'fixed';
-  logo.style.left = startRect.left + 'px';
-  logo.style.top = startRect.top + 'px';
-  logo.style.width = startRect.width + 'px';
-  logo.style.height = startRect.height + 'px';
-  logo.style.margin = '0';
-  logo.style.padding = '0';
-  logo.style.zIndex = '999999';
-
-  innerSvg.style.width = '100%';
-  innerSvg.style.height = '100%';
-  innerSvg.style.overflow = 'visible';
-
-  // 2. 清除所有干擾的舊動畫與保護衣 (不動)
+  // 2. 清除所有干擾的舊動畫與保護衣 (提前執行，確保替身乾淨)
   logo.classList.remove('svg-intro-container');
   logo.style.animation = 'none';
   logo.querySelectorAll('.anim-wrapper').forEach(w => {
@@ -4860,7 +4843,7 @@ function closeOverlayAndAnimateLogo() {
   });
 
   // ==========================================
-  // ✨ 3. 大師級數學 (不動) ✨
+  // ✨ 3. 大師級數學 ✨
   // ==========================================
   const mc0 = logo.querySelector('#layer-MC0');
   const mc1 = logo.querySelector('#layer-MC1');
@@ -4886,33 +4869,89 @@ function closeOverlayAndAnimateLogo() {
   const minY = Math.min(targetY, box1.y);
   const maxY = Math.max(targetY + box0.height * finalScale, box1.y + box1.height);
 
-  // ==========================================
-  // ✨ 【核心修改】：徹底拔除比例膨脹與假白邊 ✨
-  // ==========================================
-  
-  // 1. 取得最真實、最緊繃的內容寬高 (拿掉原本的 * 1.04)
   const contentW = maxX - minX;
   const contentH = maxY - minY;
-
-  // 2. 直接將 viewBox 鎖死在這個真實邊界上！
-  // (拿掉所有的 targetAR、padX、padY 與 if/else 判斷)
   const endVB = [minX, minY, contentW, contentH];
 
+  // 提前計算物理尺寸
+  const finalRatio = endVB[2] / endVB[3];
+  const physicalWidth = 75 * finalRatio;
+
   // ==========================================
-  // ✨ 4. 啟動電影級飛行 (不動) ✨
+  // ✨ 4. 0毫秒預演階段 (影子替身測量) ✨
   // ==========================================
+  // 設定目標容器的最終屬性
+  targetWrapper.style.display = 'flex';
+  targetWrapper.style.justifyContent = 'center';
+  targetWrapper.style.alignItems = 'center';
+  targetWrapper.style.overflow = 'visible'; 
+
+  // 複製一個替身
+  const phantomLogo = logo.cloneNode(true);
+  phantomLogo.style.cssText = `
+    position: relative !important;
+    display: block !important;
+    width: ${physicalWidth}px !important;
+    height: 75px !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    min-width: ${physicalWidth}px !important;
+    visibility: hidden !important; /* 隱形測量 */
+  `;
+  
+  const phantomSvg = phantomLogo.querySelector('svg');
+  phantomSvg.style.cssText = `
+    display: block !important;
+    width: ${physicalWidth}px !important;
+    height: 75px !important;
+    max-width: none !important;
+    min-width: ${physicalWidth}px !important;
+    overflow: visible !important;
+  `;
+  phantomSvg.removeAttribute('preserveAspectRatio');
+  phantomSvg.setAttribute('width', Math.round(physicalWidth));
+  phantomSvg.setAttribute('height', 75);
+  phantomSvg.setAttribute('viewBox', endVB.join(' '));
+  phantomSvg.querySelector('#layer-MC0').setAttribute('transform', `translate(${endTx}, ${endTy}) scale(${finalScale})`);
+
+  // 塞入 DOM，強迫瀏覽器排版並抄出絕對座標！
+  targetWrapper.appendChild(phantomLogo);
+  const phantomRect = phantomLogo.getBoundingClientRect();
+  phantomLogo.remove(); // 測量完畢，瞬間銷毀
+
+  console.log("DEBUG: Phantom Rect (真實落點):", phantomRect);
+
+  // ==========================================
+  // ✨ 5. 正式起飛 (以替身座標為目標) ✨
+  // ==========================================
+  document.body.appendChild(logo);
+  logo.style.position = 'fixed';
+  logo.style.left = startRect.left + 'px';
+  logo.style.top = startRect.top + 'px';
+  logo.style.width = startRect.width + 'px';
+  logo.style.height = startRect.height + 'px';
+  logo.style.margin = '0';
+  logo.style.padding = '0';
+  logo.style.zIndex = '999999';
+
+  innerSvg.style.width = '100%';
+  innerSvg.style.height = '100%';
+  innerSvg.style.overflow = 'visible';
+
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+  
   requestAnimationFrame(() => {
-    logo.style.left = targetRect.left + 'px';
-    logo.style.top = targetRect.top + 'px';
-    logo.style.width = targetRect.width + 'px';
-    logo.style.height = targetRect.height + 'px';
+    // 【魔法修正】：這裡不再飛向 targetRect，而是飛向替身測量出的 phantomRect！
+    logo.style.left = phantomRect.left + 'px';
+    logo.style.top = phantomRect.top + 'px';
+    logo.style.width = phantomRect.width + 'px';
+    logo.style.height = phantomRect.height + 'px';
   });
 
-  const duration = 50;
+  const duration = 800;
   const startTime = performance.now();
-  console.log("DEBUG: Target Wrapper Rect:", targetRect);
-  console.log("DEBUG: Final viewBox Target:", endVB);
   
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
@@ -4930,24 +4969,13 @@ function closeOverlayAndAnimateLogo() {
     if (progress < 1) {
       requestAnimationFrame(tween);
     } else {
-      // 1. 容器設定
-      targetWrapper.style.display = 'flex';
-      targetWrapper.style.justifyContent = 'center';
-      targetWrapper.style.alignItems = 'center';
-      targetWrapper.style.overflow = 'visible'; 
-
-      // 2. 拔除飛行狀態
+      // 落地
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
-      // 3. 計算物理尺寸
-      const finalRatio = endVB[2] / endVB[3];
-      const physicalWidth = 75 * finalRatio;
-
-      // 4. 設定 Logo 容器尺寸 (強制覆蓋)
       logo.style.cssText = `
         display: block !important;
         width: ${physicalWidth}px !important;
@@ -4959,7 +4987,6 @@ function closeOverlayAndAnimateLogo() {
         min-width: ${physicalWidth}px !important;
       `;
 
-      // 5. 【關鍵修正】：直接修改 SVG DOM 屬性，這是最後防線
       innerSvg.style.cssText = `
         display: block !important;
         width: ${physicalWidth}px !important;
@@ -4969,19 +4996,16 @@ function closeOverlayAndAnimateLogo() {
         overflow: visible !important;
       `;
       
-      // 移除可能導致比例衝突的屬性
       innerSvg.removeAttribute('preserveAspectRatio');
       innerSvg.setAttribute('width', Math.round(physicalWidth));
       innerSvg.setAttribute('height', 75);
       
-      // 6. 清除舊圖並放入
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       targetWrapper.appendChild(logo);
       
       innerSvg.style.border = "1px solid red"; 
-      
-      console.log("✅ 強制寬度已寫入:", physicalWidth);
+      console.log("✅ 完美落地，無瞬移！");
     }
   }
   requestAnimationFrame(tween);
