@@ -4920,8 +4920,9 @@ function closeOverlayAndAnimateLogo() {
 
   const duration = 800;
   const startTime = performance.now();
-console.log("DEBUG: Target Wrapper Rect:", targetRect);
+  console.log("DEBUG: Target Wrapper Rect:", targetRect);
   console.log("DEBUG: Final viewBox Target:", endVB);
+  
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
     let progress = Math.min(elapsed / duration, 1);
@@ -4938,25 +4939,36 @@ console.log("DEBUG: Target Wrapper Rect:", targetRect);
     if (progress < 1) {
       requestAnimationFrame(tween);
     } else {
-      // 1. 確保容器本身具有置中屬性 (這是最基本的防護)
-      targetWrapper.style.display = 'flex';
-      targetWrapper.style.justifyContent = 'center';
-      targetWrapper.style.alignItems = 'center';
+      // ==========================================
+      // ✨ 5. 終點防護 (解決寬度溢出的雙邊置中) ✨
+      // ==========================================
+      
+      // 1. 強制目標容器作為絕對定位基準，並隱藏超出螢幕的捲軸
+      targetWrapper.style.position = 'relative';
+      targetWrapper.style.display = 'block'; 
+      targetWrapper.style.overflow = 'hidden'; 
 
-      // 2. 拔除飛行狀態
-      logo.style.position = 'relative';
-      logo.style.left = 'auto';
-      logo.style.top = 'auto';
+      // 2. 拔除飛行狀態，改用絕對定位
+      logo.style.position = 'absolute';
+      logo.style.top = '0';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
-      // 3. 設定 Logo 容器
-      logo.style.display = 'block';
-      logo.style.width = '100%';
-      logo.style.height = '105px'; 
-      logo.style.margin = '0 auto'; // 強制物理置中
+      // 3. 【核心修正】：算出這塊 viewBox 在 105px 高度下的真實物理像素寬度
+      const finalRatio = endVB[2] / endVB[3]; // vbW / vbH
+      const physicalWidth = 105 * finalRatio;
 
-      // 4. 清除 svg 寬高限制，讓它聽從 container
+      logo.style.display = 'block';
+      logo.style.height = '105px';
+      logo.style.width = physicalWidth + 'px'; // 賦予真實寬度，不限制 100%
+      
+      // 絕對置中魔法：放棄 margin: auto
+      // 使用 left 50% + translateX(-50%)，這會強制無論實體多寬，一律雙邊對稱溢出
+      logo.style.left = '50%';
+      logo.style.transform = 'translateX(-50%)';
+      logo.style.margin = '0'; 
+
+      // 4. 清除 svg 寬高限制，讓它完全撐滿物理容器
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
       innerSvg.style.display = 'block';
@@ -4966,13 +4978,13 @@ console.log("DEBUG: Target Wrapper Rect:", targetRect);
       const wrapperRect = targetWrapper.getBoundingClientRect();
       
       console.log("--- 偵測排版異常 ---");
-      console.log("Logo 寬度:", logoRect.width, "容器寬度:", wrapperRect.width);
+      console.log("Logo 真實物理寬度:", physicalWidth, "容器寬度:", wrapperRect.width);
       console.log("Logo 左邊界距螢幕:", logoRect.left);
       console.log("容器左邊界距螢幕:", wrapperRect.left);
       
-      // 如果 logoRect.left 不等於 wrapperRect.left，代表有東西在把它推向右邊！
-      if (Math.abs(logoRect.left - wrapperRect.left) > 1) {
-          console.warn("偵測到偏移！請檢查是否 Logo 內部的 SVG 內容物含有未清除的 transform 偏移");
+      // 如果寬度大於容器，logoRect.left 必定為負數，這代表左邊成功溢出了
+      if (physicalWidth > wrapperRect.width) {
+         console.log("✅ 檢測到 SVG 大於容器，已強迫雙邊對稱溢出！");
       }
 
       const oldImg = targetWrapper.querySelector('img');
