@@ -4930,62 +4930,42 @@ function closeOverlayAndAnimateLogo() {
     if (progress < 1) {
       requestAnimationFrame(tween);
     } else {
-      // 1. 確保 Flex 不切斷內容
+      // 1. 確保容器具有 Flex 置中屬性，並且【絕對不加】overflow: hidden，讓它不會被切掉
       targetWrapper.style.display = 'flex';
       targetWrapper.style.justifyContent = 'center';
       targetWrapper.style.alignItems = 'center';
       targetWrapper.style.overflow = 'visible'; 
 
-      // 2. 拔除飛行狀態
+      // 2. 拔除飛行狀態，回歸相對定位
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
-      // 3. 【數學絕對鎖定】：算出 85px 高度下的物理寬度
+      // 3. 【核心修正】：推算這塊 viewBox 在 105px 高度下的「真實物理寬度」
       const finalRatio = endVB[2] / endVB[3]; // vbW / vbH
       const physicalWidth = 85 * finalRatio;
 
-      // 4. 【防禦性編程】：設定 Logo 容器，封殺所有外部干擾
+      // 4. 設定 Logo 容器
       logo.style.display = 'block';
-      logo.style.boxSizing = 'content-box'; // 禁止 border 擠壓內容
-      logo.style.padding = '0'; // 禁止 padding 擠壓內容
-      logo.style.minWidth = '0';
-      logo.style.maxWidth = 'none'; // 🚫 禁止全域 max-width 壓扁我們算好的寬度
-      logo.style.width = physicalWidth + 'px'; 
+      logo.style.width = physicalWidth + 'px'; // 強制賦予真實寬度 (即使大於螢幕)
       logo.style.height = '85px'; 
-      logo.style.flexShrink = '0'; 
-      logo.style.margin = '0'; 
+      logo.style.flexShrink = '0'; // 【魔法關鍵】：嚴禁 Flexbox 壓縮它！這保證它能超出邊界
+      logo.style.margin = '0';     // 【移除 margin auto】：讓父容器的 justify-content: center 發揮雙邊溢出作用
 
-      // 5. 【防禦性編程】：確保 SVG 乖乖填滿
-      innerSvg.style.display = 'block';
-      innerSvg.style.boxSizing = 'content-box';
-      innerSvg.style.padding = '0';
-      innerSvg.style.minWidth = '0';
-      innerSvg.style.maxWidth = 'none'; // 🚫 封殺 SVG 的 max-width 限制
+      // 5. 讓 SVG 乖乖填滿我們設定好真實寬度的 Logo 容器
       innerSvg.style.width = '100%';
       innerSvg.style.height = '100%';
-      innerSvg.style.overflow = 'visible'; 
-      
-      // 確保 SVG 縮放邏輯為完美貼合
-      innerSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      innerSvg.style.display = 'block';
+      innerSvg.style.overflow = 'visible'; // 保證內容不被 SVG 標籤自己切掉
 
       // 6. 清除舊圖並放入
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       targetWrapper.appendChild(logo);
       
-      // 7. 【改用 outline 測試】：outline 不會佔用空間，不會破壞 SVG 的長寬比！
-      innerSvg.style.border = "none"; 
-      innerSvg.style.outline = "1px solid red"; 
-      
-      // --- 驗證區 (你可以看 console) ---
-      console.log(`[驗證] SVG 畫布原始比例: ${endVB[2]} / ${endVB[3]} = ${finalRatio}`);
-      console.log(`[驗證] CSS 實際渲染比例: ${physicalWidth} / 85 = ${physicalWidth / 85}`);
-      if (Math.abs(finalRatio - (physicalWidth / 85)) < 0.01) {
-          console.log("✅ 比例完美一致，如果還有白邊，純粹是 SVG 內部自己畫的空白！");
-      }
+      innerSvg.style.border = "1px solid red"; // 你用來 Debug 的紅框
     }
   }
   requestAnimationFrame(tween);
