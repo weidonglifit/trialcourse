@@ -4819,8 +4819,7 @@ function startPeekabooEgg() {
   }, 8000); // 8000毫秒 = 8秒 (包含探頭的3秒，等於每躲藏5秒就會出來一次)
 }
 
-// ⚠️ 注意這裡加了 async
-async function closeOverlayAndAnimateLogo() {
+function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
   // 直接抓取預留的容器，不再依賴圖片標籤
   const targetWrapper = document.getElementById('final-logo-wrapper');
@@ -4836,7 +4835,7 @@ async function closeOverlayAndAnimateLogo() {
 
   if (startRect.width === 0) return;
 
-  // 1. 提前清除干擾，讓接下來的 Clone (替身) 也是乾淨的
+  // 1. 提前清除干擾，讓接下來的 Clone (替身) 也是絕對乾淨的
   logo.classList.remove('svg-intro-container');
   logo.style.animation = 'none';
   logo.querySelectorAll('.anim-wrapper').forEach(w => {
@@ -4846,7 +4845,7 @@ async function closeOverlayAndAnimateLogo() {
   });
 
   // ==========================================
-  // ✨ 3. 大師級數學 (不動) ✨
+  // ✨ 2. 大師級數學 (不變) ✨
   // ==========================================
   const mc0 = logo.querySelector('#layer-MC0');
   const mc1 = logo.querySelector('#layer-MC1');
@@ -4876,144 +4875,162 @@ async function closeOverlayAndAnimateLogo() {
   const contentH = maxY - minY;
   const endVB = [minX, minY, contentW, contentH];
 
+  const finalRatio = endVB[2] / endVB[3];
+  const physicalWidth = 75 * finalRatio;
+
   // ==========================================
-  // ✨ 雙階段引擎：測量 -> 修正 -> 正式執行 ✨
+  // ✨ 3. 零毫秒瞬間測量 (無轉場延遲的隱形預演) ✨
   // ==========================================
+  const clone = logo.cloneNode(true);
+  clone.style.transition = 'none'; // 🚫 絕對禁止動畫，瞬間到位
+  clone.style.animation = 'none';
+  
+  const cloneSvg = clone.querySelector('svg');
+  const cloneMc0 = clone.querySelector('#layer-MC0');
 
-  // 將 Tween 包裝成 Promise 函數，方便我們跑兩次
-  function runPass(duration, isDryRun, correctionX = 0, correctionY = 0) {
-    return new Promise((resolve) => {
-      // 乾跑模式使用透明替身，正式執行使用本尊
-      const targetNode = isDryRun ? logo.cloneNode(true) : logo;
-      const targetSvg = targetNode.querySelector('svg');
-      const targetMc0 = targetNode.querySelector('#layer-MC0');
+  // 【測量 A：模擬飛行軌跡的最終瞬間】
+  document.body.appendChild(clone);
+  clone.style.position = 'fixed';
+  clone.style.left = targetRect.left + 'px';
+  clone.style.top = targetRect.top + 'px';
+  clone.style.width = targetRect.width + 'px';
+  clone.style.height = targetRect.height + 'px';
+  clone.style.margin = '0';
+  clone.style.padding = '0';
+  clone.style.opacity = '0'; // 隱形測量，不讓使用者看見
+  clone.style.pointerEvents = 'none';
 
-      if (isDryRun) {
-        targetNode.style.opacity = '0'; // 隱形測量，避免閃爍
-        targetNode.style.pointerEvents = 'none';
-      }
+  cloneSvg.style.width = '100%';
+  cloneSvg.style.height = '100%';
+  cloneSvg.setAttribute('viewBox', endVB.join(' '));
+  cloneMc0.setAttribute('transform', `translate(${endTx}, ${endTy}) scale(${finalScale})`);
 
-      document.body.appendChild(targetNode);
-      targetNode.style.position = 'fixed';
-      targetNode.style.left = startRect.left + 'px';
-      targetNode.style.top = startRect.top + 'px';
-      targetNode.style.width = startRect.width + 'px';
-      targetNode.style.height = startRect.height + 'px';
-      targetNode.style.margin = '0';
-      targetNode.style.padding = '0';
-      targetNode.style.zIndex = '999999';
+  // 取得飛行終點的精確坐標
+  const flightEndRect = cloneSvg.getBoundingClientRect();
 
-      targetSvg.style.width = '100%';
-      targetSvg.style.height = '100%';
-      targetSvg.style.overflow = 'visible';
+  // 【測量 B：模擬 Flex 落地後的真實渲染】
+  targetWrapper.style.display = 'flex';
+  targetWrapper.style.justifyContent = 'center';
+  targetWrapper.style.alignItems = 'center';
+  targetWrapper.style.overflow = 'visible'; 
 
-      // 強制瀏覽器重排，確保起點座標生效
-      targetNode.getBoundingClientRect();
+  clone.style.position = 'relative';
+  clone.style.left = 'auto';
+  clone.style.top = 'auto';
+  clone.style.width = physicalWidth + 'px';
+  clone.style.height = '75px';
 
-      // 【核心修正】：將算出來的落差 (correctionX/Y) 加到飛行的終點目標上
-      targetNode.style.transition = `all ${duration / 1000}s cubic-bezier(0.25, 1, 0.5, 1)`;
-      targetNode.style.left = (targetRect.left + correctionX) + 'px';
-      targetNode.style.top = (targetRect.top + correctionY) + 'px';
-      targetNode.style.width = targetRect.width + 'px';
-      targetNode.style.height = targetRect.height + 'px';
+  cloneSvg.style.cssText = `
+    display: block !important;
+    width: ${physicalWidth}px !important;
+    height: 75px !important;
+    max-width: none !important;
+    min-width: ${physicalWidth}px !important;
+    overflow: visible !important;
+  `;
+  cloneSvg.removeAttribute('preserveAspectRatio');
+  cloneSvg.setAttribute('width', Math.round(physicalWidth));
+  cloneSvg.setAttribute('height', 75);
 
-      const startTime = performance.now();
+  targetWrapper.appendChild(clone);
 
-      function tween(currentTime) {
-        const elapsed = currentTime - startTime;
-        let progress = Math.min(elapsed / duration, 1);
-        const ease = 1 - Math.pow(1 - progress, 4); 
+  // 取得 Flex 排版後的精確坐標
+  const landedRect = cloneSvg.getBoundingClientRect();
 
-        const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
-        targetSvg.setAttribute('viewBox', currentVB.join(' '));
+  // 【算出偏差值】
+  const correctionX = landedRect.left - flightEndRect.left;
+  const correctionY = landedRect.top - flightEndRect.top;
 
-        const currentTx = endTx * ease;
-        const currentTy = endTy * ease;
-        const currentS = 1 + (finalScale - 1) * ease;
-        targetMc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
+  // 測量完畢，瞬間銷毀替身
+  clone.remove();
+  console.log(`🎯 精確校正值 X: ${correctionX}, Y: ${correctionY}`);
 
-        if (progress < 1) {
-          requestAnimationFrame(tween);
-        } else {
-          // 【測量 A】：記錄「落地前」那一瞬間，飛行軌跡的真實座標
-          const flightEndRect = targetSvg.getBoundingClientRect();
+  // ==========================================
+  // ✨ 4. 正式啟動飛行 (帶入絕對精準的校正值) ✨
+  // ==========================================
+  document.body.appendChild(logo);
+  logo.style.position = 'fixed';
+  logo.style.left = startRect.left + 'px';
+  logo.style.top = startRect.top + 'px';
+  logo.style.width = startRect.width + 'px';
+  logo.style.height = startRect.height + 'px';
+  logo.style.margin = '0';
+  logo.style.padding = '0';
+  logo.style.zIndex = '999999';
 
-          // 1. 容器設定
-          targetWrapper.style.display = 'flex';
-          targetWrapper.style.justifyContent = 'center';
-          targetWrapper.style.alignItems = 'center';
-          targetWrapper.style.overflow = 'visible'; 
+  innerSvg.style.width = '100%';
+  innerSvg.style.height = '100%';
+  innerSvg.style.overflow = 'visible';
 
-          // 2. 拔除飛行狀態
-          targetNode.style.position = 'relative';
-          targetNode.style.left = 'auto';
-          targetNode.style.top = 'auto';
-          targetNode.style.zIndex = 'auto';
-          targetNode.style.transition = 'none';
+  logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+  
+  requestAnimationFrame(() => {
+    // 【核心修正】：飛向加入了落差值的靶心
+    logo.style.left = (targetRect.left + correctionX) + 'px';
+    logo.style.top = (targetRect.top + correctionY) + 'px';
+    logo.style.width = targetRect.width + 'px';
+    logo.style.height = targetRect.height + 'px';
+  });
 
-          // 3. 計算物理尺寸
-          const finalRatio = endVB[2] / endVB[3];
-          const physicalWidth = 75 * finalRatio;
+  const duration = 800;
+  const startTime = performance.now();
+  
+  function tween(currentTime) {
+    const elapsed = currentTime - startTime;
+    let progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 4); 
 
-          targetNode.style.cssText = `
-            display: block !important;
-            width: ${physicalWidth}px !important;
-            height: 75px !important;
-            flex-shrink: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            max-width: none !important;
-            min-width: ${physicalWidth}px !important;
-          `;
+    const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
+    innerSvg.setAttribute('viewBox', currentVB.join(' '));
 
-          // 保持 Dry Run 的隱形狀態
-          if (isDryRun) targetNode.style.opacity = '0';
+    const currentTx = endTx * ease;
+    const currentTy = endTy * ease;
+    const currentS = 1 + (finalScale - 1) * ease;
+    mc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
 
-          targetSvg.style.cssText = `
-            display: block !important;
-            width: ${physicalWidth}px !important;
-            height: 75px !important;
-            max-width: none !important;
-            min-width: ${physicalWidth}px !important;
-            overflow: visible !important;
-          `;
-          
-          targetSvg.removeAttribute('preserveAspectRatio');
-          targetSvg.setAttribute('width', Math.round(physicalWidth));
-          targetSvg.setAttribute('height', 75);
-          
-          const oldImg = targetWrapper.querySelector('img');
-          if (oldImg) oldImg.remove();
-          targetWrapper.appendChild(targetNode);
-          
-          targetSvg.style.border = "1px solid red"; 
-
-          // 【測量 B】：延遲一幀，讓瀏覽器完成 Flex 置中排版，然後測量「落地後」的真實座標
-          requestAnimationFrame(() => {
-            const finalLandedRect = targetSvg.getBoundingClientRect();
-
-            // 算出舜移的誤差值 (落地後座標 - 飛行結束座標)
-            const offsetX = finalLandedRect.left - flightEndRect.left;
-            const offsetY = finalLandedRect.top - flightEndRect.top;
-
-            if (isDryRun) {
-              targetNode.remove(); // 測量完畢，銷毀替身
-            } else {
-              console.log("✅ 完美落地！誤差已消滅。");
-            }
-
-            resolve({ offsetX, offsetY });
-          });
-        }
-      }
+    if (progress < 1) {
       requestAnimationFrame(tween);
-    });
+    } else {
+      // ==========================================
+      // ✨ 5. 落地結算 (零誤差對接) ✨
+      // ==========================================
+      logo.style.position = 'relative';
+      logo.style.left = 'auto';
+      logo.style.top = 'auto';
+      logo.style.zIndex = 'auto';
+      logo.style.transition = 'none';
+
+      logo.style.cssText = `
+        display: block !important;
+        width: ${physicalWidth}px !important;
+        height: 75px !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: none !important;
+        min-width: ${physicalWidth}px !important;
+      `;
+
+      innerSvg.style.cssText = `
+        display: block !important;
+        width: ${physicalWidth}px !important;
+        height: 75px !important;
+        max-width: none !important;
+        min-width: ${physicalWidth}px !important;
+        overflow: visible !important;
+      `;
+      
+      innerSvg.removeAttribute('preserveAspectRatio');
+      innerSvg.setAttribute('width', Math.round(physicalWidth));
+      innerSvg.setAttribute('height', 75);
+      
+      const oldImg = targetWrapper.querySelector('img');
+      if (oldImg) oldImg.remove();
+      targetWrapper.appendChild(logo);
+      
+      innerSvg.style.border = "1px solid red"; 
+      console.log("✅ 完美落地！誤差已完全消滅。");
+    }
   }
-
-  // 執行第一階段：50ms 隱形預演 (Dry Run)
-  const dryRunResult = await runPass(50, true);
-  console.log("🔍 預演完成，測量到的偏移誤差值:", dryRunResult);
-
-  // 執行第二階段：800ms 正式飛行，並帶入預算出來的誤差值進行修正
-  await runPass(800, false, dryRunResult.offsetX, dryRunResult.offsetY);
+  requestAnimationFrame(tween);
 }
