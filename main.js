@@ -4951,36 +4951,17 @@ function closeOverlayAndAnimateLogo() {
     console.log("✈️ [Anim] 飛行轉場已觸發...");
   });
 
-  // ==========================================
-  // ✨ 5. 啟動電影級飛行 (完全改由 JS 驅動，拔除 CSS transition) ✨
-  // ==========================================
-  // 🚫 拔除 CSS 轉場，避免它鎖死在過期的舊座標
-  logo.style.transition = 'none';
-
-  const duration = 800;
+  const duration = 3000;
   const startTime = performance.now();
   
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
     let progress = Math.min(elapsed / duration, 1);
-    // 使用 easeOutQuart 確保飛行曲線絲滑
     const ease = 1 - Math.pow(1 - progress, 4); 
 
-    // 【🎯 核心修正】：動態追蹤靶心
-    // 每一幀都重新抓取容器的真實位置，完全無視 Overlay 關閉造成的排版位移干擾
-    const currentTargetRect = targetWrapper.getBoundingClientRect();
-    const dynamicFinalLeft = currentTargetRect.left + (currentTargetRect.width - physicalWidth) / 2;
-    const dynamicFinalTop = currentTargetRect.top + (currentTargetRect.height - 75) / 2;
-
-    // 動態更新外層容器的位置與大小
-    logo.style.left = startRect.left + (dynamicFinalLeft - startRect.left) * ease + 'px';
-    logo.style.top = startRect.top + (dynamicFinalTop - startRect.top) * ease + 'px';
-    logo.style.width = startRect.width + (physicalWidth - startRect.width) * ease + 'px';
-    logo.style.height = startRect.height + (75 - startRect.height) * ease + 'px';
-
-    // 更新 viewBox 與 Transform
     const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
     innerSvg.setAttribute('viewBox', currentVB.join(' '));
+    innerSvg.style.border = "1px solid red";
 
     const currentTx = endTx * ease;
     const currentTy = endTy * ease;
@@ -4991,8 +4972,14 @@ function closeOverlayAndAnimateLogo() {
       requestAnimationFrame(tween);
     } else {
       // ==========================================
-      // ✨ 6. 完美落地接軌 ✨
+      // ✨ 6. 完美落地接軌與數據核對 ✨
       // ==========================================
+      console.group("🛬 [Phase 4: 落地數據核對]");
+      
+      // 【核對 A：記錄飛行結束瞬間、尚未交接給 Flex 的絕對座標】
+      const preLandRect = logo.getBoundingClientRect();
+      console.log("🛑 [Pre-Land] 飛行結束瞬間，Logo 停在的絕對座標:", preLandRect);
+
       targetWrapper.style.display = 'flex';
       targetWrapper.style.justifyContent = 'center';
       targetWrapper.style.alignItems = 'center';
@@ -5033,7 +5020,26 @@ function closeOverlayAndAnimateLogo() {
       targetWrapper.appendChild(logo);
       
       innerSvg.style.border = "1px solid red"; 
-      console.log("✅ 動畫結束！動態追蹤靶心完成，確保與 Flex 置中 0 誤差對齊。");
+      
+      // 【核對 B：記錄交接給 Flex 之後，瀏覽器實際渲染的絕對座標】
+      // 需要包在 rAF 確保 DOM 更新完畢
+      requestAnimationFrame(() => {
+        const postLandRect = logo.getBoundingClientRect();
+        console.log("✅ [Post-Land] 交給 Flex 排版後，實際渲染的絕對座標:", postLandRect);
+        
+        // 【核對 C：計算瞬移誤差】
+        const diffX = postLandRect.left - preLandRect.left;
+        const diffY = postLandRect.top - preLandRect.top;
+        
+        console.log(`🔎 [Diff] 落地前後座標誤差 -> X偏移: ${diffX}px, Y偏移: ${diffY}px`);
+        
+        if (Math.abs(diffX) > 1 || Math.abs(diffY) > 1) {
+          console.warn("⚠️ [Warning] 發現顯著的舜移跳動！請檢查上面的 [Target CSS] 是否有 padding干擾，或是目標容器在 800ms 內尺寸發生了改變。");
+        } else {
+          console.log("🎉 [Success] 誤差在 1px 內，完美對齊！");
+        }
+        console.groupEnd();
+      });
     }
   }
   requestAnimationFrame(tween);
