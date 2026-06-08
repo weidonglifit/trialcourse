@@ -3539,7 +3539,7 @@ select {
 
 /* 1. 首字放大加粗 */
 .brand-story-p::first-letter {
-  font-size: 1.8em;         /* 維持放大 1.8 倍 */
+  font-size: 1.6em;         /* 維持放大 1.8 倍 */
   font-weight: 900;         /* 極粗體 */
   color: #D05A6E;           /* 品牌深粉色 */
   margin-right: 2px;        /* 與後方文字保留呼吸空間 */
