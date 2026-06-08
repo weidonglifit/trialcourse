@@ -4821,56 +4821,165 @@ function startPeekabooEgg() {
 
 function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
+  // 直接抓取預留的容器，不再依賴圖片標籤
   const targetWrapper = document.getElementById('final-logo-wrapper');
   
   if (!logo || !targetWrapper) return;
 
-  // 1. 紀錄動畫前的狀態
-  const startRect = logo.getBoundingClientRect();
-  
-  // 2. 設定容器為固定定位，讓他「飛過去」
-  // 注意：我們不需要 appendChild，我們直接修改 logo 的 class 或 style
+  const innerSvg = logo.querySelector('svg');
+  if (!innerSvg) return;
+
+  const startRect = innerSvg.getBoundingClientRect();
+  // 直接計算容器的位置，這比計算圖片更準確
+  const targetRect = targetWrapper.getBoundingClientRect();
+
+  if (startRect.width === 0) return;
+
+  // 1. 準備起飛，設定外層容器初始狀態
+  document.body.appendChild(logo);
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
   logo.style.top = startRect.top + 'px';
   logo.style.width = startRect.width + 'px';
   logo.style.height = startRect.height + 'px';
-  logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+  logo.style.margin = '0';
+  logo.style.padding = '0';
   logo.style.zIndex = '999999';
 
-  // 3. 執行動畫
+  innerSvg.style.width = '100%';
+  innerSvg.style.height = '100%';
+  innerSvg.style.overflow = 'visible';
+
+  // 2. 清除所有干擾的舊動畫與保護衣 (不動)
+  logo.classList.remove('svg-intro-container');
+  logo.style.animation = 'none';
+  logo.querySelectorAll('.anim-wrapper').forEach(w => {
+    w.style.animation = 'none';
+    w.style.transform = 'none';
+    w.style.opacity = '1';
+  });
+
+  // ==========================================
+  // ✨ 3. 大師級數學 (不動) ✨
+  // ==========================================
+  const mc0 = logo.querySelector('#layer-MC0');
+  const mc1 = logo.querySelector('#layer-MC1');
+  if (!mc0 || !mc1) return;
+
+  const box0 = mc0.getBBox();
+  const box1 = mc1.getBBox();
+
+  let startVB = [0, 0, 32, 32];
+  const vbAttr = innerSvg.getAttribute('viewBox');
+  if (vbAttr) startVB = vbAttr.trim().split(/[\s,]+/).map(Number);
+
+  const finalScale = box1.height / box0.height;
+  const gap = box1.height * 0.15;
+  const targetX = box1.x - gap - (box0.width * finalScale);
+  const targetY = box1.y + (box1.height - box0.height * finalScale) / 2;
+
+  const endTx = targetX - (box0.x * finalScale);
+  const endTy = targetY - (box0.y * finalScale);
+
+  const minX = targetX;
+  const maxX = box1.x + box1.width;
+  const minY = Math.min(targetY, box1.y);
+  const maxY = Math.max(targetY + box0.height * finalScale, box1.y + box1.height);
+
+  const contentW = (maxX - minX) * 1.04;
+  const contentH = (maxY - minY) * 1.04;
+  const padX = (contentW - (maxX - minX)) / 2;
+  const padY = (contentH - (maxY - minY)) / 2;
+
+  const targetAR = targetRect.width / targetRect.height;
+  const contentAR = contentW / contentH;
+
+  let vbW, vbH;
+  if (contentAR > targetAR) {
+    vbW = contentW;
+    vbH = vbW / targetAR;
+  } else {
+    vbH = contentH;
+    vbW = vbH * targetAR;
+  }
+
+  const vbX = minX - padX - (vbW - contentW) / 2;
+  const vbY = minY - padY - (vbH - contentH) / 2;
+  const endVB = [vbX, vbY, vbW, vbH];
+
+  // ==========================================
+  // ✨ 4. 啟動電影級飛行 (不動) ✨
+  // ==========================================
+  logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
   requestAnimationFrame(() => {
-    const targetRect = targetWrapper.getBoundingClientRect();
     logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
     logo.style.width = targetRect.width + 'px';
     logo.style.height = targetRect.height + 'px';
   });
 
-  // 4. 動畫結束後的狀態歸位
-  setTimeout(() => {
-    // 【核心邏輯】：不要移除它，而是把它變成 inline 的一部分
-    logo.style.position = 'relative'; // 改回 relative
-    logo.style.left = 'auto';
-    logo.style.top = 'auto';
-    logo.style.transition = 'none';
-    
-    // 讓原本的動畫內容保留，不要重置
-    // 我們只調整容器大小，讓 flex 幫我們置中
-    logo.style.width = '100%';
-    logo.style.height = '105px';
-    
-    // 如果 mc0 跳掉，是因為 transform 被重置了
-    // 我們在 setTimeout 裡，透過直接給予一個不會被清除的 style 來鎖定
-    const mc0 = logo.querySelector('#layer-MC0');
-    if(mc0) {
-        // 直接取得目前 computed 的 style
-        const style = window.getComputedStyle(mc0);
-        mc0.style.transform = style.transform; 
+  const duration = 800;
+  const startTime = performance.now();
+console.log("DEBUG: Target Wrapper Rect:", targetRect);
+  console.log("DEBUG: Final viewBox Target:", endVB);
+  function tween(currentTime) {
+    const elapsed = currentTime - startTime;
+    let progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 4); 
+
+    const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
+    innerSvg.setAttribute('viewBox', currentVB.join(' '));
+
+    const currentTx = endTx * ease;
+    const currentTy = endTy * ease;
+    const currentS = 1 + (finalScale - 1) * ease;
+    mc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
+
+    if (progress < 1) {
+      requestAnimationFrame(tween);
+    } else {
+      // 1. 確保容器本身具有置中屬性 (這是最基本的防護)
+      targetWrapper.style.display = 'flex';
+      targetWrapper.style.justifyContent = 'center';
+      targetWrapper.style.alignItems = 'center';
+
+      // 2. 拔除飛行狀態
+      logo.style.position = 'relative';
+      logo.style.left = 'auto';
+      logo.style.top = 'auto';
+      logo.style.zIndex = 'auto';
+      logo.style.transition = 'none';
+
+      // 3. 設定 Logo 容器
+      logo.style.display = 'block';
+      logo.style.width = '100%';
+      logo.style.height = '105px'; 
+      logo.style.margin = '0 auto'; // 強制物理置中
+
+      // 4. 清除 svg 寬高限制，讓它聽從 container
+      innerSvg.style.width = '100%';
+      innerSvg.style.height = '100%';
+      innerSvg.style.display = 'block';
+
+      // 5. 【關鍵 Debug 點】：檢查對齊基準
+      const logoRect = logo.getBoundingClientRect();
+      const wrapperRect = targetWrapper.getBoundingClientRect();
+      
+      console.log("--- 偵測排版異常 ---");
+      console.log("Logo 寬度:", logoRect.width, "容器寬度:", wrapperRect.width);
+      console.log("Logo 左邊界距螢幕:", logoRect.left);
+      console.log("容器左邊界距螢幕:", wrapperRect.left);
+      
+      // 如果 logoRect.left 不等於 wrapperRect.left，代表有東西在把它推向右邊！
+      if (Math.abs(logoRect.left - wrapperRect.left) > 1) {
+          console.warn("偵測到偏移！請檢查是否 Logo 內部的 SVG 內容物含有未清除的 transform 偏移");
+      }
+
+      const oldImg = targetWrapper.querySelector('img');
+      if (oldImg) oldImg.remove();
+      targetWrapper.appendChild(logo);
+      
     }
-    
-    // 這時候再把 logo 放到目標容器內，因為它已經是 relative，
-    // 它會乖乖以「元素」身份進入 flex 容器，不會觸發 layout shift
-    targetWrapper.appendChild(logo);
-  }, 800);
+  }
+  requestAnimationFrame(tween);
 }
