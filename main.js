@@ -4965,22 +4965,30 @@ function closeOverlayAndAnimateLogo() {
     else {
       const targetWrapper = targetImg.parentElement;
       
-      // 拔除飛行狀態
+      // 拔除飛行絕對定位狀態
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
       logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
 
-      // 【終極響應式鎖定】完全鎖死它的物理佔位空間與比例，不讓瀏覽器亂猜
-      logo.style.width = targetRect.width + 'px';
-      logo.style.height = targetRect.height + 'px';
-      logo.style.maxWidth = '100%';
-      logo.style.aspectRatio = `${targetRect.width} / ${targetRect.height}`;
-      logo.style.display = 'inline-block';
-      logo.style.verticalAlign = 'middle';
+      // ==========================================
+      // ✨ 終極置中與響應式鎖定 (解決手機偏右問題) ✨
+      // ==========================================
+      
+      // 1. 放棄 inline-block，改用 block + margin auto 強制物理置中！
+      logo.style.display = 'block';
+      logo.style.margin = '0 auto';
 
-      // 強迫 SVG 100% 聽從外層容器的話，拔除任何會干擾的 auto 屬性
+      // 2. 寬度設定為 100%，但最大不超過原始圖片的寬度
+      logo.style.width = '100%';
+      logo.style.maxWidth = targetRect.width + 'px';
+      
+      // 3. 鎖定長寬比例，讓高度跟著寬度一起縮放，絕對不變形
+      logo.style.height = 'auto';
+      logo.style.aspectRatio = `${targetRect.width} / ${targetRect.height}`;
+
+      // 4. 清除內部 SVG 可能干擾的預設屬性，強迫它 100% 聽外層的話
       innerSvg.removeAttribute('width');
       innerSvg.removeAttribute('height');
       innerSvg.style.width = '100%';
