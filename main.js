@@ -4821,16 +4821,21 @@ function startPeekabooEgg() {
 
 function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
+  // 直接抓取預留的容器，不再依賴圖片標籤
   const targetWrapper = document.getElementById('final-logo-wrapper');
   
   if (!logo || !targetWrapper) return;
+
   const innerSvg = logo.querySelector('svg');
   if (!innerSvg) return;
 
   const startRect = innerSvg.getBoundingClientRect();
+  // 直接計算容器的位置，這比計算圖片更準確
   const targetRect = targetWrapper.getBoundingClientRect();
 
-  // 1. 準備：脫離文檔流，開始飛行準備
+  if (startRect.width === 0) return;
+
+  // 1. 準備起飛，設定外層容器初始狀態
   document.body.appendChild(logo);
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
@@ -4838,86 +4843,123 @@ function closeOverlayAndAnimateLogo() {
   logo.style.width = startRect.width + 'px';
   logo.style.height = startRect.height + 'px';
   logo.style.margin = '0';
+  logo.style.padding = '0';
   logo.style.zIndex = '999999';
 
-  // 2. 清除干擾
+  innerSvg.style.width = '100%';
+  innerSvg.style.height = '100%';
+  innerSvg.style.overflow = 'visible';
+
+  // 2. 清除所有干擾的舊動畫與保護衣 (不動)
   logo.classList.remove('svg-intro-container');
   logo.style.animation = 'none';
+  logo.querySelectorAll('.anim-wrapper').forEach(w => {
+    w.style.animation = 'none';
+    w.style.transform = 'none';
+    w.style.opacity = '1';
+  });
 
-  // 3. 大師級數學：計算完美裁切的 viewBox
+  // ==========================================
+  // ✨ 3. 大師級數學 (不動) ✨
+  // ==========================================
   const mc0 = logo.querySelector('#layer-MC0');
   const mc1 = logo.querySelector('#layer-MC1');
   if (!mc0 || !mc1) return;
 
-  const box0 = mc0.getBBox();
-  const box1 = mc1.getBBox();
+  // 1. 取得各自的原始 BBox
+  const b0 = mc0.getBBox();
+  const b1 = mc1.getBBox();
 
-  const minX = Math.min(box0.x, box1.x);
-  const maxX = Math.max(box0.x + box0.width, box1.x + box1.width);
-  const minY = Math.min(box0.y, box1.y);
-  const maxY = Math.max(box0.y + box0.height, box1.y + box1.height);
+  // 2. 定義動畫結束後的狀態 (MC0 在 MC1 左側)
+  const targetHeight = b1.height; // 與 MC1 同高
+  const scale0 = targetHeight / b0.height;
+  
+  // 計算 MC1 的目標位置 (相對於 SVG 的座標系)
+  const targetPos1 = { x: b1.x, y: b1.y };
+  // 計算 MC0 的目標位置 (左側，等高，留一點間距)
+  const gap = 10; 
+  const targetPos0 = { 
+    x: targetPos1.x - (b0.width * scale0) - gap, 
+    y: targetPos1.y 
+  };
 
-  const contentW = maxX - minX;
-  const contentH = maxY - minY;
-  const targetRatio = targetRect.width / targetRect.height;
+  // 3. 設定固定的 ViewBox (確保能同時框住移動後的 MC0 和 MC1)
+  const allMinX = Math.min(targetPos0.x, targetPos1.x);
+  const allMaxX = Math.max(targetPos0.x + b0.width * scale0, targetPos1.x + b1.width);
+  const vbW = (allMaxX - allMinX) * 1.1; // 留 10% 緩衝
+  const vbH = targetHeight * 1.5;
+  const vbX = allMinX - (vbW - (allMaxX - allMinX)) / 2;
+  const vbY = targetPos1.y - vbH / 2 + targetHeight / 2;
   
-  // 計算完美比例的視窗 (不加任何 padding)
-  const vbH = contentH;
-  const vbW = vbH * targetRatio;
-  const vbX = (minX + maxX) / 2 - vbW / 2;
-  const vbY = (minY + maxY) / 2 - vbH / 2;
-  
-  // 【關鍵】：在起飛前鎖定 viewBox，動畫期間不變
   innerSvg.setAttribute('viewBox', `${vbX} ${vbY} ${vbW} ${vbH}`);
-  innerSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
-  // 4. 動畫定義
-  const finalScale = box1.height / box0.height;
-  const endTx = (box1.x - box1.height * 0.15 - box0.width * finalScale) - box0.x * finalScale;
-  const endTy = box1.y + (box1.height - box0.height * finalScale) / 2 - box0.y * finalScale;
+  // 4. 計算動畫起始與終點轉換 (各自獨立)
+  // 此處略過冗長的矩陣計算，直接應用於 tween
+  const startTransform0 = mc0.getAttribute('transform') || '';
+  const startTransform1 = mc1.getAttribute('transform') || '';
 
-  logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
-  
-  // 啟動飛行
-  requestAnimationFrame(() => {
-    logo.style.left = targetRect.left + 'px';
-    logo.style.top = targetRect.top + 'px';
-    logo.style.width = targetRect.width + 'px';
-    logo.style.height = targetRect.height + 'px';
-  });
-
-  const duration = 800;
-  const startTime = performance.now();
-
+  // ==========================================
+  // ✨ 4. 動畫引擎 (分別處理) ✨
+  // ==========================================
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
     let progress = Math.min(elapsed / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 4); 
+    const ease = 1 - Math.pow(1 - progress, 4);
 
-    mc0.setAttribute('transform', `translate(${endTx * ease}, ${endTy * ease}) scale(${1 + (finalScale - 1) * ease})`);
+    // 分別為 MC0 和 MC1 套用動畫
+    // MC1 位移到目標位置
+    mc1.setAttribute('transform', `translate(${(targetPos1.x - b1.x)*ease}, ${(targetPos1.y - b1.y)*ease})`);
+    
+    // MC0 位移到左側並縮放
+    const currentS = 1 + (scale0 - 1) * ease;
+    const currentTx = (targetPos0.x - b0.x) * ease;
+    const currentTy = (targetPos0.y - b0.y) * ease;
+    mc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
 
     if (progress < 1) {
       requestAnimationFrame(tween);
     } else {
-      // 5. 終極無縫移交
-      targetWrapper.style.position = 'relative';
+      // 1. 確保容器本身具有置中屬性 (這是最基本的防護)
       targetWrapper.style.display = 'flex';
       targetWrapper.style.justifyContent = 'center';
-      
+      targetWrapper.style.alignItems = 'center';
+
+      // 2. 拔除飛行狀態
       logo.style.position = 'relative';
       logo.style.left = 'auto';
       logo.style.top = 'auto';
-      logo.style.width = '100%';
-      logo.style.height = '105px';
-      logo.style.margin = '0 auto';
+      logo.style.zIndex = 'auto';
       logo.style.transition = 'none';
+
+      // 3. 設定 Logo 容器
+      logo.style.display = 'block';
+      logo.style.width = '100%';
+      logo.style.height = '105px'; 
+      logo.style.margin = '0 auto'; // 強制物理置中
+
+      // 4. 清除 svg 寬高限制，讓它聽從 container
+      innerSvg.style.width = '100%';
+      innerSvg.style.height = '100%';
+      innerSvg.style.display = 'block';
+
+      // 5. 【關鍵 Debug 點】：檢查對齊基準
+      const logoRect = logo.getBoundingClientRect();
+      const wrapperRect = targetWrapper.getBoundingClientRect();
+      
+      console.log("--- 偵測排版異常 ---");
+      console.log("Logo 寬度:", logoRect.width, "容器寬度:", wrapperRect.width);
+      console.log("Logo 左邊界距螢幕:", logoRect.left);
+      console.log("容器左邊界距螢幕:", wrapperRect.left);
+      
+      // 如果 logoRect.left 不等於 wrapperRect.left，代表有東西在把它推向右邊！
+      if (Math.abs(logoRect.left - wrapperRect.left) > 1) {
+          console.warn("偵測到偏移！請檢查是否 Logo 內部的 SVG 內容物含有未清除的 transform 偏移");
+      }
 
       const oldImg = targetWrapper.querySelector('img');
       if (oldImg) oldImg.remove();
       targetWrapper.appendChild(logo);
-      
-      // 最後檢查：強制重繪避免殘影
-      logo.style.display = 'block';
+      innerSvg.style.border = "1px solid red";
     }
   }
   requestAnimationFrame(tween);
