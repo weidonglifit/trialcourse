@@ -4954,7 +4954,7 @@ console.log("DEBUG: Target Wrapper Rect:", targetRect);
       logo.style.display = 'block';
       logo.style.width = screenWidth + 'px'; // 讓它跟螢幕一樣寬
       logo.style.marginLeft = (-(screenWidth - targetWrapper.clientWidth) / 2) + 'px'; 
-      logo.style.height = '105px';
+      logo.style.height = '100px';
       
       // 確保 SVG 內部內容置中
       innerSvg.style.display = 'block';
