@@ -4982,7 +4982,7 @@ function closeOverlayAndAnimateLogo() {
 
       // 2. 寬度設定為 100%，但最大不超過原始圖片的寬度
       logo.style.width = '100%';
-      logo.style.maxWidth = targetRect.width + 'px';
+      logo.style.maxWidth = '352px';
       
       // 3. 鎖定長寬比例，讓高度跟著寬度一起縮放，絕對不變形
       logo.style.height = 'auto';
