@@ -4991,8 +4991,8 @@ function closeOverlayAndAnimateLogo() {
       // 4. 清除內部 SVG 可能干擾的預設屬性，強迫它 100% 聽外層的話
       innerSvg.removeAttribute('width');
       innerSvg.removeAttribute('height');
-      innerSvg.style.width = '90%';
-      innerSvg.style.height = '90%';
+      innerSvg.style.width = '100%';
+      innerSvg.style.height = '100%';
       innerSvg.style.display = 'block';
 
       // 完美替換
