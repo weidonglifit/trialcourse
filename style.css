@@ -3562,36 +3562,31 @@ select {
   animation: sync-draw-outer 2s ease-in-out infinite;
 }
 
+.inner-dot {
+  animation: sync-fade-dot 2s ease-in-out infinite;
+}
 /* 2. 內部波浪線動畫（總長度 19） */
 .inner-wave {
   stroke-dasharray: 19;
   animation: sync-draw-inner 2s ease-in-out infinite;
 }
 
-/* ===== 核心魔法：兩者完全同步的動畫軌跡 ===== */
-
 /* 外圈的 0 -> 88 -> 0 軌跡 */
 @keyframes sync-draw-outer {
-  0% {
-    stroke-dashoffset: 88; /* 空的 */
-  }
-  50% {
-    stroke-dashoffset: 0;  /* 畫滿 */
-  }
-  100% {
-    stroke-dashoffset: -88; /* 往前推移，再次變空 */
-  }
+  0% { stroke-dashoffset: 88; }
+  50% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -88; }
 }
 
 /* 內圈波浪線的 0 -> 19 -> 0 軌跡 */
 @keyframes sync-draw-inner {
-  0% {
-    stroke-dashoffset: -19; /* 改成從負的開始：線條準備從右邊進入 */
-  }
-  50% {
-    stroke-dashoffset: 0;  /* 畫滿（剛好落在動畫 50% 處，與外圈同時滿） */
-  }
-  100% {
-    stroke-dashoffset: 19; /* 改成正的結尾：線條從右邊開始往左被推出去（消失） */
-  }
+  0% { stroke-dashoffset: -19; }
+  50% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 19; }
+}
+
+@keyframes sync-fade-dot {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
 }
