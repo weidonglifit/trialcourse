@@ -4967,7 +4967,7 @@ console.log("DEBUG: Target Wrapper Rect:", targetRect);
       targetWrapper.appendChild(logo);
       
       // 最後的防禦：強制視窗置中 (如果因為寬度過大導致右移)
-      window.scrollTo(0, 0);
+      //window.scrollTo(0, 0);
       innerSvg.style.border = "1px solid red";
     }
   }
