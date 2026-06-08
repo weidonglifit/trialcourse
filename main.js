@@ -4821,159 +4821,49 @@ function startPeekabooEgg() {
 
 function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
-  // 直接抓取預留的容器，不再依賴圖片標籤
   const targetWrapper = document.getElementById('final-logo-wrapper');
   
   if (!logo || !targetWrapper) return;
 
-  const innerSvg = logo.querySelector('svg');
-  if (!innerSvg) return;
-
-  const startRect = innerSvg.getBoundingClientRect();
-  // 直接計算容器的位置，這比計算圖片更準確
+  // 1. 取得當前真實座標 (相對視窗)
+  const startRect = logo.getBoundingClientRect();
   const targetRect = targetWrapper.getBoundingClientRect();
 
-  if (startRect.width === 0) return;
-
-  // 1. 準備起飛，設定外層容器初始狀態
+  // 2. 將 logo 變成固定定位，準備開始飛行
   document.body.appendChild(logo);
   logo.style.position = 'fixed';
   logo.style.left = startRect.left + 'px';
   logo.style.top = startRect.top + 'px';
   logo.style.width = startRect.width + 'px';
   logo.style.height = startRect.height + 'px';
-  logo.style.margin = '0';
-  logo.style.padding = '0';
   logo.style.zIndex = '999999';
-
-  innerSvg.style.width = '100%';
-  innerSvg.style.height = '100%';
-  innerSvg.style.overflow = 'visible';
-
-  // 2. 清除所有干擾的舊動畫與保護衣 (不動)
-  logo.classList.remove('svg-intro-container');
-  logo.style.animation = 'none';
-  logo.querySelectorAll('.anim-wrapper').forEach(w => {
-    w.style.animation = 'none';
-    w.style.transform = 'none';
-    w.style.opacity = '1';
-  });
-
-  // ==========================================
-  // ✨ 3. 大師級數學 (不動) ✨
-  // ==========================================
-  const mc0 = logo.querySelector('#layer-MC0');
-  const mc1 = logo.querySelector('#layer-MC1');
-  if (!mc0 || !mc1) return;
-
-  const box0 = mc0.getBBox();
-  const box1 = mc1.getBBox();
-
-  let startVB = [0, 0, 32, 32];
-  const vbAttr = innerSvg.getAttribute('viewBox');
-  if (vbAttr) startVB = vbAttr.trim().split(/[\s,]+/).map(Number);
-
-  const finalScale = box1.height / box0.height;
-  const gap = box1.height * 0.15;
-  const targetX = box1.x - gap - (box0.width * finalScale);
-  const targetY = box1.y + (box1.height - box0.height * finalScale) / 2;
-
-  const endTx = targetX - (box0.x * finalScale);
-  const endTy = targetY - (box0.y * finalScale);
-
-  const minX = targetX;
-  const maxX = box1.x + box1.width;
-  const minY = Math.min(targetY, box1.y);
-  const maxY = Math.max(targetY + box0.height * finalScale, box1.y + box1.height);
-
-  const contentW = (maxX - minX) * 1.04;
-  const contentH = (maxY - minY) * 1.04;
-  const padX = (contentW - (maxX - minX)) / 2;
-  const padY = (contentH - (maxY - minY)) / 2;
-
-  const targetAR = targetRect.width / targetRect.height;
-  const contentAR = contentW / contentH;
-
-  let vbW, vbH;
-  if (contentAR > targetAR) {
-    vbW = contentW;
-    vbH = vbW / targetAR;
-  } else {
-    vbH = contentH;
-    vbW = vbH * targetAR;
-  }
-
-  const vbX = minX - padX - (vbW - contentW) / 2;
-  const vbY = minY - padY - (vbH - contentH) / 2;
-  const endVB = [vbX, vbY, vbW, vbH];
-
-  // ==========================================
-  // ✨ 4. 啟動電影級飛行 (不動) ✨
-  // ==========================================
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+
+  // 3. 觸發位移 (讓 CSS 自動完成動畫)
   requestAnimationFrame(() => {
     logo.style.left = targetRect.left + 'px';
     logo.style.top = targetRect.top + 'px';
     logo.style.width = targetRect.width + 'px';
     logo.style.height = targetRect.height + 'px';
+    
+    // 如果要裁切 SVG，這裡只需要調整一次 viewBox 即可，不需要逐格
+    // 瀏覽器會自動處理屬性的過渡 (如果瀏覽器支援)
+    // 或者直接跳過裁切動畫，落地後再切換內容
   });
 
-  const duration = 800;
-  const startTime = performance.now();
-console.log("DEBUG: Target Wrapper Rect:", targetRect);
-  console.log("DEBUG: Final viewBox Target:", endVB);
-  function tween(currentTime) {
-    const elapsed = currentTime - startTime;
-    let progress = Math.min(elapsed / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 4); 
-
-    const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
-    innerSvg.setAttribute('viewBox', currentVB.join(' '));
-
-    const currentTx = endTx * ease;
-    const currentTy = endTy * ease;
-    const currentS = 1 + (finalScale - 1) * ease;
-    mc0.setAttribute('transform', `translate(${currentTx}, ${currentTy}) scale(${currentS})`);
-
-    if (progress < 1) {
-      requestAnimationFrame(tween);
-    } else {
-      // 1. 取得落地時容器的精確尺寸 (防止 flex 重新計算造成的跳動)
-      const finalWidth = targetWrapper.clientWidth;
-      const finalHeight = 105; // 強制固定為你設定的 105px
-
-      // 2. 移除所有定位干擾，但保留位置
-      logo.style.position = 'relative';
-      logo.style.left = 'auto';
-      logo.style.top = 'auto';
-      logo.style.zIndex = 'auto';
-      logo.style.transition = 'none';
-
-      // 3. 【關鍵點】：不使用 margin auto，直接用 Flex 容器屬性對齊，
-      // 並給予 logo 精確的像素寬高，這能確保它在 Flex 內部絕對不跑位
-      targetWrapper.style.display = 'flex';
-      targetWrapper.style.justifyContent = 'center';
-      targetWrapper.style.alignItems = 'center';
-
-      logo.style.display = 'block';
-      logo.style.width = finalWidth + 'px'; // 強制鎖定寬度
-      logo.style.height = finalHeight + 'px'; // 強制鎖定高度
-      logo.style.flexShrink = '0'; // 防止 flex 壓縮它
-
-      // 4. SVG 強制對齊中心
-      innerSvg.style.width = '100%';
-      innerSvg.style.height = '100%';
-      innerSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-      
-      // 5. 移入容器
-      const oldImg = targetWrapper.querySelector('img');
-      if (oldImg) oldImg.remove();
-      targetWrapper.appendChild(logo);
-      
-      // 檢查是否還有殘留變形，有的話徹底清除
-      mc0.removeAttribute('transform');
-      innerSvg.style.border = "1px solid red";
-    }
-  }
-  requestAnimationFrame(tween);
+  // 4. 落地後無縫接軌 (使用 setTimeout 等待 CSS 動畫結束)
+  setTimeout(() => {
+    // 恢復為標準排版
+    logo.style.position = 'relative';
+    logo.style.left = 'auto';
+    logo.style.top = 'auto';
+    logo.style.transition = 'none';
+    
+    // 調整大小以符合容器
+    logo.style.width = '100%';
+    logo.style.height = '105px';
+    
+    // 放入容器，讓 Flexbox 瞬間對齊
+    targetWrapper.appendChild(logo);
+  }, 800);
 }
