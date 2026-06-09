@@ -3537,12 +3537,12 @@ select {
 
 /* 左邊文字初始往右微調，準備向左推開 */
 .anim-text-left {
-  transform: translateX(15px);
+  transform: translateX(20px);
 }
 
 /* 右邊文字初始往左微調，準備向右推開 */
 .anim-text-right {
-  transform: translateX(-15px);
+  transform: translateX(-20px);
 }
 
 /* 觸發動畫後的最終狀態 */
