@@ -70,11 +70,7 @@ window.addEventListener('load', function () {
       allRoomBookState = initData.popularWallData;
       globalSingleBookedMap = initData.singleBookedMap;
       renderAllRules();
-      if(initData.settings && initData.settings.announcement) {
-        renderAnnouncements(initData.settings.announcement);
-      } else {
-        renderAnnouncements(""); 
-      }
+      renderAnnouncements(globalSettings.announcement);
       // 2. 處理網頁與表單標題
       //document.getElementById('main-title').innerText = globalSettings.title[0] + "\n課程報名｜教室預約";
       document.getElementById('main-title').innerHTML = `
@@ -5027,15 +5023,15 @@ function closeOverlayAndAnimateLogo() {
   requestAnimationFrame(tween);
 }
 
-// 打開公告視窗
+// ======= 停課與代課公告邏輯 =======
 function openAnnouncement() {
   const container = document.getElementById('announcementContainer');
   if(container) {
-    container.classList.add('active');
+    // 順著你原本的 CSS 設計，加上 active 就能觸發下拉動畫
+    container.classList.add('active'); 
   }
 }
 
-// 關閉公告視窗
 function closeAnnouncement(event) {
   if(event) event.stopPropagation();
   const container = document.getElementById('announcementContainer');
@@ -5044,12 +5040,11 @@ function closeAnnouncement(event) {
   }
 }
 
-// 解析從後端傳來的多行字串並渲染成小卡
 function renderAnnouncements(announcementStr) {
   const container = document.getElementById('expandAnnouncementContent');
   if (!container) return;
 
-  // 如果沒有公告內容
+  // 防呆：如果表格 A31 沒資料
   if (!announcementStr || announcementStr.trim() === "") {
     container.innerHTML = '<p style="text-align: center; color: #999; margin: 20px 0;">目前無停課或代課公告</p>';
     return;
@@ -5057,10 +5052,9 @@ function renderAnnouncements(announcementStr) {
 
   const lines = announcementStr.split('\n');
   let htmlResult = '';
-
-  // 匹配最外層： [日期][課程資訊][狀態](可選的[代課老師])
+  // 匹配格式： [5/31][流動瑜珈-Zoe 週五 10:00-10:55][停課] 或是 [代課][God]
   const regex = /^\[(.*?)\]\[(.*?)\]\[(.*?)\](?:\[(.*?)\])?$/;
-  // 匹配課程資訊： 流動瑜珈-Zoe 週五 10:00-10:55
+  // 匹配課程內部字串，抓出時間
   const courseRegex = /^(.*?)-(.*?)\s+(.*?)\s+(\d{2}:\d{2})-(\d{2}:\d{2})$/;
 
   lines.forEach(line => {
@@ -5069,36 +5063,32 @@ function renderAnnouncements(announcementStr) {
 
     const match = line.match(regex);
     if (match) {
-      const datePart = match[1];        // 例：5/31
-      const coursePart = match[2];      // 例：流動瑜珈-Zoe 週五 10:00-10:55
-      const statusPart = match[3];      // 例：停課 或 代課
-      const subTeacherPart = match[4];  // 例：God (如果有的話)
+      const datePart = match[1];
+      const coursePart = match[2];
+      const statusPart = match[3];
+      const subTeacherPart = match[4];
 
       const cMatch = coursePart.match(courseRegex);
-      
-      // 如果內部課程字串符合格式，拆解出老師與時間
       if (cMatch) {
-        const courseName = cMatch[1]; // 流動瑜珈
-        const teacher = cMatch[2];    // Zoe
-        const day = cMatch[3];        // 週五
-        const startTime = cMatch[4];  // 10:00
-        const endTime = cMatch[5];    // 10:55
+        const courseName = cMatch[1];
+        const teacher = cMatch[2];
+        const day = cMatch[3];
+        const startTime = cMatch[4];
+        const endTime = cMatch[5];
 
-        // 判斷狀態 (停課 / 代課) 以決定樣式與文字
         let statusClass = '';
         let statusTextHtml = '';
-        
+
         if (statusPart === '停課') {
           statusClass = 'status-cancel';
           statusTextHtml = '<div class="status-cancel-text">停課</div>';
         } else if (statusPart === '代課') {
           statusClass = 'status-sub';
-          // 如果有抓到第4個括號就顯示 XX老師代課，否則顯示 代課
           const subName = subTeacherPart ? `${subTeacherPart}老師代課` : '代課';
           statusTextHtml = `<div class="status-sub-text">${subName}</div>`;
         }
 
-        // 組裝小卡 HTML
+        // 組裝小卡
         htmlResult += `
           <div class="announcement-card ${statusClass}">
             <div class="time-tag">
@@ -5119,11 +5109,9 @@ function renderAnnouncements(announcementStr) {
     }
   });
 
-  // 如果解析完後沒有產出任何卡片 (可能格式都不對)
   if (htmlResult === '') {
     htmlResult = '<p style="text-align: center; color: #999; margin: 20px 0;">目前無格式相符的公告</p>';
   }
-
-  // 注入到隱藏的 Content 中
   container.innerHTML = htmlResult;
 }
+// ================================
