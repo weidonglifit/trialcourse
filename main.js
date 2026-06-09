@@ -5079,9 +5079,9 @@ function renderAnnouncements() {
             html += `
             <div class="course-card result-card-anim" style="margin-bottom: 12px; cursor: default; border: 1px solid #F4A7B9; border-radius: 12px; background: #fff; display: flex; align-items: center; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                 <div style="width: 70px; flex-shrink: 0; margin-right: 15px; text-align: center;">
-                    <div class="time-tag" style="background: #F4A7B9; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 70px; height: 70px; margin: 0 auto; border-radius: 12px; color: white; box-shadow: 0 4px 8px rgba(232, 122, 144, 0.3);">
+                    <div class="time-tag">
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${startTime}</span>
-                        <div class="time-line" style="width: 2px; height: 10px; background: rgba(255,255,255,0.7); margin: 3px 0;"></div>
+                        <div class="time-line"></div>
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${endTime}</span>
                     </div>
                 </div>
