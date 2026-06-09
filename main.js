@@ -5086,7 +5086,7 @@ function renderAnnouncements() {
                     </div>
                 </div>
                 <div style="flex: 1; text-align: left; min-width: 0;">
-                    <div style="font-weight: bold; color: #d14d72; font-size: 1.15em; margin-bottom: 4px;">${courseName}<span style="font-size: 0.85em; color: #7f8c8d; font-weight: normal; margin-left: 2px;">(${teacherName})</span></div>
+                    <div style="font-weight: bold; color: #d14d72; font-size: 1.1em; margin-bottom: 4px;">${courseName}<span style="font-size: 0.8em; color: #7f8c8d; font-weight: normal; margin-left: 2px;">(${teacherName})</span></div>
                     <div style="font-size: 0.9em; color: #555;">日期：${dateStr}</div>
                 </div>
                 <div style="flex-shrink: 0; text-align: right; margin-left: 10px;">
