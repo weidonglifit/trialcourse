@@ -1879,7 +1879,8 @@ select {
 
 .notice-pulse-container {
   width: 100%;
-  background: linear-gradient(135deg, #FFF0F2 0%, #FFE5E9 100%);
+  /* background: linear-gradient(135deg, #FFF0F2 0%, #FFE5E9 100%); */
+  background: white;
   border: 1px solid #F4A7B9;
   border-radius: 12px;
   margin: 15px 0;
