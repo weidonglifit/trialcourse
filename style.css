@@ -2726,7 +2726,7 @@ select {
   align-items: center;
   justify-content: center;
   /* 讓文字與圖示在按鈕內置中 */
-  padding: 6px 12px;
+  padding: 6px 6px;
   border-radius: 10px;
   background: #FFFFFF;
   color: #E87A90 !important;
