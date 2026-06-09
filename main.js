@@ -4981,7 +4981,7 @@ function closeOverlayAndAnimateLogo() {
       `;
 
       targetWrapper.appendChild(logo);
-      function expandMainTitle();      
+      expandMainTitle();
     }
   }
   requestAnimationFrame(tween);
