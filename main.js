@@ -2709,7 +2709,9 @@ function closeOverlay() {
     setTimeout(() => {
       overlay.style.display = 'none';
     }, 800);
-    expandMainTitle();
+    setTimeout(() => {
+      expandMainTitle();
+    }, 1600);    
   }
 }
 // 打開 QRCode 視窗
