@@ -744,17 +744,6 @@ select {
   cursor: pointer;
 }
 
-.course-card {
-  perspective: 1000px;
-  margin-bottom: 15px;
-  background: transparent !important;
-  /* 移除背景，由內部層負責 */
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  cursor: pointer;
-}
-
 /* 2. 旋轉核心：控制翻轉動作 */
 .card-inner {
   position: relative;
