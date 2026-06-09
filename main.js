@@ -5066,7 +5066,7 @@ function renderAnnouncements() {
                 statusColor = "#e74c3c"; // 紅色系
                 statusBg = "#fdf2f4";
             } else if (statusStr === "代課") {
-                statusText = `${subTeacher}老師代課`;
+                statusText = `${subTeacher}代課`;
                 statusColor = "#3498db"; // 藍色系
                 statusBg = "#ebf5fb";
             } else {
