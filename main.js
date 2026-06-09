@@ -5077,15 +5077,15 @@ function renderAnnouncements() {
 
             // 組合符合你設計規範的 小卡 HTML
             html += `
-            <div class="course-card result-card-anim" style="margin-bottom: 12px; cursor: default; border: 1px solid #F4A7B9; border-radius: 12px; background: #fff; display: flex; align-items: center; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                <div style="width: 70px; flex-shrink: 0; margin-right: 15px; text-align: center;">
+            <div class="announcement-card result-card-anim">
+                <div style="width: 550px; flex-shrink: 0; margin-right: 15px; text-align: center;">
                     <div class="time-tag">
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${startTime}</span>
-                        <div class="time-line"></div>
+                        <div class="time-line" style="width: 2px; height: 10px; background: rgba(255,255,255,0.7); margin: 3px 0;"></div>
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${endTime}</span>
                     </div>
                 </div>
-                <div style="flex: 1; text-align: left; min-width: 0;">
+                <div style="flex: 1; text-align: center; min-width: 0;">
                     <div style="font-weight: bold; color: #d14d72; font-size: 1.15em; margin-bottom: 4px;">${courseName}<span style="font-size: 0.85em; color: #7f8c8d; font-weight: normal; margin-left: 2px;">(${teacherName})</span></div>
                     <div style="font-size: 0.9em; color: #555;">日期：${dateStr}</div>
                 </div>

@@ -744,6 +744,17 @@ select {
   cursor: pointer;
 }
 
+.course-card {
+  perspective: 1000px;
+  margin-bottom: 15px;
+  background: transparent !important;
+  /* 移除背景，由內部層負責 */
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  cursor: pointer;
+}
+
 /* 2. 旋轉核心：控制翻轉動作 */
 .card-inner {
   position: relative;
@@ -3584,4 +3595,17 @@ select {
   0% { stroke-dashoffset: 19; }
   50% { stroke-dashoffset: 38; }
   100% { stroke-dashoffset: 57; }
+}
+
+.announcement-card {
+  margin-bottom: 12px;
+  cursor: default; /* 公告卡片不需要手指鼠標 */
+  border: 1px solid #F4A7B9;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* 輕柔的陰影 */
+  perspective: 1000px; /* 保留這個，讓進場動畫 (result-card-anim) 的 3D 翻轉效果正常運作 */
 }
