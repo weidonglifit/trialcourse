@@ -5077,8 +5077,8 @@ function renderAnnouncements() {
             // 組合符合你設計規範的 小卡 HTML
             html += `
             <div class="announcement-card result-card-anim" style="margin-bottom: 12px; cursor: default; border: 1px solid #F4A7B9; border-radius: 12px; background: #fff; display: flex; align-items: center; padding: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                <div style="width: 50px; flex-shrink: 0; margin-right: 15px; display: flex; flex-direction: column; align-items: center;">
-                    <div class="time-tag" style="min-width: none; width: 45px; padding: 6px 4px;">
+                <div style="width: 50px; flex-shrink: 0; margin-right: 15px; text-align: center;">
+                    <div class="time-tag" style="min-width: 0; width: 45px; padding: 6px 4px; margin: 0 auto;">
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${startTime}</span>
                         <div class="time-line"></div>
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${endTime}</span>
