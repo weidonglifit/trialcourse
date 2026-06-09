@@ -75,18 +75,18 @@ window.addEventListener('load', function () {
       //document.getElementById('main-title').innerText = globalSettings.title[0] + "\n課程報名｜教室預約";
       document.getElementById('main-title').innerHTML = `
   <svg xmlns="http://www.w3.org/2000/svg" 
-       width="0.75em" 
-       height="0.75em" 
-       viewBox="0 0 24 24" 
-       fill="none" 
-       stroke="currentColor" 
-       stroke-width="1" 
-       stroke-linecap="round" 
-       stroke-linejoin="round" 
-       style="vertical-align: middle; margin: 0 12px; opacity: 0.8;">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
+     width="0.75em" 
+     height="0.75em" 
+     viewBox="0 0 24 24" 
+     fill="none" 
+     stroke="currentColor" 
+     stroke-width="1" 
+     stroke-linecap="round" 
+     stroke-linejoin="round" 
+     style="vertical-align: middle; margin: 0 12px; opacity: 0.8;">
+  <line x1="12" y1="6" x2="12" y2="18"></line>
+  <line x1="6" y1="12" x2="18" y2="12"></line>
+</svg>
 `;
       document.getElementById('all-course-title').innerHTML = `
       <span style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
