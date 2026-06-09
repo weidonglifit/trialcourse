@@ -2675,20 +2675,27 @@ window.addEventListener('load', () => {
 
   // 尋找所有的文字、電話、信箱輸入框
   const textInputs = document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]');
+  const stickyNav = document.getElementById('stickyQuickNav');
 
   textInputs.forEach(input => {
     input.addEventListener('input', function () {
-      // 1. 先移除舊的 class，確保連續打字時動畫能重新觸發
       this.classList.remove('typing-pulse-effect');
-
-      // 2. 強制瀏覽器重繪 (Reflow) 
       void this.offsetWidth;
-
-      // 3. 加上動畫 class
       this.classList.add('typing-pulse-effect');
     });
+    input.addEventListener('focus', () => {
+    if(stickyNav) {
+        stickyNav.style.display = 'none';
+    }
   });
 
+  input.addEventListener('blur', () => {
+    setTimeout(() => {
+        if(stickyNav) {
+            stickyNav.style.display = ''; // 恢復 CSS 預設的 display (flex)
+        }
+    }, 100);
+  });
 
 });
 
