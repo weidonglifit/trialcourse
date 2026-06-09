@@ -3587,14 +3587,8 @@ select {
 }
 
 .announcement-card {
-  margin-bottom: 12px;
-  cursor: default; /* 公告卡片不需要手指鼠標 */
-  border: 1px solid #F4A7B9;
-  border-radius: 12px;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  padding: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* 輕柔的陰影 */
-  perspective: 1000px; /* 保留這個，讓進場動畫 (result-card-anim) 的 3D 翻轉效果正常運作 */
+  perspective: 1000px;
+  margin-bottom: 15px;
+  background: transparent !important;
+  cursor: pointer;
 }
