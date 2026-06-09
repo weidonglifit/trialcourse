@@ -2710,6 +2710,7 @@ function closeOverlay() {
       overlay.style.display = 'none';
     }, 800);
   }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 // 打開 QRCode 視窗
 function openQRCodeModal() {
