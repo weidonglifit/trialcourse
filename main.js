@@ -5077,7 +5077,7 @@ function renderAnnouncements() {
             // 組合符合你設計規範的 小卡 HTML
             html += `
             <div class="announcement-card result-card-anim" style="margin-bottom: 12px; cursor: default; border: 1px solid #F4A7B9; border-radius: 12px; background: #fff; display: flex; align-items: center; padding: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                <div style="width: 50px; flex-shrink: 0; margin-right: 15px; text-align: center;">
+                <div style="width: 50px; flex-shrink: 0; margin-right: 15px; display: flex; flex-direction: column; align-items: center;">
                     <div class="time-tag" style="min-width: none; width: 45px; padding: 6px 4px;">
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${startTime}</span>
                         <div class="time-line"></div>
@@ -5087,7 +5087,7 @@ function renderAnnouncements() {
                 </div>
                 <div style="flex: 1; text-align: left; min-width: 0;">
                     <div style="font-weight: bold; color: #d14d72; font-size: 1.1em; margin-bottom: 4px;">${courseName}<span style="font-size: 0.8em; color: #7f8c8d; font-weight: normal; margin-left: 2px;">(${teacherName})</span></div>
-                    <div style="font-size: 0.9em; color: #3498db;">代課：${subT}</div>
+                    <div style="font-size: 0.9em; color: #555;">代課：${subT}</div>
                     <div style="font-size: 0.9em; color: #555;">日期：${dateStr}</div>
                 </div>
                 <div style="flex-shrink: 0; text-align: right; margin-left: 10px;">
