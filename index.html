@@ -112,6 +112,24 @@
       <div id="news-board-content" class="news-board-text">最新消息載入中...</div>
     </div>
 
+
+    <div class="field" style="margin: 15px 0; position: relative;">
+      <div class="announcement-trigger-btn" onclick="openAnnouncement()"
+        style="cursor: pointer; background: linear-gradient(135deg, #FFF0F2 0%, #FFE5E9 100%); border: 1px solid #E87A90; border-radius: 30px; padding: 12px 20px; text-align: center; color: #d14d72; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        📢 查看停課與代課公告
+      </div>
+
+      <div class="expand-input-container" id="announcementContainer" style="z-index: 100; top: 100%; margin-top: 10px;">
+        <div class="expand-header">
+          <span class="expand-title">停課與代課公告</span>
+          <span class="expand-close" onclick="closeAnnouncement(event)">×</span>
+        </div>
+        <div class="expand-content" id="expandAnnouncementContent" style="padding: 15px; background: #fdfdfd;">
+          <p style="text-align: center; color: #999;">資料載入中...</p>
+        </div>
+      </div>
+    </div>
+
     <div class="info-box">
       <div class="drawer-trigger-list">
 
