@@ -5052,21 +5052,20 @@ function renderAnnouncements() {
             const ct = cParts[0].split('-'); 
             const courseName = ct[0];
             const teacherName = ct[1] || "";
+            const week = cParts[1];
             
             const timeParts = (cParts[2] || "").split('-');
             const startTime = timeParts[0] || "";
             const endTime = timeParts[1] || "";
             
             // 處理狀態字眼與專屬顏色
-            let statusText = "";
             let statusColor = "";
             let statusBg = "";
+            let subT = subTeacher || "無";
             if (statusStr === "停課") {
-                statusText = "停課";
                 statusColor = "#e74c3c"; // 紅色系
                 statusBg = "#fdf2f4";
             } else if (statusStr === "代課") {
-                statusText = `${subTeacher}代課`;
                 statusColor = "#3498db"; // 藍色系
                 statusBg = "#ebf5fb";
             } else {
@@ -5079,18 +5078,20 @@ function renderAnnouncements() {
             html += `
             <div class="announcement-card result-card-anim" style="margin-bottom: 12px; cursor: default; border: 1px solid #F4A7B9; border-radius: 12px; background: #fff; display: flex; align-items: center; padding: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                 <div style="width: 50px; flex-shrink: 0; margin-right: 15px; text-align: center;">
-                    <div class="time-tag" style="min-width: none; width: 45px; padding: 5px 5px;">
+                    <div class="time-tag" style="min-width: none; width: 45px; padding: 6px 4px;">
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${startTime}</span>
                         <div class="time-line"></div>
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${endTime}</span>
                     </div>
+                    <span style="font-size: 1.0em; line-height: 1;">${week}</span>
                 </div>
                 <div style="flex: 1; text-align: left; min-width: 0;">
                     <div style="font-weight: bold; color: #d14d72; font-size: 1.1em; margin-bottom: 4px;">${courseName}<span style="font-size: 0.8em; color: #7f8c8d; font-weight: normal; margin-left: 2px;">(${teacherName})</span></div>
+                    <div style="font-size: 0.9em; color: #3498db;">代課：${subT}</div>
                     <div style="font-size: 0.9em; color: #555;">日期：${dateStr}</div>
                 </div>
                 <div style="flex-shrink: 0; text-align: right; margin-left: 10px;">
-                    <span style="font-weight: bold; color: ${statusColor}; font-size: 0.95em; background: ${statusBg}; padding: 6px 10px; border-radius: 20px; border: 1px solid ${statusColor}; white-space: nowrap;">${statusText}</span>
+                    <span style="font-weight: bold; color: ${statusColor}; font-size: 0.95em; background: ${statusBg}; padding: 6px 10px; border-radius: 20px; border: 1px solid ${statusColor}; white-space: nowrap;">${statusStr}</span>
                 </div>
             </div>`;
         });
