@@ -3132,7 +3132,7 @@ select {
    ========================================= */
 @media (max-width: 600px) {
   #svg1 {
-    width: 80vw !important; 
+    width: 100%; 
     max-width: none !important;
     transform: scale(1.1) !important; 
     transform-origin: center center !important;
