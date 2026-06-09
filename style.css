@@ -3608,25 +3608,6 @@ select {
   border-left-color: #f39c12;
 }
 
-/* 左側：時間標籤 */
-.time-tag {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: #555;
-  min-width: 50px;
-  font-size: 0.9em;
-}
-
-.time-line {
-  width: 2px;
-  height: 12px;
-  background-color: #ccc;
-  margin: 4px 0;
-}
-
 /* 中間：課程與日期 */
 .announcement-middle {
   flex: 1;
