@@ -3552,19 +3552,20 @@ select {
   transform: translateX(0);
 }
 
-/* --- Custom Loader Animations --- */
+/* --- 方案一：全正數化完美動畫 --- */
 
 /* 外圈動畫 */
 .ring-anim {
   animation: dash-ring 2s linear infinite;
 }
 @keyframes dash-ring {
-  0% { stroke-dashoffset: 88; }
-  50% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: -88; }
+  /* 原本是 88 -> 0 -> -88，全部加上 176 */
+  0% { stroke-dashoffset: 264; }
+  50% { stroke-dashoffset: 176; }
+  100% { stroke-dashoffset: 88; }
 }
 
-/* 小圓點透明度動畫 */
+/* 小圓點透明度動畫 (沒有負數 Bug，維持原樣) */
 .dot-anim {
   animation: fade-dot 2s linear infinite;
 }
@@ -3579,7 +3580,8 @@ select {
   animation: dash-wave 2s linear infinite;
 }
 @keyframes dash-wave {
-  0% { stroke-dashoffset: -19; }
-  50% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: 19; }
+  /* 原本是 -19 -> 0 -> 19，全部加上 38 */
+  0% { stroke-dashoffset: 19; }
+  50% { stroke-dashoffset: 38; }
+  100% { stroke-dashoffset: 57; }
 }
