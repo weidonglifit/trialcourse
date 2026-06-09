@@ -1882,20 +1882,11 @@ select {
   /* background: linear-gradient(135deg, #FFF0F2 0%, #FFE5E9 100%); */
   /* border: 1px solid #F4A7B9; */
   border-radius: 12px;
-  margin: 15px 0;
-  padding: 7px 12px;
+  /* margin: 15px 0; */
+  /* padding: 7px 12px; */
   box-sizing: border-box;
   /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); */
   text-align: center;
-}
-
-/* 2. 提示框主標題 */
-.notice-pulse-title {
-  color: #D05A6E;
-  font-weight: bold;
-  font-size: 1.15rem;
-  letter-spacing: 1px;
-  line-height: 1.5;
 }
 
 /* 3. 核心警告內文 */
@@ -1904,6 +1895,7 @@ select {
   font-weight: bold;
   font-size: 1.2rem;
   line-height: 1.6;
+  letter-spacing: 2px;
   margin-top: 4px;
 }
 
