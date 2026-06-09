@@ -4864,6 +4864,7 @@ function closeOverlayAndAnimateLogo() {
   const startRect = innerSvg.getBoundingClientRect();
   const targetRect = targetWrapper.getBoundingClientRect();
   const wrapperStyle = window.getComputedStyle(targetWrapper);
+  const targetHeight = targetRect.height;
 
   if (startRect.width === 0) {
     console.warn("⚠️ [Error] startRect 寬度為 0，取消動畫");
@@ -4930,10 +4931,10 @@ function closeOverlayAndAnimateLogo() {
   // ✨ 4. 核心物理尺寸與 Flex 置中數學模擬 ✨
   // ==========================================
   const finalRatio = endVB[2] / endVB[3];
-  const physicalWidth = 75 * finalRatio;
+  const physicalWidth = targetHeight * finalRatio;
 
   const finalLeft = targetRect.left + (targetRect.width - physicalWidth) / 2;
-  const finalTop = targetRect.top + (targetRect.height - 75) / 2;
+  const finalTop = targetRect.top + (targetRect.height - targetHeight) / 2;
 
   // ==========================================
   // ✨ 5. 啟動電影級飛行 ✨
@@ -4944,7 +4945,7 @@ function closeOverlayAndAnimateLogo() {
     logo.style.left = finalLeft + 'px';
     logo.style.top = finalTop + 'px';
     logo.style.width = physicalWidth + 'px';
-    logo.style.height = '75px';
+    logo.style.height = targetHeight + 'px';
   });
 
   const duration = 1500;
@@ -4958,7 +4959,7 @@ function closeOverlayAndAnimateLogo() {
     // 1. 【關鍵】：飛行路徑中的「寬度補間」
     // 從起點寬度平滑過渡到我們算出來的物理終點寬度
     const currentWidth = startRect.width + (physicalWidth - startRect.width) * ease;
-    const currentHeight = startRect.height + (75 - startRect.height) * ease;
+    const currentHeight = startRect.height + (targetHeight - startRect.height) * ease;
 
     // 2. 更新 SVG 內部的 viewBox 與 transform (不動)
     const currentVB = startVB.map((startVal, i) => startVal + (endVB[i] - startVal) * ease);
@@ -5005,7 +5006,7 @@ function closeOverlayAndAnimateLogo() {
       logo.style.cssText = `
         display: block !important;
         width: ${physicalWidth}px !important;
-        height: 75px !important;
+        height: ${targetHeight}px !important;
         flex-shrink: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
