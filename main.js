@@ -83,9 +83,9 @@ window.addEventListener('load', function () {
      stroke-width="1" 
      stroke-linecap="round" 
      stroke-linejoin="round" 
-     style="vertical-align: middle; margin: 0 12px; opacity: 0.8;">
-  <line x1="12" y1="6" x2="12" y2="18"></line>
-  <line x1="6" y1="12" x2="18" y2="12"></line>
+     style="vertical-align: middle; margin: 0 12px; opacity: 0.8; transform: rotate(45deg);">
+  <line x1="18" y1="6" x2="6" y2="18"></line>
+  <line x1="6" y1="6" x2="18" y2="18"></line>
 </svg>
 `;
       document.getElementById('all-course-title').innerHTML = `
