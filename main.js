@@ -70,6 +70,7 @@ window.addEventListener('load', function () {
       allRoomBookState = initData.popularWallData;
       globalSingleBookedMap = initData.singleBookedMap;
       renderAllRules();
+      renderAnnouncements();
       // 2. 處理網頁與表單標題
       //document.getElementById('main-title').innerText = globalSettings.title[0] + "\n課程報名｜教室預約";
       document.getElementById('main-title').innerHTML = `
@@ -5020,4 +5021,144 @@ function closeOverlayAndAnimateLogo() {
     }
   }
   requestAnimationFrame(tween);
+}
+
+// ==========================================
+// ✨ 停課與代課公告：解析與渲染邏輯
+// ==========================================
+function renderAnnouncements() {
+    const annText = globalSettings.announcement || "";
+    // 將公告依換行符號分割，並過濾掉空行
+    const lines = annText.split(/\r?\n/).filter(line => line.trim() !== "");
+    
+    let html = "";
+    if (lines.length === 0) {
+        html = '<div style="text-align: center; color: #999; padding: 30px 10px;">目前無任何停課與代課公告 🎉</div>';
+    } else {
+        lines.forEach(line => {
+            // 利用 '][' 來切割字串，例如 "[5/31][流動瑜珈-Zoe 週五 10:00-10:55][停課]"
+            const parts = line.split(']['); 
+            if (parts.length < 3) return;
+            
+            // 清理多餘的括號符號
+            const dateStr = parts[0].replace('[', '');
+            const courseStr = parts[1]; 
+            const statusStr = parts[2].replace(']', ''); 
+            // 判斷是否有第四個元素(代課老師)
+            let subTeacher = parts.length > 3 ? parts[3].replace(']', '') : '';
+            
+            // 解析課程字串 (如: "流動瑜珈-Zoe 週五 10:00-10:55")
+            const cParts = courseStr.split(' '); 
+            const ct = cParts[0].split('-'); 
+            const courseName = ct[0];
+            const teacherName = ct[1] || "";
+            
+            const timeParts = (cParts[2] || "").split('-');
+            const startTime = timeParts[0] || "";
+            const endTime = timeParts[1] || "";
+            
+            // 處理狀態字眼與專屬顏色
+            let statusText = "";
+            let statusColor = "";
+            let statusBg = "";
+            if (statusStr === "停課") {
+                statusText = "停課";
+                statusColor = "#e74c3c"; // 紅色系
+                statusBg = "#fdf2f4";
+            } else if (statusStr === "代課") {
+                statusText = `${subTeacher}老師代課`;
+                statusColor = "#3498db"; // 藍色系
+                statusBg = "#ebf5fb";
+            } else {
+                statusText = statusStr;
+                statusColor = "#888";
+                statusBg = "#f4f4f4";
+            }
+
+            // 組合符合你設計規範的 小卡 HTML
+            html += `
+            <div class="course-card result-card-anim" style="margin-bottom: 12px; cursor: default; border: 1px solid #F4A7B9; border-radius: 12px; background: #fff; display: flex; align-items: center; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <div style="width: 70px; flex-shrink: 0; margin-right: 15px; text-align: center;">
+                    <div class="time-tag" style="background: #F4A7B9; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 70px; height: 70px; margin: 0 auto; border-radius: 12px; color: white; box-shadow: 0 4px 8px rgba(232, 122, 144, 0.3);">
+                        <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${startTime}</span>
+                        <div class="time-line" style="width: 2px; height: 10px; background: rgba(255,255,255,0.7); margin: 3px 0;"></div>
+                        <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${endTime}</span>
+                    </div>
+                </div>
+                <div style="flex: 1; text-align: left; min-width: 0;">
+                    <div style="font-weight: bold; color: #d14d72; font-size: 1.15em; margin-bottom: 4px;">${courseName}<span style="font-size: 0.85em; color: #7f8c8d; font-weight: normal; margin-left: 2px;">(${teacherName})</span></div>
+                    <div style="font-size: 0.9em; color: #555;">日期：${dateStr}</div>
+                </div>
+                <div style="flex-shrink: 0; text-align: right; margin-left: 10px;">
+                    <span style="font-weight: bold; color: ${statusColor}; font-size: 0.95em; background: ${statusBg}; padding: 6px 10px; border-radius: 20px; border: 1px solid ${statusColor}; white-space: nowrap;">${statusText}</span>
+                </div>
+            </div>`;
+        });
+    }
+    
+    // 將生成好的卡片存入隱藏的 Content 容器中
+    const hiddenContainer = document.getElementById('hiddenAnnouncementData');
+    if(hiddenContainer) {
+        hiddenContainer.innerHTML = html;
+    }
+}
+
+// ==========================================
+// ✨ 仿造 openQueryCourse 的公告翻頁跳窗動畫
+// ==========================================
+function openAnnouncementModal() {
+  const container = document.getElementById('announcementInputContainer');
+  const contentBox = document.getElementById('announcementContentArea');
+  const sourceHtml = document.getElementById('hiddenAnnouncementData').innerHTML;
+  
+  if (!container || !contentBox) return;
+  
+  // 1. 將預先準備好的小卡 HTML 填充進去
+  contentBox.innerHTML = sourceHtml;
+  
+  // 2. 將容器掛載到 body 下方，確保它的 z-index 與 fixed 視窗定位不會被父元素切斷
+  document.body.appendChild(container); 
+  
+  // 3. 呼叫共用的黑底遮罩
+  const overlay = getOrCreateExpandOverlay();
+  overlay.classList.add('show');
+  
+  // 4. 顯示跳窗並鎖住底層網頁滑動
+  container.classList.add('expanded');
+  document.body.style.overflow = 'hidden';
+  
+  // 5. 觸發翻轉滑入動畫 (無縫接軌你寫的 expandFlipIn CSS)
+  setTimeout(function () {
+    container.style.animation = "expandFlipIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards";
+    setTimeout(function () {
+      container.style.animation = "none";
+      container.style.transform = "translate(-50%, -50%) perspective(1000px) rotateX(0deg) scale(1)";
+    }, 400);
+  }, 20);
+}
+
+function closeAnnouncementModal(event) {
+  if (event) event.stopPropagation();
+  
+  // 1. 關閉遮罩
+  const overlay = document.getElementById('expandSharedOverlay');
+  if (overlay) overlay.classList.remove('show');
+  
+  const container = document.getElementById('announcementInputContainer');
+  if (container) {
+    // 2. 觸發翻轉滑出退場動畫
+    container.style.transform = "";
+    container.style.animation = "expandFlipOut 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards";
+    
+    // 3. 等動畫結束後打掃戰場並歸位
+    setTimeout(function () {
+      container.classList.remove('expanded');
+      container.style.animation = "";
+      document.body.style.overflow = '';
+      
+      // 將它裝回原本的 Wrapper 中
+      const wrapper = document.getElementById('announcementWrapper');
+      if (wrapper) wrapper.appendChild(container);
+    }, 350);
+  }
 }
