@@ -4813,6 +4813,39 @@ function startPeekabooEgg() {
   }, 8000); // 8000毫秒 = 8秒 (包含探頭的3秒，等於每躲藏5秒就會出來一次)
 }
 
+function expandMainTitle() {
+  const titleEl = document.getElementById('main-title');
+  
+  // 1. 置換 HTML 內容，並套用剛剛在 CSS 寫好的 Class
+  titleEl.innerHTML = `
+    <span class="anim-text anim-text-left" style="font-size: 0.95em; font-weight: 300; letter-spacing: 4px;">
+      微微的動
+    </span>
+    <svg xmlns="http://www.w3.org/2000/svg" 
+         width="0.75em" 
+         height="0.75em" 
+         viewBox="0 0 24 24" 
+         fill="none" 
+         stroke="currentColor" 
+         stroke-width="1" 
+         stroke-linecap="round" 
+         stroke-linejoin="round" 
+         style="vertical-align: middle; margin: 0 12px; opacity: 0.8;">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <span class="anim-text anim-text-right" style="font-size: 0.95em; font-weight: 300; letter-spacing: 4px;">
+      慢慢身活
+    </span>
+  `;
+
+  // 2. 強制瀏覽器重繪 (Reflow)，讓瀏覽器抓到初始的 max-width: 0
+  void titleEl.offsetWidth;
+
+  // 3. 加上 .title-expanded 來觸發 CSS 的 transition 動畫
+  titleEl.classList.add('title-expanded');
+}
+
 function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
   const targetWrapper = document.getElementById('final-logo-wrapper');
@@ -4985,37 +5018,4 @@ function closeOverlayAndAnimateLogo() {
     }
   }
   requestAnimationFrame(tween);
-}
-
-function expandMainTitle() {
-  const titleEl = document.getElementById('main-title');
-  
-  // 1. 置換 HTML 內容，並套用剛剛在 CSS 寫好的 Class
-  titleEl.innerHTML = `
-    <span class="anim-text anim-text-left" style="font-size: 0.95em; font-weight: 300; letter-spacing: 4px;">
-      微微的動
-    </span>
-    <svg xmlns="http://www.w3.org/2000/svg" 
-         width="0.75em" 
-         height="0.75em" 
-         viewBox="0 0 24 24" 
-         fill="none" 
-         stroke="currentColor" 
-         stroke-width="1" 
-         stroke-linecap="round" 
-         stroke-linejoin="round" 
-         style="vertical-align: middle; margin: 0 12px; opacity: 0.8;">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-    <span class="anim-text anim-text-right" style="font-size: 0.95em; font-weight: 300; letter-spacing: 4px;">
-      慢慢身活
-    </span>
-  `;
-
-  // 2. 強制瀏覽器重繪 (Reflow)，讓瀏覽器抓到初始的 max-width: 0
-  void titleEl.offsetWidth;
-
-  // 3. 加上 .title-expanded 來觸發 CSS 的 transition 動畫
-  titleEl.classList.add('title-expanded');
 }
