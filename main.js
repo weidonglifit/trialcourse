@@ -2684,18 +2684,23 @@ window.addEventListener('load', () => {
       this.classList.add('typing-pulse-effect');
     });
     input.addEventListener('focus', () => {
+    // 當鍵盤彈出時，暫時隱藏導覽列
     if(stickyNav) {
         stickyNav.style.display = 'none';
     }
   });
-
   input.addEventListener('blur', () => {
+    // 當鍵盤收合時，恢復導覽列的顯示
+    // 稍微延遲一點點恢復，讓畫面過渡更自然，避免閃爍
     setTimeout(() => {
         if(stickyNav) {
             stickyNav.style.display = ''; // 恢復 CSS 預設的 display (flex)
         }
     }, 100);
   });
+    
+  });
+
 
 });
 
