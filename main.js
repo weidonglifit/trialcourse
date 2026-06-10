@@ -5170,3 +5170,45 @@ function closeAnnouncementModal(event) {
     }, 350);
   }
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+  const aiBubble = document.getElementById("aiChatBubble");
+  let scrollTimeout;
+  
+  // 顯示泡泡的函式
+  function showAiBubble() {
+    if (aiBubble) {
+      aiBubble.classList.add("show-bubble");
+    }
+  }
+
+  // 隱藏泡泡的函式
+  function hideAiBubble() {
+    if (aiBubble) {
+      aiBubble.classList.remove("show-bubble");
+    }
+  }
+
+  // 監聽滑動事件
+  window.addEventListener("scroll", function() {
+    // 只要一滑動，立刻隱藏泡泡
+    hideAiBubble();
+    
+    // 清除先前的倒數計時器
+    clearTimeout(scrollTimeout);
+    
+    // 重新設定計時器，停止滑動 15 秒 (15000 毫秒) 後顯示泡泡
+    scrollTimeout = setTimeout(showAiBubble, 15000);
+  }, { passive: true }); // 使用 passive 提升滑動效能
+
+  scrollTimeout = setTimeout(showAiBubble, 15000);
+  
+  // 點擊泡泡時的行為：隱藏泡泡，並幫使用者點擊 AI CHAT 按鈕
+  if (aiBubble) {
+    aiBubble.addEventListener("click", function() {
+      hideAiBubble();
+       const aiBtn = document.getElementById('ai-toggle-btn');
+       if (aiBtn) aiBtn.click();
+    });
+  }
+});

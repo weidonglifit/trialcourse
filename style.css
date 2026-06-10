@@ -3601,3 +3601,45 @@ select {
   background: transparent !important;
   cursor: pointer;
 }
+
+/* --- AI 小助手浮動泡泡 --- */
+.ai-chat-bubble {
+  position: fixed;
+  /* 請根據您右下角 AI CHAT 按鈕的實際位置微調 bottom 與 right */
+  bottom: 90px; 
+  right: 25px; 
+  
+  /* 品牌漸層與視覺設計 */
+  background: linear-gradient(135deg, #F4A7B9 0%, #E87A90 100%);
+  color: white;
+  padding: 10px 16px;
+  /* 創造對話泡泡形狀：左上、右上、左下圓角，右下直角 */
+  border-radius: 20px 20px 0 20px; 
+  box-shadow: 0 4px 12px rgba(232, 122, 144, 0.4);
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: 1px;
+  z-index: 9999;
+  cursor: pointer;
+  
+  /* 預設隱藏狀態與平滑動畫 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(15px) scale(0.9);
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none; /* 隱藏時不可被點擊 */
+}
+
+/* 顯示時的狀態 */
+.ai-chat-bubble.show-bubble {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* 泡泡懸停時的微動回饋 */
+.ai-chat-bubble:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 6px 15px rgba(232, 122, 144, 0.5);
+}
