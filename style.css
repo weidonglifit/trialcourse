@@ -3633,7 +3633,7 @@ select {
   content: '';
   position: absolute;
   top: 50%; /* 垂直置中 */
-  right: -8px; /* 把尖角往右推到泡泡外面 */
+  right: -6px; /* 把尖角往右推到泡泡外面 */
   transform: translateY(-50%); /* 完美垂直置中的微調 */
   
   /* 利用邊框畫出指向右邊的三角形 */
