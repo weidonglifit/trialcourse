@@ -3659,10 +3659,10 @@ select {
 .location-link {
   /* 初始狀態：隱形但保留原本排版空間 */
   opacity: 0;
-  transform: translateY(-15px); /* 初始位置偏上，準備由上往下淡入 */
+  transform: translateY(-20px); /* 初始位置偏上，準備由上往下淡入 */
   
   /* 設定平滑動畫時間與動態曲線 */
-  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: opacity 1s ease, transform 1s cubic-bezier(0.25, 1, 0.5, 1);
   
   /* 隱形時，防止使用者誤點擊到綁定的 openDeviceMap 事件 */
   pointer-events: none; 
