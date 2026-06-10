@@ -5108,8 +5108,7 @@ function renderAnnouncements() {
                     </div>
                     <span style="
                         font-size: 0.95em; 
-                        font-weight: bold; 
-                        margin: 6px auto 0 auto; 
+                        margin: 4px auto 0 auto; 
                         display: block; 
                         width: 100%;
                         text-align: center;">${week}</span>
