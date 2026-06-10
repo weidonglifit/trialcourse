@@ -5096,7 +5096,7 @@ function renderAnnouncements() {
                         align-items: center; 
                         justify-content: center; 
                         width: 60px; 
-                        height: 60px; 
+                        height: 50px; 
                         margin: 0 auto; 
                         border-radius: 12px; 
                         color: white; 
