@@ -4307,10 +4307,13 @@ ${res}
 
       var brainContext = "【💡 現實世界明天天氣預報資訊】:\n" + aiTomorrowWeatherText +
         "\n\n【💡 微動身活場館生活常見問題 FAQ】:\n" + JSON.stringify(aiStoreConfig) +
-        "\n\n【微動身活期課課表與名額(未來，如果顧客強調期課課程以這筆資料為主，沒有就說課表還沒出來) name:課程名稱,dates:課程日期如果要計算剩餘課堂數要用天數來計算,room:上課教室,pricePerClass:期課每堂價格,maxCapacity:最大人數,remaining:剩餘人數名額】：\n" + JSON.stringify(allCourseData) +
+        "\n\n【微動身活期課課表與名額(未來課表，如果顧客強調期課課程以這筆資料為主，沒有就說課表還沒出來) name:課程名稱,dates:課程日期如果要計算剩餘課堂數要用天數來計算,room:上課教室,pricePerClass:期課每堂價格,maxCapacity:最大人數,remaining:剩餘人數名額】：\n" + JSON.stringify(allCourseData) +
+        "\n\n【這份期課課表的時間是】:\n" + globalSettings.title[1] +
         "\n\n【當顧客強調期課課程且schedule-body的內容是最新課表準備中，敬請期待！就照此回答】" +
         "\n\n【微動身活當月開課課表與名額(現在如果顧客只問課程，就以這筆資料為主) name:課程名稱,dates:課程日期如果要計算剩餘課堂數要用天數來計算,room:上課教室,pricePerClass:每堂價格,maxCapacity:最大人數,remaining:剩餘人數名額】：\n" + JSON.stringify(allCourseDataPast) +
         "\n\n【回答當月開課課表與名額時，把名額多考慮這份單堂報名資料，只在當月課程考慮，期課課程不考慮】：\n" + JSON.stringify(globalSingleBookedMap) +
+        "\n\n【這份當月課表的時間是】:\n" + globalSettings.title[2] +
+        "\n\n【期課課表就是未來的課表，本月課表就是現在的課表，假設現在是5/6月，期課課表就是7/8月，本月課表就是5/6月，假設現在是7/8月，期課課表就是9/10月，本月課表就是7/8月，以此類推】" +
         "\n\n【各課程的詳細介紹特色】：\n" + JSON.stringify(globalSettings.courseIntros) +
         "\n\n【教室的預約狀況】：\n" + JSON.stringify(allRoomBookState) +
         "\n\n【官方全體師資團隊詳細簡介資料庫】:\n" + teachersDataText +
