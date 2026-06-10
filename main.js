@@ -5088,15 +5088,15 @@ function renderAnnouncements() {
       // 組合符合你設計規範的 小卡 HTML
       html += `
             <div class="announcement-card result-card-anim" style="margin-bottom: 12px; cursor: default; border: 1px solid #F4A7B9; border-radius: 12px; background: #fff; display: flex; align-items: center; padding: 5px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                <div style="width: 70px; flex-shrink: 0; margin-right: 15px; text-align: center;">
+                <div style="width: 60px; flex-shrink: 0; margin-right: 15px; text-align: center;">
                     <div class="time-tag" style="
                         background: #F4A7B9; 
                         display: flex; 
                         flex-direction: column; 
                         align-items: center; 
                         justify-content: center; 
-                        width: 70px; 
-                        height: 70px; 
+                        width: 60px; 
+                        height: 60px; 
                         margin: 0 auto; 
                         border-radius: 12px; 
                         color: white; 
@@ -5109,7 +5109,7 @@ function renderAnnouncements() {
                     <span style="
                         font-size: 0.95em; 
                         font-weight: bold; 
-                        margin: 8px auto 0 auto; 
+                        margin: 6px auto 0 auto; 
                         display: block; 
                         width: 100%;
                         text-align: center;">${week}</span>
