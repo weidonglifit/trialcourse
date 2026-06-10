@@ -3655,3 +3655,22 @@ select {
   transform: translateY(-3px) scale(1.02);
   box-shadow: 0 6px 15px rgba(232, 122, 144, 0.5);
 }
+
+.location-link {
+  /* 初始狀態：隱形但保留原本排版空間 */
+  opacity: 0;
+  transform: translateY(-15px); /* 初始位置偏上，準備由上往下淡入 */
+  
+  /* 設定平滑動畫時間與動態曲線 */
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  
+  /* 隱形時，防止使用者誤點擊到綁定的 openDeviceMap 事件 */
+  pointer-events: none; 
+}
+
+/* 當被觸發加上 .show-location 類別時的最終狀態 */
+.location-link.show-location {
+  opacity: 1;
+  transform: translateY(0); /* 回到原本的位置 */
+  pointer-events: auto;     /* 恢復可以點擊點開地圖 */
+}

@@ -2682,7 +2682,7 @@ window.addEventListener('load', () => {
       void this.offsetWidth;
       this.classList.add('typing-pulse-effect');
     });
-    
+
   });
 
 
@@ -4821,12 +4821,12 @@ function expandMainTitle() {
   titleEl.style.transformOrigin = 'center center';
   titleEl.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
   titleEl.style.transform = 'rotate(45deg)';
-  
-  
+
+
   setTimeout(() => {
     titleEl.style.transition = 'none';
     titleEl.style.transform = 'rotate(0deg)';
-    
+
     titleEl.innerHTML = `
       <span class="anim-text anim-text-left" style="font-size: 0.95em; font-weight: 300; letter-spacing: 4px;">
         微微的動
@@ -4852,14 +4852,18 @@ function expandMainTitle() {
     void titleEl.offsetWidth;
 
     titleEl.classList.add('title-expanded');
-    
+    const locationElement = document.getElementById('locationLink');
+    if (locationElement) {
+      locationElement.classList.add('show-location');
+    }
+
   }, 400); // 對應上方旋轉動畫的 0.4s
 }
 
 function closeOverlayAndAnimateLogo() {
   const logo = document.getElementById('logo-container');
   const targetWrapper = document.getElementById('final-logo-wrapper');
-  
+
   if (!logo || !targetWrapper) {
     console.warn("⚠️ [Error] 找不到 logo 或目標容器");
     return;
@@ -4895,7 +4899,7 @@ function closeOverlayAndAnimateLogo() {
   innerSvg.style.width = '100%';
   innerSvg.style.height = '100%';
   innerSvg.style.overflow = 'visible';
-  
+
 
   // 2. 清除所有干擾的舊動畫與保護衣
   logo.classList.remove('svg-intro-container');
@@ -4950,7 +4954,7 @@ function closeOverlayAndAnimateLogo() {
   // ✨ 5. 啟動電影級飛行 ✨
   // ==========================================
   logo.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
-  
+
   requestAnimationFrame(() => {
     logo.style.left = finalLeft + 'px';
     logo.style.top = finalTop + 'px';
@@ -4960,11 +4964,11 @@ function closeOverlayAndAnimateLogo() {
 
   const duration = 1500;
   const startTime = performance.now();
-    
+
   function tween(currentTime) {
     const elapsed = currentTime - startTime;
     let progress = Math.min(elapsed / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 4); 
+    const ease = 1 - Math.pow(1 - progress, 4);
 
     // 1. 【關鍵】：飛行路徑中的「寬度補間」
     // 從起點寬度平滑過渡到我們算出來的物理終點寬度
@@ -4997,13 +5001,13 @@ function closeOverlayAndAnimateLogo() {
       // ==========================================
       // ✨ 6. 極致純淨落地接軌 (不碰任何 SVG 內部屬性) ✨
       // ==========================================
-      
+
 
       // 1. 設定外層目標容器為 Flex 置中
       targetWrapper.style.display = 'flex';
       targetWrapper.style.justifyContent = 'center';
       targetWrapper.style.alignItems = 'center';
-      targetWrapper.style.overflow = 'visible'; 
+      targetWrapper.style.overflow = 'visible';
 
       // 2. 拔除飛行狀態的 fixed，恢復相對定位讓 Flex 接手
       logo.style.position = 'relative';
@@ -5035,54 +5039,54 @@ function closeOverlayAndAnimateLogo() {
 // ✨ 停課與代課公告：解析與渲染邏輯
 // ==========================================
 function renderAnnouncements() {
-    const annText = globalSettings.announcement || "";
-    // 將公告依換行符號分割，並過濾掉空行
-    const lines = annText.split(/\r?\n/).filter(line => line.trim() !== "");
-    
-    let html = "";
-    if (lines.length === 0) {
-        html = '<div style="text-align: center; color: #999; padding: 30px 10px;">目前無任何停課與代課公告 🎉</div>';
-    } else {
-        lines.forEach(line => {
-            // 利用 '][' 來切割字串，例如 "[5/31][流動瑜珈-Zoe 週五 10:00-10:55][停課]"
-            const parts = line.split(']['); 
-            if (parts.length < 3) return;
-            
-            // 清理多餘的括號符號
-            const dateStr = parts[0].replace('[', '');
-            const courseStr = parts[1]; 
-            const statusStr = parts[2].replace(']', ''); 
-            // 判斷是否有第四個元素(代課老師)
-            let subTeacher = parts.length > 3 ? parts[3].replace(']', '') : '';
-            
-            // 解析課程字串 (如: "流動瑜珈-Zoe 週五 10:00-10:55")
-            const cParts = courseStr.split(' '); 
-            const ct = cParts[0].split('-'); 
-            const courseName = ct[0];
-            const teacherName = ct[1] || "";
-            const week = cParts[1];
-            
-            const timeParts = (cParts[2] || "").split('-');
-            const startTime = timeParts[0] || "";
-            const endTime = timeParts[1] || "";
-            
-            // 處理狀態字眼與專屬顏色
-            let statusColor = "";
-            let statusBg = "";
-            let subT = subTeacher || "無";
-            if (statusStr === "停課") {
-                statusColor = "#e74c3c"; // 紅色系
-                statusBg = "#fdf2f4";
-            } else if (statusStr === "代課") {
-                statusColor = "#3498db"; // 藍色系
-                statusBg = "#ebf5fb";
-            } else {
-                statusColor = "#888";
-                statusBg = "#f4f4f4";
-            }
+  const annText = globalSettings.announcement || "";
+  // 將公告依換行符號分割，並過濾掉空行
+  const lines = annText.split(/\r?\n/).filter(line => line.trim() !== "");
 
-            // 組合符合你設計規範的 小卡 HTML
-            html += `
+  let html = "";
+  if (lines.length === 0) {
+    html = '<div style="text-align: center; color: #999; padding: 30px 10px;">目前無任何停課與代課公告 🎉</div>';
+  } else {
+    lines.forEach(line => {
+      // 利用 '][' 來切割字串，例如 "[5/31][流動瑜珈-Zoe 週五 10:00-10:55][停課]"
+      const parts = line.split('][');
+      if (parts.length < 3) return;
+
+      // 清理多餘的括號符號
+      const dateStr = parts[0].replace('[', '');
+      const courseStr = parts[1];
+      const statusStr = parts[2].replace(']', '');
+      // 判斷是否有第四個元素(代課老師)
+      let subTeacher = parts.length > 3 ? parts[3].replace(']', '') : '';
+
+      // 解析課程字串 (如: "流動瑜珈-Zoe 週五 10:00-10:55")
+      const cParts = courseStr.split(' ');
+      const ct = cParts[0].split('-');
+      const courseName = ct[0];
+      const teacherName = ct[1] || "";
+      const week = cParts[1];
+
+      const timeParts = (cParts[2] || "").split('-');
+      const startTime = timeParts[0] || "";
+      const endTime = timeParts[1] || "";
+
+      // 處理狀態字眼與專屬顏色
+      let statusColor = "";
+      let statusBg = "";
+      let subT = subTeacher || "無";
+      if (statusStr === "停課") {
+        statusColor = "#e74c3c"; // 紅色系
+        statusBg = "#fdf2f4";
+      } else if (statusStr === "代課") {
+        statusColor = "#3498db"; // 藍色系
+        statusBg = "#ebf5fb";
+      } else {
+        statusColor = "#888";
+        statusBg = "#f4f4f4";
+      }
+
+      // 組合符合你設計規範的 小卡 HTML
+      html += `
             <div class="announcement-card result-card-anim" style="margin-bottom: 12px; cursor: default; border: 1px solid #F4A7B9; border-radius: 12px; background: #fff; display: flex; align-items: center; padding: 5px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                 <div style="width: 50px; flex-shrink: 0; margin-right: 15px; text-align: center;">
                     <div class="time-tag" style="width: 50px; padding: 6px 4px; margin: 0 auto;">
@@ -5101,14 +5105,14 @@ function renderAnnouncements() {
                     <span style="font-weight: bold; color: ${statusColor}; font-size: 0.95em; background: ${statusBg}; padding: 6px 10px; border-radius: 20px; border: 1px solid ${statusColor}; white-space: nowrap;">${statusStr}</span>
                 </div>
             </div>`;
-        });
-    }
-    
-    // 將生成好的卡片存入隱藏的 Content 容器中
-    const hiddenContainer = document.getElementById('hiddenAnnouncementData');
-    if(hiddenContainer) {
-        hiddenContainer.innerHTML = html;
-    }
+    });
+  }
+
+  // 將生成好的卡片存入隱藏的 Content 容器中
+  const hiddenContainer = document.getElementById('hiddenAnnouncementData');
+  if (hiddenContainer) {
+    hiddenContainer.innerHTML = html;
+  }
 }
 
 // ==========================================
@@ -5118,23 +5122,23 @@ function openAnnouncementModal() {
   const container = document.getElementById('announcementInputContainer');
   const contentBox = document.getElementById('announcementContentArea');
   const sourceHtml = document.getElementById('hiddenAnnouncementData').innerHTML;
-  
+
   if (!container || !contentBox) return;
-  
+
   // 1. 將預先準備好的小卡 HTML 填充進去
   contentBox.innerHTML = sourceHtml;
-  
+
   // 2. 將容器掛載到 body 下方，確保它的 z-index 與 fixed 視窗定位不會被父元素切斷
-  document.body.appendChild(container); 
-  
+  document.body.appendChild(container);
+
   // 3. 呼叫共用的黑底遮罩
   const overlay = getOrCreateExpandOverlay();
   overlay.classList.add('show');
-  
+
   // 4. 顯示跳窗並鎖住底層網頁滑動
   container.classList.add('expanded');
   document.body.style.overflow = 'hidden';
-  
+
   // 5. 觸發翻轉滑入動畫 (無縫接軌你寫的 expandFlipIn CSS)
   setTimeout(function () {
     container.style.animation = "expandFlipIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards";
@@ -5147,23 +5151,23 @@ function openAnnouncementModal() {
 
 function closeAnnouncementModal(event) {
   if (event) event.stopPropagation();
-  
+
   // 1. 關閉遮罩
   const overlay = document.getElementById('expandSharedOverlay');
   if (overlay) overlay.classList.remove('show');
-  
+
   const container = document.getElementById('announcementInputContainer');
   if (container) {
     // 2. 觸發翻轉滑出退場動畫
     container.style.transform = "";
     container.style.animation = "expandFlipOut 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards";
-    
+
     // 3. 等動畫結束後打掃戰場並歸位
     setTimeout(function () {
       container.classList.remove('expanded');
       container.style.animation = "";
       document.body.style.overflow = '';
-      
+
       // 將它裝回原本的 Wrapper 中
       const wrapper = document.getElementById('announcementWrapper');
       if (wrapper) wrapper.appendChild(container);
@@ -5171,10 +5175,10 @@ function closeAnnouncementModal(event) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   const aiBubble = document.getElementById("aiChatBubble");
   let scrollTimeout;
-  
+
   // 顯示泡泡的函式
   function showAiBubble() {
     if (aiBubble) {
@@ -5190,25 +5194,25 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // 監聽滑動事件
-  window.addEventListener("scroll", function() {
+  window.addEventListener("scroll", function () {
     // 只要一滑動，立刻隱藏泡泡
     hideAiBubble();
-    
+
     // 清除先前的倒數計時器
     clearTimeout(scrollTimeout);
-    
+
     // 重新設定計時器，停止滑動 15 秒 (15000 毫秒) 後顯示泡泡
     scrollTimeout = setTimeout(showAiBubble, 15000);
   }, { passive: true }); // 使用 passive 提升滑動效能
 
   scrollTimeout = setTimeout(showAiBubble, 15000);
-  
+
   // 點擊泡泡時的行為：隱藏泡泡，並幫使用者點擊 AI CHAT 按鈕
   if (aiBubble) {
-    aiBubble.addEventListener("click", function() {
+    aiBubble.addEventListener("click", function () {
       hideAiBubble();
-       const aiBtn = document.getElementById('ai-toggle-btn');
-       if (aiBtn) aiBtn.click();
+      const aiBtn = document.getElementById('ai-toggle-btn');
+      if (aiBtn) aiBtn.click();
     });
   }
 });
