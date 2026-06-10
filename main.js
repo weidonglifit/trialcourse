@@ -5094,7 +5094,7 @@ function renderAnnouncements() {
                         <div class="time-line"></div>
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${endTime}</span>
                     </div>
-                    <span style="font-size: 1.0em; line-height: 1;">${week}</span>
+                    <span style="font-size: 1.0em; line-height: 1; display: block;">${week}</span>
                 </div>
                 <div style="flex: 1; text-align: left; min-width: 0;">
                     <div style="font-weight: bold; color: #d14d72; font-size: 1.1em; margin-bottom: 4px;">${courseName}<span style="font-size: 0.8em; color: #7f8c8d; font-weight: normal; margin-left: 2px;">(${teacherName})</span></div>
