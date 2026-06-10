@@ -3606,8 +3606,8 @@ select {
 .ai-chat-bubble {
   position: fixed;
   /* 請根據您右下角 AI CHAT 按鈕的實際位置微調 bottom 與 right */
-  bottom: 90px; 
-  right: 25px; 
+  bottom: 25px; 
+  right: 90px; 
   
   /* 品牌漸層與視覺設計 */
   background: linear-gradient(135deg, #F4A7B9 0%, #E87A90 100%);
