@@ -5089,7 +5089,19 @@ function renderAnnouncements() {
       html += `
             <div class="announcement-card result-card-anim" style="margin-bottom: 12px; cursor: default; border: 1px solid #F4A7B9; border-radius: 12px; background: #fff; display: flex; align-items: center; padding: 5px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                 <div style="width: 50px; flex-shrink: 0; margin-right: 15px; text-align: center;">
-                    <div class="time-tag" style="width: 50px; padding: 6px 4px; margin: 0 auto;">
+                    <div class="time-tag" style="
+                        background: #F4A7B9; 
+                        display: flex; 
+                        flex-direction: column; 
+                        align-items: center; 
+                        justify-content: center; 
+                        width: 70px; 
+                        height: 70px; 
+                        margin: 0 auto; 
+                        border-radius: 12px; 
+                        color: white; 
+                        box-sizing: border-box;
+                        box-shadow: 0 4px 8px rgba(232, 122, 144, 0.3);">
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${startTime}</span>
                         <div class="time-line"></div>
                         <span style="font-size: 1.0em; font-weight: bold; line-height: 1;">${endTime}</span>
