@@ -1929,14 +1929,10 @@ select {
 
 .countdown-timer {
   font-family: 'Courier New', Courier, monospace;
-  /* 使用等寬字體防止數字跳動縮放 */
-  font-size: 1.2rem;
   font-weight: bold;
-  color: #E87A90;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
 }
 
 .countdown-timer span {
@@ -3749,7 +3745,6 @@ select {
   font-weight: bold;
   color: #E87A90;
   line-height: 1;
-  margin-top: 2px;
 }
 
 /* 底部 DAY/HOUR/MIN 樣式 */
