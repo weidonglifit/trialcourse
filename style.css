@@ -2248,7 +2248,7 @@ select {
   /* 讓文字與圖示在容器內置中 */
   width: fit-content;
   /* 讓寬度剛好符合文字長度，使下底線長度正確 */
-  margin: 15px auto;
+  margin: 0 auto 15px auto;
   /* 上下保留 15px 邊距，左右 auto 達成區塊置中 */
   transition: all 0.3s ease;
   border-bottom: 1px dashed #E87A90;
