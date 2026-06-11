@@ -511,14 +511,6 @@ select {
   /* 微幅放大，製造彈跳感 */
 }
 
-
-
-/* 額外建議：確保包裝層也是 100% 寬度 */
-.course-filter-wrapper {
-  display: block;
-  width: 100%;
-}
-
 /* 1. 平時外觀：讓它低調一點，使用淡淡的灰色邊框（不搶課程卡片的風采） */
 
 .agreement-item {

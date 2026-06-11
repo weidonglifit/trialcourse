@@ -1658,28 +1658,6 @@ function checkDateTrigger() {
   updatePriceList();
 }
 
-// 輔助函式：確保日期格式正確且不跳時區
-function formatDate(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-// 針對 iPhone 的防呆檢查
-function handleDateChange(input, min, max) {
-  const selectedDate = input.value;
-  if (!selectedDate) return;
-
-  if (selectedDate < min || selectedDate > max) {
-    input.value = ""; // 強制清空
-    return;
-  }
-
-  // 原本的邏輯：抓取教室狀態
-  fetchRoomStatus();
-}
-
 // 2. 抓取教室狀態並生成表格
 function fetchRoomStatus() {
   const room = document.getElementById('roomSelect').value;
