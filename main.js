@@ -4798,10 +4798,12 @@ function startPeekabooEgg() {
 }
 
 function expandMainTitle() {
+  const titleEl = document.getElementById('main-title');
   const menuIcon = document.getElementById('menu-icon');
   if (menuIcon) {
-    menuIcon.classList.add('active'); 
+    menuIcon.classList.add('active');
   }
+
 
 
   setTimeout(() => {
@@ -4818,7 +4820,7 @@ function expandMainTitle() {
            viewBox="0 0 24 24" 
            fill="none" 
            stroke="currentColor" 
-           stroke-width="1.5" 
+           stroke-width="1" 
            stroke-linecap="round" 
            stroke-linejoin="round" 
            style="vertical-align: middle; margin: 0 12px; opacity: 0.9;">
