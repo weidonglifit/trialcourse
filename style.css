@@ -3688,7 +3688,7 @@ select {
 .countdown-timer.circle-theme {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 10px;
   background: transparent;
 }
 
