@@ -4811,7 +4811,7 @@ function expandMainTitle() {
     titleEl.style.transform = 'rotate(0deg)';
 
     titleEl.innerHTML = `
-      <span class="anim-text anim-text-left" style="font-size: 0.95em; font-weight: 300; letter-spacing: 4px; color: #ffffff; text-shadow: 0 0 5px #E87A90, 0 0 10px #E87A90, 0 0 15px #E87A90;">
+      <span class="anim-text anim-text-left" style="font-size: 0.95em; font-weight: 300; letter-spacing: 4px;">
         微微的動
       </span>
       <svg xmlns="http://www.w3.org/2000/svg" 
