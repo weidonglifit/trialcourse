@@ -3666,3 +3666,28 @@ select {
   transform: translateY(0); /* 回到原本的位置 */
   pointer-events: auto;     /* 恢復可以點擊點開地圖 */
 }
+
+#menu-icon .menu-line {
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* 固定每條線的旋轉中心點在自己身上的正中央 (X=12, Y=線的高度) */
+#menu-icon .top    { transform-origin: 12px 6px; }
+#menu-icon .middle { transform-origin: 12px 12px; }
+#menu-icon .bottom { transform-origin: 12px 18px; }
+
+/* 當 SVG 獲得 .active class 時，觸發變形變成 X */
+#menu-icon.active .top {
+  /* 往下位移到中間，並順時針轉 45 度 */
+  transform: translate(0, 6px) rotate(45deg);
+}
+
+#menu-icon.active .middle {
+  /* 中間的線淡出消失 */
+  opacity: 0;
+}
+
+#menu-icon.active .bottom {
+  /* 往上位移到中間，並逆時針轉 45 度 */
+  transform: translate(0, -6px) rotate(-45deg);
+}

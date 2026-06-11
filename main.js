@@ -76,19 +76,20 @@ window.addEventListener('load', function () {
       // 2. 處理網頁與表單標題
       //document.getElementById('main-title').innerText = globalSettings.title[0] + "\n課程報名｜教室預約";
       document.getElementById('main-title').innerHTML = `
-  <svg xmlns="http://www.w3.org/2000/svg" 
-     width="0.9em" 
-     height="0.9em" 
-     viewBox="0 0 24 24" 
-     fill="none" 
-     stroke="currentColor" 
-     stroke-width="1" 
-     stroke-linecap="round" 
-     stroke-linejoin="round" 
-     style="vertical-align: middle; margin: 0 12px; opacity: 0.6; transform-origin: center center; transform: rotate(45deg);">
-  <line x1="18" y1="6" x2="6" y2="18"></line>
-  <line x1="6" y1="6" x2="18" y2="18"></line>
-</svg>
+  <svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" 
+       width="0.9em" 
+       height="0.9em" 
+       viewBox="0 0 24 24" 
+       fill="none" 
+       stroke="currentColor" 
+       stroke-width="1.5" 
+       stroke-linecap="round" 
+       stroke-linejoin="round" 
+       style="vertical-align: middle; margin: 0 12px; opacity: 0.6; cursor: pointer;">
+    <line class="menu-line top" x1="4" y1="6" x2="20" y2="6"></line>
+    <line class="menu-line middle" x1="4" y1="12" x2="20" y2="12"></line>
+    <line class="menu-line bottom" x1="4" y1="18" x2="20" y2="18"></line>
+  </svg>
 `;
       document.getElementById('all-course-title').innerHTML = `
       <span style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
@@ -4797,10 +4798,10 @@ function startPeekabooEgg() {
 }
 
 function expandMainTitle() {
-  const titleEl = document.getElementById('main-title');
-  titleEl.style.transformOrigin = 'center center';
-  titleEl.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-  titleEl.style.transform = 'rotate(-45deg)';
+  const menuIcon = document.getElementById('menu-icon');
+  if (menuIcon) {
+    menuIcon.classList.add('active'); 
+  }
 
 
   setTimeout(() => {
@@ -4817,7 +4818,7 @@ function expandMainTitle() {
            viewBox="0 0 24 24" 
            fill="none" 
            stroke="currentColor" 
-           stroke-width="1" 
+           stroke-width="1.5" 
            stroke-linecap="round" 
            stroke-linejoin="round" 
            style="vertical-align: middle; margin: 0 12px; opacity: 0.9;">
