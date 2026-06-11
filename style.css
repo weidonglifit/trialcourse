@@ -1,6 +1,6 @@
 body {
   /* font-family: "Microsoft JhengHei", sans-serif; */
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'LXGW WenKai TC', sans-serif;
   background-color: #f4f7f6;
   margin: 0;
   padding: 7px;
@@ -13,9 +13,7 @@ button, input, select, textarea {
 ::placeholder {
   font-family: inherit;
 }
-h1, h2, h3, .main-title, button, .ai-chat-bubble, .anim-text {
-  font-family: 'LXGW WenKai TC', sans-serif !important;
-}
+
 .container {
   max-width: 800px;
   margin: 10px auto;

@@ -624,7 +624,7 @@ function renderAllRules() {
         section.appendChild(h4);
 
         const contentDiv = document.createElement('div');
-        contentDiv.style.cssText = 'padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px; line-height: 1.6; color: #555;';
+        contentDiv.style.cssText = 'padding-left: 10px; border-left: 3px solid #E87A90; margin-top: 10px; line-height: 1.6; color: #555; font-family: 'Noto Sans TC', sans-serif;';
         contentDiv.innerHTML = parsedContent; // 塞入處理好的內文
 
         section.appendChild(contentDiv);
