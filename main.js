@@ -2673,7 +2673,6 @@ function closeOverlay() {
   if (textTimer) {
     clearInterval(textTimer);
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
   const overlay = document.getElementById('video-overlay');
   if (overlay) {
     closeOverlayAndAnimateLogo();
