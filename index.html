@@ -294,11 +294,39 @@
                     </svg>
                     距離早鳥優惠截止還剩：
                   </span>
-                  <div class="countdown-timer">
-                    <span id="cd-days">00</span><small>天</small>
-                    <span id="cd-hours">00</span><small>時</small>
-                    <span id="cd-minutes">00</span><small>分</small>
-                    <span id="cd-seconds">00</span><small>秒</small>
+                  <div class="countdown-timer circle-theme">
+                    <div class="cd-item">
+                      <svg class="cd-svg" width="60" height="60">
+                        <circle class="cd-bg" cx="30" cy="30" r="26"></circle>
+                        <circle class="cd-ring" id="ring-days" cx="30" cy="30" r="26"></circle>
+                      </svg>
+                      <div class="cd-text">
+                        <span id="cd-days">00</span>
+                        <small>DAY</small>
+                      </div>
+                    </div>
+
+                    <div class="cd-item">
+                      <svg class="cd-svg" width="60" height="60">
+                        <circle class="cd-bg" cx="30" cy="30" r="26"></circle>
+                        <circle class="cd-ring" id="ring-hours" cx="30" cy="30" r="26"></circle>
+                      </svg>
+                      <div class="cd-text">
+                        <span id="cd-hours">00</span>
+                        <small>HOUR</small>
+                      </div>
+                    </div>
+
+                    <div class="cd-item">
+                      <svg class="cd-svg" width="60" height="60">
+                        <circle class="cd-bg" cx="30" cy="30" r="26"></circle>
+                        <circle class="cd-ring" id="ring-minutes" cx="30" cy="30" r="26"></circle>
+                      </svg>
+                      <div class="cd-text">
+                        <span id="cd-minutes">00</span>
+                        <small>MIN</small>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

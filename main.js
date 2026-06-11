@@ -186,18 +186,45 @@ window.addEventListener('load', function () {
             return;
           }
 
+          // 計算時間
           const days = Math.floor(distance / (1000 * 60 * 60 * 24));
           const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
           const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
           const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
           if (countdownContainer && countdownContainer.style.display === 'none') {
-            countdownContainer.style.display = 'block'; // 確保時間未到時可見
+            countdownContainer.style.display = 'block';
           }
+
+          // 1. 更新中間的數字 (使用您原本的動畫函式)
           if (dEl) animateCountdownValue(dEl, String(days).padStart(2, '0'));
           if (hEl) animateCountdownValue(hEl, String(hours).padStart(2, '0'));
           if (mEl) animateCountdownValue(mEl, String(minutes).padStart(2, '0'));
-          if (sEl) animateCountdownValue(sEl, String(seconds).padStart(2, '0'));
+
+          // 2. 計算與更新外圍圓圈的進度
+          const circumference = 163.36; // 圓周長
+
+          // 天的圓圈 (一圈 30 天)
+          let dPercent = days / 30;
+          if (dPercent > 1) dPercent = 1; // 超過 30 天就維持全滿
+          const dRing = document.getElementById('ring-days');
+          if (dRing) {
+            dRing.style.strokeDashoffset = circumference - (circumference * dPercent);
+          }
+
+          // 時的圓圈 (一圈 60 分)
+          let hPercent = minutes / 60;
+          const hRing = document.getElementById('ring-hours');
+          if (hRing) {
+            hRing.style.strokeDashoffset = circumference - (circumference * hPercent);
+          }
+
+          // 分的圓圈 (一圈 60 秒)
+          let mPercent = seconds / 60;
+          const mRing = document.getElementById('ring-minutes');
+          if (mRing) {
+            mRing.style.strokeDashoffset = circumference - (circumference * mPercent);
+          }
         }
 
         updateCountdown();
