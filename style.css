@@ -1,12 +1,19 @@
 body {
   /* font-family: "Microsoft JhengHei", sans-serif; */
-  font-family: 'LXGW WenKai TC', sans-serif;
+  /* font-family: 'LXGW WenKai TC', sans-serif; */
+  font-family: 'Noto Sans TC', sans-serif;
   background-color: #f4f7f6;
   margin: 0;
   padding: 7px;
   color: #333;
 }
 
+button, input, select, textarea {
+  font-family: inherit;
+}
+::placeholder {
+  font-family: inherit;
+}
 .container {
   max-width: 800px;
   margin: 10px auto;
