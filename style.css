@@ -1902,7 +1902,7 @@ select {
 
 /* 早鳥倒數計時器專屬樣式 */
 #earlybird-countdown-container {
-  width: 100%;
+  width: auto;
   margin: 15px 0;
   padding: 12px;
   /* background: linear-gradient(135deg, #FFF0F2 0%, #FFE5E9 100%); */
