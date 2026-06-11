@@ -1,5 +1,6 @@
 body {
-  font-family: "Microsoft JhengHei", sans-serif;
+  /* font-family: "Microsoft JhengHei", sans-serif; */
+  font-family: 'LXGW WenKai TC', sans-serif;
   background-color: #f4f7f6;
   margin: 0;
   padding: 7px;
@@ -1952,18 +1953,7 @@ select {
   opacity: 1;
   transform: translateY(0);
 }
-/*
-.countdown-timer i.num-inner.exit {
-  opacity: 0;
-  transform: translateY(-20px);
-}
 
-.countdown-timer i.num-inner.enter {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: none;
-}
-*/
 .countdown-timer i.num-inner.exit {
   opacity: 0;
   transform: perspective(100px) rotateX(90deg);
