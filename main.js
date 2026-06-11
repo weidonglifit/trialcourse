@@ -4817,7 +4817,7 @@ function expandMainTitle() {
            viewBox="0 0 24 24" 
            fill="none" 
            stroke="currentColor" 
-           stroke-width="1.5" 
+           stroke-width="1" 
            stroke-linecap="round" 
            stroke-linejoin="round" 
            style="vertical-align: middle; margin: 0 12px; opacity: 0.9;">
