@@ -3749,12 +3749,12 @@ select {
   font-weight: bold;
   color: #E87A90;
   line-height: 1;
+  margin-top: 2px;
 }
 
 /* 底部 DAY/HOUR/MIN 樣式 */
 .cd-text small {
   font-size: 0.65rem;
   color: #d14d72;
-  margin-top: 2px;
   font-weight: bold;
 }
