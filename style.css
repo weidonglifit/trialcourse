@@ -3711,7 +3711,7 @@ select {
   position: absolute;
   top: 0;
   left: 0;
-  transform: rotate(-90deg) scaleX(-1);
+  transform: rotate(-90deg) scaleX(1);
 }
 
 /* 底部灰色底圈 */
