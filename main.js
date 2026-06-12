@@ -1018,7 +1018,7 @@ function renderAccordionSchedule(courseSource, containerElement, type) {
               <span>${endTime}</span>
             </div>
             <div class="course-info">
-              <b>${nameTeacher[0]}</b> - ${nameTeacher[1] || ""} ${quotaHtml}
+              <b style="color: #d14d72;">${nameTeacher[0]}</b><span style="font-size: 0.9em; color: #7f8c8d;">(${nameTeacher[1] || ""})</span>${quotaHtml}
             </div>
           </div>`;
       });
