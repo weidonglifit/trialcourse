@@ -3785,10 +3785,6 @@ select {
   height: 44px;
 }
 
-/* 懸停時的微幅變化 */
-#ai-toggle-btn.ai-glow-btn:hover {
-  transform: scale(1.05); /* 輕微放大整個按鈕 */
-}
 #ai-toggle-btn.ai-glow-btn:hover::before {
   opacity: 1;
   filter: blur(4px);
