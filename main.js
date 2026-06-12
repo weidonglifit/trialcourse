@@ -5208,10 +5208,12 @@ function closeAnnouncementModal(event) {
 
 document.addEventListener("DOMContentLoaded", function () {
   const aiBubble = document.getElementById("aiChatBubble");
+  const aiWidget = document.getElementById("ai-chat-widget");
   let scrollTimeout;
 
   // 顯示泡泡的函式
   function showAiBubble() {
+    aiWidget.classList.add("show");
     if (aiBubble) {
       aiBubble.classList.add("show-bubble");
     }
@@ -5219,6 +5221,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 隱藏泡泡的函式
   function hideAiBubble() {
+    aiWidget.classList.remove("show");
     if (aiBubble) {
       aiBubble.classList.remove("show-bubble");
     }
