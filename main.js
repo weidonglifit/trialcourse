@@ -534,7 +534,7 @@ function renderCurrentCoursesUI(courses) {
           accordionHtml += `
             <div class="accordion-course-item" style="cursor: pointer;" title="點擊直接加入預約" onclick="selectFromScheduleSingle('${course.name.replace(/'/g, "\\'")}')">
               <div class="time-tag"><span>${times[0] || ""}</span><div class="time-line"></div><span>${times[1] || ""}</span></div>
-              <div class="course-info"><b>${nameTeacher[0]}</b> - ${nameTeacher[1] || ""} ${quotaHtml}</div>
+              <div class="course-info"><b style="color: #d14d72;">${nameTeacher[0]}</b><span style="font-size: 0.9em; color: #7f8c8d;">(${nameTeacher[1] || ""})</span>${quotaHtml}</div>
             </div>`;
         });
       } else {
