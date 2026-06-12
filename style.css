@@ -2311,7 +2311,7 @@ select {
 
 /* 當加上 .show 類別時，優雅地彈出並淡入 */
 #ai-chat-widget.show {
-  opacity: 0.9;
+  opacity: 1;
   pointer-events: auto;
   /* 恢復可點擊狀態 */
   transform: scale(1);
