@@ -15,7 +15,7 @@ button, input, select, textarea {
   font-family: inherit;
 }
 strong {
-  -webkit-text-stroke: 0.6px currentColor;
+  -webkit-text-stroke: 0.4px currentColor;
 }
 .container {
   max-width: 800px;
