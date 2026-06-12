@@ -219,20 +219,32 @@
         <div id="historyWrapper" style="position: relative; margin-bottom: 20px;">
           <div
             style="background: linear-gradient(135deg, #fff9fa 0%, #ffeef1 100%); padding: 15px; border-radius: 12px; border: 1px dashed #F4A7B9;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="width: 20px; height: 20px;">
-              <!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
-              <path fill="#e87a90" d="M434.8 54.1C446.7 62.7 451.1 78.3 445.7 91.9L367.3 288L512 288C525.5 288 537.5 296.4 542.1 309.1C546.7 321.8 542.8 336 532.5 344.6L244.5 584.6C233.2 594 217.1 594.5 205.2 585.9C193.3 577.3 188.9 561.7 194.3 548.1L272.7 352L128 352C114.5 352 102.5 343.6 97.9 330.9C93.3 318.2 97.2 304 107.5 295.4L395.5 55.4C406.8 46 422.9 45.5 434.8 54.1z"/>
-            </svg>
-            <b style="color: #d14d72; display: block; margin-bottom: 10px;">快速帶入歷史資料</b>
-            <div style="display: flex; gap: 10px;">
-              <input type="tel" id="historySearchPhone" placeholder="輸入電話號碼搜尋" maxlength="10" inputmode="numeric"
-                style="flex: 1; border-radius: 8px; border: 1px solid #ddd; padding: 10px; font-size: 16px;">
-              <button type="button" class="btn-universal" onclick="searchHistoricalData()"
-                style="width: auto; margin: 0; padding: 10px 20px; font-size: 1em; background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%);"
-                id="historySearchBtn">搜尋</button>
+
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 12px;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                style="width: 18px; height: 18px; flex-shrink: 0;">
+                <path fill="#e87a90"
+                  d="M434.8 54.1C446.7 62.7 451.1 78.3 445.7 91.9L367.3 288L512 288C525.5 288 537.5 296.4 542.1 309.1C546.7 321.8 542.8 336 532.5 344.6L244.5 584.6C233.2 594 217.1 594.5 205.2 585.9C193.3 577.3 188.9 561.7 194.3 548.1L272.7 352L128 352C114.5 352 102.5 343.6 97.9 330.9C93.3 318.2 97.2 304 107.5 295.4L395.5 55.4C406.8 46 422.9 45.5 434.8 54.1z" />
+              </svg>
+              <b style="color: #d14d72; font-size: 1.05em;">快速帶入歷史資料</b>
             </div>
+
+            <div class="form-row" style="display: flex; align-items: flex-end; gap: 0;">
+              <div class="field" style="flex: 1; margin-bottom: 0;">
+                <input type="tel" id="historySearchPhone" placeholder="輸入電話號碼搜尋" maxlength="10" inputmode="numeric"
+                  pattern="\d{10}"
+                  style="width: 100%; border-radius: 30px 0 0 30px; height: 48px; box-sizing: border-box; padding: 10px 15px; border: 1px solid #ddd; font-size: 16px;">
+              </div>
+              <button type="button" class="btn-universal" id="historySearchBtn" onclick="searchHistoricalData()"
+                style="background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); width: 30%; height: 48px; margin: 0; padding: 0;
+             border-radius: 0 30px 30px 0; border: 1px solid #E87A90; border-left: none; font-size: 1em; color: white;">
+                搜尋
+              </button>
+            </div>
+
             <div id="historyOutput"
-              style="color: #e74c3c; font-size: 0.9em; margin-top: 8px; display: none; font-weight: bold;"></div>
+              style="color: #e74c3c; font-size: 0.9em; margin-top: 8px; display: none; font-weight: bold; padding-left: 5px;">
+            </div>
           </div>
 
           <div class="expand-input-container" id="historyDataContainer">
