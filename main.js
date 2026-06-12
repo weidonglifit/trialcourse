@@ -5208,6 +5208,7 @@ function closeAnnouncementModal(event) {
 
 document.addEventListener("DOMContentLoaded", function () {
   const aiBubble = document.getElementById("aiChatBubble");
+  const aiWidget = document.getElementById('ai-chat-widget');
   let scrollTimeout;
 
   // 顯示泡泡的函式
@@ -5215,12 +5216,18 @@ document.addEventListener("DOMContentLoaded", function () {
     if (aiBubble) {
       aiBubble.classList.add("show-bubble");
     }
+    if (aiWidget) {
+      aiWidget.classList.add('show');
+    }
   }
 
   // 隱藏泡泡的函式
   function hideAiBubble() {
     if (aiBubble) {
       aiBubble.classList.remove("show-bubble");
+    }
+    if (aiWidget) {
+      aiWidget.classList.remove('show');
     }
   }
 
