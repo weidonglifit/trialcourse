@@ -2707,8 +2707,12 @@ function closeOverlay() {
     overlay.classList.add('exit-animation'); // 直接套用 CSS 動畫
 
     const aiWidget = document.getElementById('ai-chat-widget');
+    const aiBubble = document.getElementById("aiChatBubble");
     if (aiWidget) {
       aiWidget.classList.add('show');
+    }
+    if (aiBubble) {
+      aiBubble.classList.add("show-bubble");
     }
     //document.getElementById('qrcode-widget').classList.add('show');
 
