@@ -1939,7 +1939,7 @@ select {
 }
 
 .countdown-timer {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Black Ops One', Courier, monospace;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -3740,7 +3740,7 @@ select {
 
 /* 數字樣式 */
 .cd-text span {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Black Ops One', Courier, monospace;
   font-size: 1.3rem;
   font-weight: bold;
   color: #E87A90;
