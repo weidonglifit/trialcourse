@@ -3578,12 +3578,12 @@ select {
   /* 品牌漸層與視覺設計 */
   background: linear-gradient(135deg, #F4A7B9 0%, #E87A90 100%);
   color: white;
-  padding: 10px 16px;
+  padding: 5px 10px;
   /* 創造對話泡泡形狀：左上、右上、左下圓角，右下直角 */
   border-radius: 20px; 
   box-shadow: 0 4px 12px rgba(232, 122, 144, 0.4);
   font-weight: bold;
-  font-size: 14px;
+  font-size: 095em;
   letter-spacing: 1px;
   z-index: 9999;
   cursor: pointer;
