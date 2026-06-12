@@ -3583,7 +3583,7 @@ select {
   border-radius: 20px; 
   box-shadow: 0 4px 12px rgba(232, 122, 144, 0.4);
   font-weight: bold;
-  font-size: 095em;
+  font-size: 0.95em;
   letter-spacing: 1px;
   z-index: 9999;
   cursor: pointer;
