@@ -5250,3 +5250,151 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
+// ==========================================
+// 🚀 新增：歷史資料快速帶入功能
+// ==========================================
+function searchHistoricalData() {
+  const phone = document.getElementById('historySearchPhone').value.trim();
+  const output = document.getElementById('historyOutput');
+  const btn = document.getElementById('historySearchBtn');
+  
+  if (!phone) {
+    output.innerText = "⚠️ 請輸入電話號碼以供搜尋";
+    output.style.display = "block";
+    return;
+  }
+  
+  // 初始化狀態
+  output.style.display = "none";
+  const originalText = btn.innerText;
+  btn.innerHTML = "搜尋中...";
+  btn.disabled = true;
+
+  callGasApi("queryHistoricalData", [phone])
+    .then(function(res) {
+      btn.innerText = originalText;
+      btn.disabled = false;
+      
+      if (res.error) {
+        output.innerText = res.error;
+        output.style.display = "block";
+        return;
+      }
+      
+      if (!res || res.length === 0) {
+        output.innerText = "⚠️ 查無歷史報名紀錄";
+        output.style.display = "block";
+        return;
+      }
+      
+      renderHistoryCards(res);
+      openHistoryModal();
+    })
+    .catch(function(err) {
+      btn.innerText = originalText;
+      btn.disabled = false;
+      output.innerText = "❌ 查詢失敗：" + (err.message || err);
+      output.style.display = "block";
+    });
+}
+
+// 將陣列渲染為精緻卡片
+function renderHistoryCards(dataList) {
+  const contentArea = document.getElementById('historyDataContentArea');
+  let html = "";
+  
+  dataList.forEach((item) => {
+    // 進行字串跳脫，防止含單引號造成 JS 錯誤
+    const name = (item.name || "").replace(/'/g, "\\'");
+    const phone = (item.phone || "").replace(/'/g, "\\'");
+    const line = (item.lineId || "").replace(/'/g, "\\'");
+    const email = (item.email || "").replace(/'/g, "\\'");
+    
+    html += `
+      <div style="background: white; border: 1px solid #F4A7B9; border-left: 5px solid #E87A90; border-radius: 10px; padding: 15px; margin-bottom: 15px; cursor: pointer; box-shadow: 0 4px 10px rgba(232, 122, 144, 0.15); transition: transform 0.2s;" onclick="fillHistoricalData('${name}', '${phone}', '${line}', '${email}')">
+        <div style="font-weight: bold; color: #d14d72; font-size: 1.15em; margin-bottom: 8px;">${item.name}</div>
+        <div style="font-size: 0.95em; color: #555; line-height: 1.6;">
+          <b style="color: #E87A90;">電話：</b>${item.phone}<br>
+          <b style="color: #E87A90;">LINE：</b>${item.lineId}<br>
+          <b style="color: #E87A90;">信箱：</b>${item.email}
+        </div>
+        <div style="text-align: right; margin-top: 10px;">
+          <span style="background: #E87A90; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.9em; font-weight: bold;">帶入此資料</span>
+        </div>
+      </div>
+    `;
+  });
+  
+  contentArea.innerHTML = html;
+}
+
+// 開啟翻頁視窗 (沿用 announcement 相同動畫與全螢幕覆蓋機制)
+function openHistoryModal() {
+  const container = document.getElementById('historyDataContainer');
+  if (container) {
+    document.body.appendChild(container); // 移到最外層防止被 overflow 截斷
+    
+    container.classList.add('expanded');
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100vw';
+    container.style.height = '100vh';
+    container.style.zIndex = '9999';
+    container.style.animation = "expandFlipIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1) forwards";
+    
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+// 關閉翻頁視窗
+function closeHistoryModal(event) {
+  if (event) event.stopPropagation();
+  const container = document.getElementById('historyDataContainer');
+  if (container && container.classList.contains('expanded')) {
+    container.style.animation = "expandFlipOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards";
+    
+    setTimeout(function() {
+      container.classList.remove('expanded');
+      container.style.animation = "";
+      document.body.style.overflow = '';
+      
+      // 動畫結束後歸位
+      const wrapper = document.getElementById('historyWrapper');
+      if (wrapper) wrapper.appendChild(container);
+      
+      // 清空動態加上的行內樣式
+      container.style.position = '';
+      container.style.top = '';
+      container.style.left = '';
+      container.style.width = '';
+      container.style.height = '';
+      container.style.zIndex = '';
+    }, 350);
+  }
+}
+
+// 使用者點選卡片後：帶入下方 Input 並觸發防呆驗證
+function fillHistoricalData(name, phone, line, email) {
+  const form = document.getElementById('regForm');
+  if (form) {
+    const nameInput = form.querySelector('input[name="name"]');
+    const phoneInput = form.querySelector('input[name="phone"]'); 
+    const lineInput = form.querySelector('input[name="lineId"]');
+    const emailInput = form.querySelector('input[name="email"]');
+    
+    if (nameInput) nameInput.value = name;
+    if (phoneInput) {
+      phoneInput.value = phone;
+      // 主動觸發你原本的電話格式驗證機制
+      if (typeof validateCoursePhone === 'function') {
+        validateCoursePhone(phoneInput);
+      }
+    }
+    if (lineInput) lineInput.value = line;
+    if (emailInput) emailInput.value = email;
+  }
+  
+  closeHistoryModal();
+}

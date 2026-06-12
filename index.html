@@ -8,16 +8,14 @@
   <meta name="description" content="微動身活位於新竹市北區，提供最舒適的共享舞蹈空間、即時課表查詢、線上報名系統。內建智慧 AI 櫃檯秘書">
   <meta name="keywords" content="微動身活, 新竹舞蹈教室, 新竹租教室, 北區舞蹈空間, 舞蹈課表, 共享舞室">
   <meta property="og:title" content="微動身活 | 共享舞蹈空間">
-  <meta property="og:image"
-    content="https://weidonglifit.github.io/course/weidong_logoL.jpg">
+  <meta property="og:image" content="https://weidonglifit.github.io/course/weidong_logoL.jpg">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://weidonglifit.github.io/course/">
   <meta property="og:description" content="微動身活位於新竹市北區，提供最舒適的共享舞蹈空間、即時課表查詢、線上報名系統。">
   <meta property="og:site_name" content="微動身活">
   <link rel="canonical" href="https://weidonglifit.github.io/course/" />
   <title>微動身活 | 新竹共享舞蹈空間與教室租借</title>
-  <link rel="icon" type="image/png"
-    href="https://weidonglifit.github.io/course/icon_c2.png">
+  <link rel="icon" type="image/png" href="https://weidonglifit.github.io/course/icon_c2.png">
   <base target="_top">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script type="application/ld+json">
@@ -45,7 +43,9 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@300;400;700&family=Play:wght@400;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@300;400;700&family=Play:wght@400;700&display=swap"
+    rel="stylesheet">
 </head>
 
 <body>
@@ -229,6 +229,31 @@
           <h3 id="all-course-title" style="text-align: center; margin-top: 0; font-size: 1.5em;">...</h3>
           <custom-notice-pulse></custom-notice-pulse>
           <form id="regForm">
+            <div id="historyWrapper" style="position: relative; margin-bottom: 20px;">
+              <div
+                style="background: linear-gradient(135deg, #fff9fa 0%, #ffeef1 100%); padding: 15px; border-radius: 12px; border: 1px dashed #F4A7B9;">
+                <b style="color: #d14d72; display: block; margin-bottom: 10px;">⚡ 快速帶入歷史資料</b>
+                <div style="display: flex; gap: 10px;">
+                  <input type="tel" id="historySearchPhone" placeholder="輸入電話號碼搜尋" maxlength="10" inputmode="numeric"
+                    style="flex: 1; border-radius: 8px; border: 1px solid #ddd; padding: 10px; font-size: 16px;">
+                  <button type="button" class="btn-universal" onclick="searchHistoricalData()"
+                    style="width: auto; margin: 0; padding: 10px 20px; font-size: 1em; background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%);"
+                    id="historySearchBtn">搜尋</button>
+                </div>
+                <div id="historyOutput"
+                  style="color: #e74c3c; font-size: 0.9em; margin-top: 8px; display: none; font-weight: bold;"></div>
+              </div>
+
+              <div class="expand-input-container" id="historyDataContainer">
+                <div class="expand-header">
+                  <span class="expand-title">請點選要帶入的資料</span>
+                  <span class="expand-close" onclick="closeHistoryModal(event)">×</span>
+                </div>
+                <div class="expand-content" id="historyDataContentArea"
+                  style="padding: 15px; min-height: 250px; background: #fcfcfc; overflow-y: auto;">
+                </div>
+              </div>
+            </div>
             <div class="form-row">
               <div class="field">
                 <span class="pink-highlight">姓名</span>
