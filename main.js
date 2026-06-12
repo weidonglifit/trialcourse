@@ -5375,26 +5375,51 @@ function closeHistoryModal(event) {
   }
 }
 
-// 使用者點選卡片後：帶入下方 Input 並觸發防呆驗證
+// 使用者點選卡片後：動態帶入對應表單並觸發防呆驗證
 function fillHistoricalData(name, phone, line, email) {
-  const form = document.getElementById('regForm');
-  if (form) {
-    const nameInput = form.querySelector('input[name="name"]');
-    const phoneInput = form.querySelector('input[name="phone"]'); 
-    const lineInput = form.querySelector('input[name="lineId"]');
-    const emailInput = form.querySelector('input[name="email"]');
+  // 判斷單堂課程分頁按鈕是否有 'active' class
+  const isSingleActive = document.getElementById('btn-single-class') && document.getElementById('btn-single-class').classList.contains('active');
+
+  if (isSingleActive) {
+    // 🎯 帶入【單堂課程報名】表單 (singleFormContent)
+    const sName = document.getElementById('sName');
+    const sPhone = document.getElementById('sPhone');
+    const sLine = document.getElementById('sLine');
+    const sEmail = document.getElementById('sEmail');
     
-    if (nameInput) nameInput.value = name;
-    if (phoneInput) {
-      phoneInput.value = phone;
-      // 主動觸發你原本的電話格式驗證機制
-      if (typeof validateCoursePhone === 'function') {
-        validateCoursePhone(phoneInput);
+    if (sName) sName.value = name;
+    if (sPhone) {
+      sPhone.value = phone;
+      // 觸發單堂專屬的電話防呆驗證
+      if (typeof validateSinglePhone === 'function') {
+        validateSinglePhone(sPhone);
       }
     }
-    if (lineInput) lineInput.value = line;
-    if (emailInput) emailInput.value = email;
+    if (sLine) sLine.value = line;
+    if (sEmail) sEmail.value = email;
+
+  } else {
+    // 🎯 帶入【整期課程報名】表單 (regForm)
+    const form = document.getElementById('regForm');
+    if (form) {
+      const nameInput = form.querySelector('input[name="name"]');
+      const phoneInput = form.querySelector('input[name="phone"]'); 
+      const lineInput = form.querySelector('input[name="lineId"]');
+      const emailInput = form.querySelector('input[name="email"]');
+      
+      if (nameInput) nameInput.value = name;
+      if (phoneInput) {
+        phoneInput.value = phone;
+        // 觸發整期專屬的電話防呆驗證
+        if (typeof validateCoursePhone === 'function') {
+          validateCoursePhone(phoneInput);
+        }
+      }
+      if (lineInput) lineInput.value = line;
+      if (emailInput) emailInput.value = email;
+    }
   }
   
+  // 帶入後自動關閉小卡視窗
   closeHistoryModal();
 }

@@ -216,6 +216,31 @@
     <div id="courseTab" class="tab-content active">
 
       <div id="courseEnrollmentSystem">
+        <div id="historyWrapper" style="position: relative; margin-bottom: 20px;">
+          <div
+            style="background: linear-gradient(135deg, #fff9fa 0%, #ffeef1 100%); padding: 15px; border-radius: 12px; border: 1px dashed #F4A7B9;">
+            <b style="color: #d14d72; display: block; margin-bottom: 10px;">⚡ 快速帶入歷史資料</b>
+            <div style="display: flex; gap: 10px;">
+              <input type="tel" id="historySearchPhone" placeholder="輸入電話號碼搜尋" maxlength="10" inputmode="numeric"
+                style="flex: 1; border-radius: 8px; border: 1px solid #ddd; padding: 10px; font-size: 16px;">
+              <button type="button" class="btn-universal" onclick="searchHistoricalData()"
+                style="width: auto; margin: 0; padding: 10px 20px; font-size: 1em; background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%);"
+                id="historySearchBtn">搜尋</button>
+            </div>
+            <div id="historyOutput"
+              style="color: #e74c3c; font-size: 0.9em; margin-top: 8px; display: none; font-weight: bold;"></div>
+          </div>
+
+          <div class="expand-input-container" id="historyDataContainer">
+            <div class="expand-header">
+              <span class="expand-title">請點選要帶入的資料</span>
+              <span class="expand-close" onclick="closeHistoryModal(event)">×</span>
+            </div>
+            <div class="expand-content" id="historyDataContentArea"
+              style="padding: 15px; min-height: 250px; background: #fcfcfc; overflow-y: auto;">
+            </div>
+          </div>
+        </div>
         <div class="tabs child-tabs" style="margin-top: 20px;">
           <div id="child-ghost-tab" class="tab-btn ghost-active"
             style="display:none; position:absolute; z-index:10; pointer-events:none;"></div>
@@ -229,31 +254,6 @@
           <h3 id="all-course-title" style="text-align: center; margin-top: 0; font-size: 1.5em;">...</h3>
           <custom-notice-pulse></custom-notice-pulse>
           <form id="regForm">
-            <div id="historyWrapper" style="position: relative; margin-bottom: 20px;">
-              <div
-                style="background: linear-gradient(135deg, #fff9fa 0%, #ffeef1 100%); padding: 15px; border-radius: 12px; border: 1px dashed #F4A7B9;">
-                <b style="color: #d14d72; display: block; margin-bottom: 10px;">⚡ 快速帶入歷史資料</b>
-                <div style="display: flex; gap: 10px;">
-                  <input type="tel" id="historySearchPhone" placeholder="輸入電話號碼搜尋" maxlength="10" inputmode="numeric"
-                    style="flex: 1; border-radius: 8px; border: 1px solid #ddd; padding: 10px; font-size: 16px;">
-                  <button type="button" class="btn-universal" onclick="searchHistoricalData()"
-                    style="width: auto; margin: 0; padding: 10px 20px; font-size: 1em; background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%);"
-                    id="historySearchBtn">搜尋</button>
-                </div>
-                <div id="historyOutput"
-                  style="color: #e74c3c; font-size: 0.9em; margin-top: 8px; display: none; font-weight: bold;"></div>
-              </div>
-
-              <div class="expand-input-container" id="historyDataContainer">
-                <div class="expand-header">
-                  <span class="expand-title">請點選要帶入的資料</span>
-                  <span class="expand-close" onclick="closeHistoryModal(event)">×</span>
-                </div>
-                <div class="expand-content" id="historyDataContentArea"
-                  style="padding: 15px; min-height: 250px; background: #fcfcfc; overflow-y: auto;">
-                </div>
-              </div>
-            </div>
             <div class="form-row">
               <div class="field">
                 <span class="pink-highlight">姓名</span>
