@@ -3595,22 +3595,11 @@ select {
   transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   pointer-events: none; /* 隱藏時不可被點擊 */
 }
-.ai-chat-bubble::after {
-  content: '';
-  position: absolute;
-  top: 50%; /* 垂直置中 */
-  right: -6px; /* 把尖角往右推到泡泡外面 */
-  transform: translateY(-50%); /* 完美垂直置中的微調 */
-  
-  /* 利用邊框畫出指向右邊的三角形 */
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
-  border-left: 8px solid #E87A90; /* 顏色對應漸層右側的深粉紅，銜接更自然 */
-}
+
 
 /* 顯示時的狀態 */
 .ai-chat-bubble.show-bubble {
-  opacity: 1;
+  opacity: 0.8;
   visibility: visible;
   transform: translateY(0) scale(1);
   pointer-events: auto;
