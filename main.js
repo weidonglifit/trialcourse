@@ -251,7 +251,7 @@ window.addEventListener('load', function () {
           option.value = room.name; option.text = room.name;
           selectRoom.appendChild(option);
           roomPriceMap[room.name] = room.price;
-          priceHtml += `• ${room.name}：<strong>${room.price}/小時</strong><br>`;
+          priceHtml += `• ${room.name}：<b>${room.price}/小時</b><br>`;
         });
         const priceDisplay = document.getElementById('room-price-display');
         if (priceDisplay) { priceDisplay.innerHTML = priceHtml; }

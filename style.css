@@ -14,7 +14,9 @@ button, input, select, textarea {
 ::placeholder {
   font-family: inherit;
 }
-
+strong {
+  -webkit-text-stroke: 0.6px currentColor;
+}
 .container {
   max-width: 800px;
   margin: 10px auto;
