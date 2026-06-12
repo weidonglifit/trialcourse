@@ -3572,7 +3572,7 @@ select {
 .ai-chat-bubble {
   position: fixed;
   /* 請根據您右下角 AI CHAT 按鈕的實際位置微調 bottom 與 right */
-  bottom: 30px; 
+  bottom: 40px; 
   right: 90px; 
   
   /* 品牌漸層與視覺設計 */
