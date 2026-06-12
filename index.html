@@ -216,6 +216,16 @@
     <div id="courseTab" class="tab-content active">
 
       <div id="courseEnrollmentSystem">
+
+        <div class="tabs child-tabs" style="margin-top: 20px;">
+          <div id="child-ghost-tab" class="tab-btn ghost-active"
+            style="display:none; position:absolute; z-index:10; pointer-events:none;"></div>
+          <button class="tab-btn sub-tab active" id="btn-full-term"
+            onclick="openSubTab(event, 'fullTermSection')">整期課程報名</button>
+          <button class="tab-btn sub-tab" id="btn-single-class"
+            onclick="openSubTab(event, 'singleCourseSection')">單堂課程報名</button>
+        </div>
+
         <div id="historyWrapper" style="position: relative; margin-bottom: 20px;">
           <div
             style="background: linear-gradient(135deg, #fff9fa 0%, #ffeef1 100%); padding: 15px; border-radius: 12px; border: 1px dashed #F4A7B9;">
@@ -256,14 +266,6 @@
               style="padding: 15px; min-height: 250px; background: #fcfcfc; overflow-y: auto;">
             </div>
           </div>
-        </div>
-        <div class="tabs child-tabs" style="margin-top: 20px;">
-          <div id="child-ghost-tab" class="tab-btn ghost-active"
-            style="display:none; position:absolute; z-index:10; pointer-events:none;"></div>
-          <button class="tab-btn sub-tab active" id="btn-full-term"
-            onclick="openSubTab(event, 'fullTermSection')">整期課程報名</button>
-          <button class="tab-btn sub-tab" id="btn-single-class"
-            onclick="openSubTab(event, 'singleCourseSection')">單堂課程報名</button>
         </div>
 
         <div id="fullTermSection" class="sub-tab-content active">
