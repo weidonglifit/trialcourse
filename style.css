@@ -2981,57 +2981,28 @@ select {
   animation: flyRightAndFade 1.5s infinite ease-in-out;
 }
 
-@keyframes fireFlicker {
-  0% { 
-    opacity: 1; 
-    transform: scale(1); 
-  }
-  25% { 
-    opacity: 0.7; 
-    transform: scale(0.95); 
-  }
-  50% { 
-    opacity: 0.9; 
-    transform: scale(1.05); 
-  }
-  75% { 
-    opacity: 0.6; 
-    transform: scale(0.92); 
-  }
-  100% { 
-    opacity: 1; 
-    transform: scale(1); 
-  }
-}
-
 @keyframes realisticFlicker {
   0% { 
-    /* 基準狀態 */
     transform: scale(1, 1) skewX(0deg); 
     filter: brightness(1) drop-shadow(0 0 2px rgba(232, 122, 144, 0.3));
   }
   20% { 
-    /* 火苗往上竄，稍微被風往左吹，亮度激增 */
     transform: scale(0.95, 1.15) skewX(-3deg); 
-    filter: brightness(1.3) drop-shadow(0 0 8px rgba(232, 122, 144, 0.8));
+    filter: brightness(1.3) drop-shadow(0 0 6px rgba(232, 122, 144, 0.8));
   }
   40% { 
-    /* 火苗被壓低，稍微往右扁平，稍微變暗 */
     transform: scale(1.05, 0.95) skewX(2deg); 
     filter: brightness(0.9) drop-shadow(0 0 2px rgba(232, 122, 144, 0.2));
   }
   60% { 
-    /* 再次急速往上竄，且拉得更細長 */
     transform: scale(0.9, 1.2) skewX(-1deg); 
-    filter: brightness(1.4) drop-shadow(0 0 10px rgba(232, 122, 144, 1));
+    filter: brightness(1.4) drop-shadow(0 0 8px rgba(232, 122, 144, 1));
   }
   80% { 
-    /* 不規則的扭動與收縮 */
     transform: scale(1.02, 0.92) skewX(4deg); 
     filter: brightness(0.85) drop-shadow(0 0 1px rgba(232, 122, 144, 0.2));
   }
   100% { 
-    /* 回到基準狀態，達成完美循環 */
     transform: scale(1, 1) skewX(0deg); 
     filter: brightness(1) drop-shadow(0 0 2px rgba(232, 122, 144, 0.3));
   }
