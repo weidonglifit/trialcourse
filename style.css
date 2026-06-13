@@ -3030,7 +3030,7 @@ select {
     transform: scale(1); /* 保持原本大小 */
   }
   50% {
-    filter: drop-shadow(0 0 12px rgb(250, 242, 159));
+    filter: drop-shadow(0 0 12px rgb(252, 240, 101));
     transform: scale(1.08); /* 微微放大 8%，讓呼吸感更逼真 */
   }
 }
