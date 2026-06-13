@@ -5312,7 +5312,7 @@ function renderHistoryCards(dataList) {
     const email = (item.email || "").replace(/'/g, "\\'");
     
     html += `
-      <div style="background: white; border: 1px solid #F4A7B9; border-left: 5px solid #E87A90; border-radius: 10px; padding: 15px; margin-bottom: 15px; cursor: pointer; box-shadow: 0 4px 10px rgba(232, 122, 144, 0.15); transition: transform 0.2s;" onclick="fillHistoricalData('${name}', '${phone}', '${line}', '${email}')">
+      <div style="background: white; border: 1px solid #F4A7B9; border-radius: 10px; padding: 15px; margin-bottom: 15px; cursor: pointer; box-shadow: 0 4px 10px rgba(232, 122, 144, 0.15); transition: transform 0.2s;" onclick="fillHistoricalData('${name}', '${phone}', '${line}', '${email}')">
         <div style="font-weight: bold; color: #d14d72; font-size: 1.15em; margin-bottom: 8px;">${item.name}</div>
         <div style="font-size: 0.95em; color: #555; line-height: 1.6;">
           <b style="color: #E87A90;">電話：</b>${item.phone}<br>
