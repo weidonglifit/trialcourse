@@ -3203,33 +3203,18 @@ select {
 /* =========================================
    膠囊標籤文字專屬：心跳放大淡出特效
    ========================================= */
-@keyframes badgeTextHeartbeat {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  15% {
-    transform: scale(1.15); /* 第一次心跳放大 */
-    opacity: 0.75;          /* 放大時同步微淡出 */
-  }
-  30% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  45% {
-    transform: scale(1.15); /* 第二次連擊放大 */
-    opacity: 0.75;
-  }
-  60%, 100% {
-    transform: scale(1);    /* 回歸原狀並稍作停頓，模擬真實心跳節奏 */
-    opacity: 1;
-  }
+@keyframes badgeJellyPop {
+  0%, 100% { transform: scale(1, 1); }
+  15% { transform: scale(1.15, 0.85); } /* 往下壓扁準備跳 */
+  30% { transform: scale(0.9, 1.15); }  /* 往上拉長跳起 */
+  45% { transform: scale(1.05, 0.95); } /* 落地稍微變形 */
+  60% { transform: scale(1, 1); }       /* 迅速回歸原狀 */
 }
 
 .badge-text-heartbeat {
-  display: inline-block;    /* 🌟 關鍵：必須是 inline-block，transform 縮放才會生效 */
-  transform-origin: center; /* 確保從文字正中心放大 */
-  animation: badgeTextHeartbeat 1.8s infinite ease-in-out; /* 無限循環重複 */
+  display: inline-block;
+  transform-origin: center;
+  animation: badgeJellyPop 1.5s infinite;
 }
 
 /* 老師小卡容器：使用 Flex 排列 */
