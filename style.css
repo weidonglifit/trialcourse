@@ -3030,11 +3030,11 @@ select {
 
 @keyframes breathe-glow {
   0%, 100% {
-    filter: brightness(1) drop-shadow(0 0 2px rgba(250, 242, 159, 0.3));
+    filter: brightness(1) drop-shadow(0 0 2px rgba(231, 212, 179, 0.3));
     transform: scale(1); /* 保持原本大小 */
   }
   50% {
-    filter: brightness(1.2) drop-shadow(0 0 6px rgb(252, 240, 101));
+    filter: brightness(1.1) drop-shadow(0 0 6px rgb(231, 212, 179));
     transform: scale(1.08); /* 微微放大 8%，讓呼吸感更逼真 */
   }
 }
