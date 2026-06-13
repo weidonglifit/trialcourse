@@ -3023,6 +3023,24 @@ select {
   animation: swing-animation 2s ease-in-out infinite;
 }
 
+
+@keyframes breathe-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px rgba(250, 242, 159, 0.3));
+    transform: scale(1); /* 保持原本大小 */
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgb(250, 242, 159));
+    transform: scale(1.08); /* 微微放大 8%，讓呼吸感更逼真 */
+  }
+}
+
+/* 2. 只要加上這個 class，圖案就會呼吸發光 */
+.glow-svg {
+  animation: breathe-glow 2.5s ease-in-out infinite;
+  vertical-align: middle; 
+}
+
 .walking-circle {
   width: 24px;   /* 圖案本身的大小 */
   height: 24px;  
