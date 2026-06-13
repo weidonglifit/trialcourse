@@ -3203,24 +3203,34 @@ select {
 /* =========================================
    膠囊標籤文字專屬：心跳放大淡出特效
    ========================================= */
-@keyframes textShine {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+@keyframes badgeJellyPop {
+  0%, 100% { 
+    transform: scale(1, 1); 
+    filter: brightness(1); /* 正常亮度 */
+  }
+  15% { 
+    transform: scale(1.15, 0.85); 
+    filter: brightness(0.9); /* 往下壓扁蓄力時，稍微變暗一點點，對比會更強烈 */
+  }
+  30% { 
+    transform: scale(0.9, 1.15); 
+    /* 🌟 往上拉長跳起時：亮度瞬間提升到 1.4 倍，並自帶一點點外發光 */
+    filter: brightness(1.2) drop-shadow(0 0 5px rgba(232, 122, 144, 0.6)); 
+  }
+  45% { 
+    transform: scale(1.05, 0.95); 
+    filter: brightness(1.1); /* 落地時稍微還有一點點餘光 */
+  }
+  60% { 
+    transform: scale(1, 1); 
+    filter: brightness(1); /* 迅速回歸正常亮度 */
+  }
 }
 
 .badge-text-heartbeat {
   display: inline-block;
-  font-weight: bold;
-  /* 用背景做出漸層：原本的粉紅 -> 中間帶有一道白光 -> 原本的粉紅 */
-  background: linear-gradient(120deg, #E87A90 35%, #ffffff 50%, #E87A90 65%);
-  background-size: 200% auto;
-  
-  /* 把背景裁切成文字的形狀，並把原本的文字顏色變透明 */
-  color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-  
-  animation: textShine 2.5s infinite linear;
+  transform-origin: center;
+  animation: badgeJellyPop 1.5s infinite;
 }
 
 /* 老師小卡容器：使用 Flex 排列 */
