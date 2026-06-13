@@ -3373,8 +3373,8 @@ select {
 }
 
 .peekaboo-cat svg {
-  width: 22px;
-  height: 22px;
+  width: 16px;
+  height: 16px;
   display: block; /* 避免底部出現神祕的留白間隙 */
 }
 
