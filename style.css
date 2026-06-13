@@ -3009,6 +3009,20 @@ select {
   animation: fireFlicker 0.8s infinite alternate ease-in-out; 
 }
 
+@keyframes swing-animation {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(20deg); }
+  30% { transform: rotate(-15deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-5deg); }
+  75% { transform: rotate(0deg); }
+}
+
+.swing-bell {
+  transform-origin: 50% 10%; 
+  animation: swing-animation 2s ease-in-out infinite;
+}
+
 .walking-circle {
   width: 24px;   /* 圖案本身的大小 */
   height: 24px;  
