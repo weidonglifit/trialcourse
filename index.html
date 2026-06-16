@@ -545,26 +545,6 @@
           <custom-notice-pulse></custom-notice-pulse>
 
           <div id="singleFormContent">
-            <div class="field" id="singleCourseWrapper">
-              <span class="pink-highlight">選擇課程</span>
-              <input type="text" id="singleCourseSelect" readonly placeholder="🔍 點擊此處開啟課表選擇課程"
-                onclick="openExpandedCourse()" style="cursor: pointer; background-color: #fafafa;">
-              <div class="expand-input-container" id="expandInputContainer">
-                <div class="expand-header">
-                  <span class="expand-title">點選欲報名課程</span>
-                  <span class="expand-close" onclick="closeExpandedCourse(event)">×</span>
-                </div>
-                <div class="expand-content" id="expandCourseContent"></div>
-              </div>
-            </div>
-
-            <div id="singleDateContainer" class="field" style="margin-top: 15px;">
-              <span class="pink-highlight">選擇日期 (單選)</span>
-              <div id="dateRadioGroup" class="checkbox-group" style="min-height: 50px;">
-                <p style="color: #999; font-size: 0.9em;">請先選擇課程...</p>
-              </div>
-            </div>
-
             <div class="form-row">
               <div class="field">
                 <span class="pink-highlight">姓名</span>
@@ -592,6 +572,26 @@
             <div class="field">
               <span class="pink-highlight">電子郵件</span>
               <input type="email" id="sEmail" placeholder="example@mail.com">
+            </div>
+
+            <div class="field" id="singleCourseWrapper">
+              <span class="pink-highlight">選擇課程</span>
+              <input type="text" id="singleCourseSelect" readonly placeholder="🔍 點擊此處開啟課表選擇課程"
+                onclick="openExpandedCourse()" style="cursor: pointer; background-color: #fafafa;">
+              <div class="expand-input-container" id="expandInputContainer">
+                <div class="expand-header">
+                  <span class="expand-title">點選欲報名課程</span>
+                  <span class="expand-close" onclick="closeExpandedCourse(event)">×</span>
+                </div>
+                <div class="expand-content" id="expandCourseContent"></div>
+              </div>
+            </div>
+
+            <div id="singleDateContainer" class="field" style="margin-top: 15px;">
+              <span class="pink-highlight">選擇日期 (單選)</span>
+              <div id="dateRadioGroup" class="checkbox-group" style="min-height: 50px;">
+                <p style="color: #999; font-size: 0.9em;">請先選擇課程...</p>
+              </div>
             </div>
 
             <div id="singlePriceDisplay"
