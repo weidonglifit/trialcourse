@@ -1479,6 +1479,7 @@ select {
   align-items: center;
   flex-direction: column;
   position: relative;
+  overflow: hidden;
 
   /* 1. 預設改為浮起狀態：加入位移與較明顯的陰影 */
   transform: translateY(-8px);
@@ -1508,6 +1509,17 @@ select {
 
 .info-card-btn small {
   display: none; 
+}
+
+.info-card-bg-svg {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  bottom: -20px;
+  right: -15px;
+  transform: rotate(-25deg);
+  opacity: 0.2;
+  z-index: 0;
 }
 
 /* 飛出替身小卡的專屬外觀與動畫 */
