@@ -5420,3 +5420,27 @@ function fillHistoricalData(name, phone, line, email) {
   // 帶入後自動關閉小卡視窗
   closeHistoryModal();
 }
+
+function openTeacherLightbox() {
+    const overlay = document.getElementById('teacherLightboxOverlay');
+    const mainImg = document.getElementById('teacherImg');
+    const lightboxImg = document.getElementById('teacherImgLightbox');
+    
+    // 將原本畫面上的圖片網址，同步複製給燈箱內的圖片
+    if (mainImg.src) {
+        lightboxImg.src = mainImg.src;
+    }
+    
+    // 防呆機制：確保每次打開時卡片都是「正面」
+    document.getElementById('teacherLightboxCard').classList.remove('flipped');
+    
+    // 顯示燈箱並鎖定底層網頁滾動
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden'; 
+  }
+
+  function closeTeacherLightbox() {
+    const overlay = document.getElementById('teacherLightboxOverlay');
+    overlay.classList.remove('active');
+    document.body.style.overflow = ''; // 恢復底層滾動
+  }
