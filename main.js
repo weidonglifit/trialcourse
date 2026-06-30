@@ -5244,7 +5244,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // 點擊泡泡時的行為：隱藏泡泡，並幫使用者點擊 AI CHAT 按鈕
   if (aiBubble) {
     aiBubble.addEventListener("click", function () {
-      hideAiBubble();
+      aiBubble.classList.remove("show-bubble");
       const aiBtn = document.getElementById('ai-toggle-btn');
       if (aiBtn) aiBtn.click();
     });
