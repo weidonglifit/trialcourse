@@ -5425,22 +5425,31 @@ function openTeacherLightbox() {
     const overlay = document.getElementById('teacherLightboxOverlay');
     const mainImg = document.getElementById('teacherImg');
     const lightboxImg = document.getElementById('teacherImgLightbox');
+    const card = document.getElementById('teacherLightboxCard');
     
-    // 將原本畫面上的圖片網址，同步複製給燈箱內的圖片
-    if (mainImg.src) {
-        lightboxImg.src = mainImg.src;
+    // 1. 同步複製主畫面的圖片連結到燈箱
+    if (mainImg && mainImg.src) {
+      lightboxImg.src = mainImg.src;
     }
     
-    // 防呆機制：確保每次打開時卡片都是「正面」
-    document.getElementById('teacherLightboxCard').classList.remove('flipped');
+    // 2. 每次打開前，強制將卡片重置為「正面」，並清除可能殘留的動畫
+    card.classList.remove('flipped');
     
-    // 顯示燈箱並鎖定底層網頁滾動
-    overlay.classList.add('active');
+    // 3. 滿版顯示（啟動 visibility 與不透明度）
+    overlay.style.visibility = 'visible';
+    overlay.style.opacity = '1';
+    
+    // 4. 鎖定網頁底層滾動，防止干擾
     document.body.style.overflow = 'hidden'; 
   }
 
   function closeTeacherLightbox() {
     const overlay = document.getElementById('teacherLightboxOverlay');
-    overlay.classList.remove('active');
-    document.body.style.overflow = ''; // 恢復底層滾動
+    
+    // 關閉燈箱淡出
+    overlay.style.opacity = '0';
+    overlay.style.visibility = 'hidden';
+    
+    // 恢復底層滾動
+    document.body.style.overflow = ''; 
   }
