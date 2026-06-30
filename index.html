@@ -1159,32 +1159,38 @@
     </div>
 
     <div id="teacherDisplayArea" style="margin-top: 20px; text-align: left; display:none;">
-      <div style="cursor: pointer; text-align: center;" onclick="openTeacherLightbox()">
-  <span style="color: #bababa; font-size: 0.85em; display: block; margin-bottom: 8px;">💡 點擊照片展開全螢幕燈箱</span>
-  <img id="teacherImg" src="" referrerpolicy="no-referrer">
-</div>
+      <div id="teacherLightboxWrapper" style="width: 100%;">
+  
+  <div class="teacher-card-container" onclick="openTeacherLightbox(this)" style="margin: 0 auto; width: 100%; transform: none !important;">
+    <span style="color: #bababa; font-size: 0.85em; display: block; margin-bottom: 8px; text-align: center;">💡 點擊照片展開全螢幕燈箱</span>
+    <div class="teacher-card-inner" style="transform: none !important; transition: none;">
+      <div class="teacher-card-front" style="box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border-left: 6px solid #F4A7B9;">
+        <img id="teacherImg" src="" referrerpolicy="no-referrer">
+      </div>
+    </div>
+  </div>
 
-<div id="teacherLightboxOverlay" class="photo-modal" onclick="closeTeacherLightbox()" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999; background-color: rgba(0, 0, 0, 0.9); display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: opacity 0.3s ease, visibility 0.3s ease;">
-  
-  <span class="photo-modal-close" onclick="closeTeacherLightbox()" style="position: absolute; top: 20px; right: 25px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 100000; user-select: none;">×</span>
-  
-  <div class="teacher-card-container result-card-anim" id="teacherLightboxCard" onclick="this.classList.toggle('flipped')" style="margin: 0 auto; width: 90%; max-width: 450px; background: transparent !important; box-shadow: none !important; border: none !important;">
+  <div id="teacherLightboxOverlay" class="photo-modal" onclick="closeTeacherLightbox()" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background-color: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: opacity 0.3s ease, visibility 0.3s ease;">
     
-    <div class="teacher-card-inner" style="transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;">
-      
-      <div class="teacher-card-front" style="background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;">
-        <img id="teacherImgLightbox" src="" referrerpolicy="no-referrer" style="width: 100%; height: auto; display: block; object-fit: contain; max-height: 75vh;">
-      </div>
-      
-      <div class="teacher-card-back" style="background: #FFF5F7; border: 2px solid #F4A7B9; border-radius: 15px; padding: 25px; display: flex; flex-direction: column; align-items: flex-start; box-sizing: border-box; position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden; transform: rotateY(180deg); z-index: 1;">
-        <div style="color: #d14d72; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #F4A7B9; width: 100%; padding-bottom: 8px; text-align: center; font-size: 1.15em;">
-          資歷與專長
+    <span class="photo-modal-close" onclick="closeTeacherLightbox()" style="position: absolute; top: 20px; right: 25px; color: #fff; font-size: 45px; font-weight: bold; cursor: pointer; z-index: 1000001; user-select: none;">×</span>
+    
+    <div class="teacher-card-container" id="teacherLightboxCard" onclick="event.stopPropagation(); this.classList.toggle('flipped');" style="margin: 0 auto; width: 90%; max-width: 420px; background: transparent !important; box-shadow: none !important; border: none !important;">
+      <div class="teacher-card-inner" style="position: relative; width: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;">
+        
+        <div class="teacher-card-front" style="background: #ffffff; border-radius: 15px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; backface-visibility: hidden; padding: 0; border: none;">
+          <img id="teacherImgLightbox" src="" referrerpolicy="no-referrer" style="width: 100%; height: auto; display: block; max-height: 70vh; object-fit: contain;">
         </div>
-        <div id="teacherIntroText" style="font-size: 1rem; line-height: 1.7; text-align: left; color: #555; white-space: pre-wrap; overflow-y: auto; width: 100%; flex: 1; padding-right: 5px;">
+        
+        <div class="teacher-card-back" style="background: #FFF5F7; border: 2px solid #F4A7B9; border-radius: 15px; padding: 25px; display: flex; flex-direction: column; align-items: flex-start; box-sizing: border-box; position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden; transform: rotateY(180deg); z-index: 1; box-shadow: 0 12px 40px rgba(0,0,0,0.6);">
+          <div style="color: #d14d72; font-weight: bold; margin-bottom: 12px; border-bottom: 2px solid #F4A7B9; width: 100%; padding-bottom: 6px; text-align: center; font-size: 1.15em;">
+            資歷與專長
+          </div>
+          <div id="teacherIntroText" style="font-size: 0.95rem; line-height: 1.6; text-align: left; color: #555; white-space: pre-wrap; overflow-y: auto; width: 100%; flex: 1; padding-right: 5px;">
+          </div>
+          <span style="color: #bababa; font-size: 0.8em; align-self: center; margin-top: 8px;">💡 再次點擊卡片可翻回正面</span>
         </div>
-        <span style="color: #bababa; font-size: 0.8em; align-self: center; margin-top: 10px;">💡 再次點擊卡片可翻回正面</span>
+
       </div>
-      
     </div>
   </div>
 </div>

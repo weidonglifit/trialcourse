@@ -5421,35 +5421,38 @@ function fillHistoricalData(name, phone, line, email) {
   closeHistoryModal();
 }
 
-function openTeacherLightbox() {
-    const overlay = document.getElementById('teacherLightboxOverlay');
-    const mainImg = document.getElementById('teacherImg');
-    const lightboxImg = document.getElementById('teacherImgLightbox');
-    const card = document.getElementById('teacherLightboxCard');
+function openTeacherLightbox(triggerEl) {
+    // 1. 利用 closest 智慧向上搜尋專屬外殼，精準抓取對應的圖片與文字元素
+    const wrapper = triggerEl.closest('#teacherLightboxWrapper');
+    if (!wrapper) return;
     
-    // 1. 同步複製主畫面的圖片連結到燈箱
+    const overlay = wrapper.querySelector('#teacherLightboxOverlay');
+    const mainImg = wrapper.querySelector('#teacherImg');
+    const lightboxImg = wrapper.querySelector('#teacherImgLightbox');
+    const card = wrapper.querySelector('#teacherLightboxCard');
+    
+    // 2. 完美的圖片與正面狀態同步
     if (mainImg && mainImg.src) {
       lightboxImg.src = mainImg.src;
     }
-    
-    // 2. 每次打開前，強制將卡片重置為「正面」，並清除可能殘留的動畫
     card.classList.remove('flipped');
     
-    // 3. 滿版顯示（啟動 visibility 與不透明度）
+    // 🚀 【極致關鍵點】：將燈箱節點動態剪貼搬移到網頁的 <body> 最外層！
+    // 這行程式碼會強行脫離抽屜、排版容器的所有寬度裁切與 transform 動態軸線，讓燈箱擁有真正 100% 視窗全螢幕
+    document.body.appendChild(overlay);
+    
+    // 3. 觸發顯現與毛玻璃背景動畫
     overlay.style.visibility = 'visible';
     overlay.style.opacity = '1';
-    
-    // 4. 鎖定網頁底層滾動，防止干擾
-    document.body.style.overflow = 'hidden'; 
+    document.body.style.overflow = 'hidden'; // 防止底層畫面跟著滾動
   }
 
   function closeTeacherLightbox() {
     const overlay = document.getElementById('teacherLightboxOverlay');
+    if (!overlay) return;
     
-    // 關閉燈箱淡出
+    // 隱藏燈箱
     overlay.style.opacity = '0';
     overlay.style.visibility = 'hidden';
-    
-    // 恢復底層滾動
-    document.body.style.overflow = ''; 
+    document.body.style.overflow = ''; // 釋放滾動條
   }
