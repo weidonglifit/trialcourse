@@ -1294,7 +1294,14 @@ select {
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
+.teacher-card-container.flipped .teacher-card-front {
+  pointer-events: none !important; /* 翻過去後，正面徹底失去觸控能力 */
+}
 
+.teacher-card-container.flipped .teacher-card-back {
+  z-index: 3 !important; /* 翻過去後，強制讓背面來到最上層接收滑動事件 */
+  pointer-events: auto !important;
+}
 /* 讓 B 表格（老師課表）與 A 表格視覺統一 */
 .teacher-table {
   border-collapse: collapse;
