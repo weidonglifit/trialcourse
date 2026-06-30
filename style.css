@@ -1638,7 +1638,7 @@ select {
 /* 4. 手機版響應式微調 */
 @media (max-width: 600px) {
   .side-drawer {
-    width: 85%;
+    width: 100%;
     /* 手機上滑出佔據大部分螢幕 */
   }
 }

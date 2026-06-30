@@ -5421,39 +5421,3 @@ function fillHistoricalData(name, phone, line, email) {
   closeHistoryModal();
 }
 
-function openTeacherLightbox(triggerEl) {
-    // 1. 利用 closest 智慧向上搜尋專屬外殼，精準抓取對應的圖片與文字元素
-    const wrapper = triggerEl.closest('#teacherLightboxWrapper');
-    if (!wrapper) return;
-    
-    const overlay = wrapper.querySelector('#teacherLightboxOverlay');
-    const mainImg = wrapper.querySelector('#teacherImg');
-    const lightboxImg = wrapper.querySelector('#teacherImgLightbox');
-    const card = wrapper.querySelector('#teacherLightboxCard');
-    
-    // 2. 完美的圖片與正面狀態同步
-    if (mainImg && mainImg.src) {
-      lightboxImg.src = mainImg.src;
-    }
-    card.classList.remove('flipped');
-    
-    // 🚀 【極致關鍵點】：將燈箱節點動態剪貼搬移到網頁的 <body> 最外層！
-    // 這行程式碼會強行脫離抽屜、排版容器的所有寬度裁切與 transform 動態軸線，讓燈箱擁有真正 100% 視窗全螢幕
-    document.body.appendChild(overlay);
-    
-    // 3. 觸發顯現與毛玻璃背景動畫
-    overlay.style.visibility = 'visible';
-    overlay.style.opacity = '1';
-    document.body.style.overflow = 'hidden'; // 防止底層畫面跟著滾動
-  }
-
-  function closeTeacherLightbox() {
-    const overlay = document.getElementById('teacherLightboxOverlay');
-    if (!overlay) return;
-    
-    // 隱藏燈箱
-    overlay.style.opacity = '0';
-    overlay.style.visibility = 'hidden';
-    document.body.style.overflow = ''; // 釋放滾動條
-  }
-  
