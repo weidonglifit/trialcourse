@@ -664,7 +664,7 @@ select {
 }
 
 /* 核心文字樣式：置中、大字、加粗、以及設定反光漸層底色 */
-.news-board-text {
+..news-board-text {
   font-size: 1.35rem;
   font-weight: bold;
   text-align: center;
@@ -673,18 +673,20 @@ select {
   box-sizing: border-box;
   white-space: nowrap;
 
-  /* 營造文字高級反光感 (Shimmer Effect) */
+  /* 預備滑動動畫過渡 */
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 2. 新增：專門負責文字反光的類別 */
+.shimmer-text {
   background: linear-gradient(to right, #6e2727 20%, #E87A90 40%, #F4A7B9 50%, #E87A90 60%, #6e2727 80%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: text-shimmer 3s linear infinite;
-
-  /* 預備滑動動畫過渡 */
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* 文字退場類別：往上滑出並淡出 */

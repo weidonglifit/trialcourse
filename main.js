@@ -130,7 +130,7 @@ window.addEventListener('load', function () {
 
             const badgeHtml = `<span style="background: linear-gradient(135deg, #FFD1DC 0%, #E87A90 100%); color: white; padding: 2px 7px; border-radius: 50px; font-size: 0.55em; font-weight: bold; margin-right: 5px; display: inline-block; vertical-align: middle; box-shadow: 0 2px 5px rgba(232, 122, 144, 0.2); position: relative;"><span class="badge-text-heartbeat">${tagText}</span></span>`;
 
-            return badgeHtml + `<span style="vertical-align: middle;">${messageText}</span>`;
+            return badgeHtml + `<span class="shimmer-text" style="vertical-align: middle;">${messageText}</span>`;
           }
 
           newsBoardEl.innerHTML = getNewsHtml(newsLines[currentLineIndex]);
