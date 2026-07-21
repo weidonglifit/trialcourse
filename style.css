@@ -663,8 +663,12 @@ select {
   align-items: center;
 }
 
-/* 核心文字樣式：置中、大字、加粗、以及設定反光漸層底色 */
-..news-board-text {
+/* =========================================
+   跑馬燈文字與動畫設定
+   ========================================= */
+
+/* 1. 核心容器：負責上下滑動與淡入淡出 */
+.news-board-text {
   font-size: 1.35rem;
   font-weight: bold;
   text-align: center;
@@ -679,7 +683,20 @@ select {
   transform: translateY(0);
 }
 
-/* 2. 新增：專門負責文字反光的類別 */
+/* 2. 文字退場類別：往上滑出並淡出 */
+.news-board-text.exit {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+/* 3. 文字進場準備類別：先隱藏在下方 */
+.news-board-text.enter {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: none; /* 瞬間到位，不觸發動態 */
+}
+
+/* 4. 獨立出來的反光特效（與心跳標籤徹底分離） */
 .shimmer-text {
   background: linear-gradient(to right, #6e2727 20%, #E87A90 40%, #F4A7B9 50%, #E87A90 60%, #6e2727 80%);
   background-size: 200% auto;
@@ -687,28 +704,14 @@ select {
   background-clip: text;
   color: transparent;
   animation: text-shimmer 3s linear infinite;
+  display: inline-block; /* 確保漸層遮罩的寬度能正常渲染 */
 }
 
-/* 文字退場類別：往上滑出並淡出 */
-.news-board-text.exit {
-  opacity: 0;
-  transform: translateY(-30px);
-}
-
-/* 文字進場準備類別：先隱藏在下方 */
-.news-board-text.enter {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: none;
-  /* 瞬間到位，不觸發動態 */
-}
-
-/* 反光從左到右滑過去的動態軌跡 */
+/* 5. 反光從左到右滑過去的動態軌跡 */
 @keyframes text-shimmer {
   0% {
     background-position: 200% center;
   }
-
   100% {
     background-position: 0% center;
   }
