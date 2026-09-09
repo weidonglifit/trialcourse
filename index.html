@@ -612,7 +612,12 @@
                 <input type="text" id="sLine" placeholder="方便後續聯繫">
               </div>
               <div class="field">
-                <span class="pink-highlight">匯款末5碼</span>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
+                  <span class="pink-highlight" style="margin-bottom: 0;">匯款末5碼</span>
+                  <label style="display: flex; align-items: center; cursor: pointer; color: #D05A6E; font-weight: bold; font-size: 0.95em; margin-bottom: 2px;">
+                    <input type="checkbox" id="usePointsCheckbox" onchange="togglePointsUse()" style="margin-right: 5px; width: 16px; height: 16px; cursor: pointer;"> 使用點數
+                  </label>
+                </div>
                 <input type="text" id="sBank" maxlength="5" placeholder="請輸入帳號末 5 碼" inputmode="numeric"
                   oninput="validateNumber(this)">
               </div>

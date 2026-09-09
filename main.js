@@ -2967,6 +2967,12 @@ function executeSingleCourseSubmit(data, emergencyInfo, btn, output) {
       document.getElementById('sLine').value = "";
       document.getElementById('sEmail').value = "";
       document.getElementById('agreementCheckbox_S').checked = false;
+      
+      const usePointsCheckbox = document.getElementById('usePointsCheckbox');
+      if (usePointsCheckbox) {
+        usePointsCheckbox.checked = false;
+        togglePointsUse(); // 觸發還原狀態
+      }
 
       loadSingleDates(); // 刷新名額狀態
     })
@@ -5508,4 +5514,34 @@ function submitPointsCardForm() {
       output.style.color = "red";
       output.innerText = "❌ 購買失敗：" + (err.message || err);
     });
+}
+
+// 控制單堂課程「使用點數」勾選框的狀態
+function togglePointsUse() {
+  const checkbox = document.getElementById('usePointsCheckbox');
+  const bankInput = document.getElementById('sBank');
+  
+  if (checkbox.checked) {
+    // 勾選時：帶入文字、變灰、鎖定、移除數字驗證
+    bankInput.value = "使用點數";
+    bankInput.disabled = true;
+    bankInput.style.backgroundColor = "#eee";
+    bankInput.style.color = "#888";
+    bankInput.style.cursor = "not-allowed";
+    
+    // 移除會把非數字砍掉的機制
+    bankInput.removeAttribute('maxlength');
+    bankInput.removeAttribute('oninput');
+  } else {
+    // 取消勾選時：清空文字、恢復白色、解鎖、加回數字驗證
+    bankInput.value = "";
+    bankInput.disabled = false;
+    bankInput.style.backgroundColor = "#fff";
+    bankInput.style.color = "#333";
+    bankInput.style.cursor = "text";
+    
+    // 恢復輸入限制
+    bankInput.setAttribute('maxlength', '5');
+    bankInput.setAttribute('oninput', 'validateNumber(this)');
+  }
 }
