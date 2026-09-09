@@ -2791,6 +2791,13 @@ function loadSingleDates() {
   var extraFee = 0;
   priceSpan.innerText = course.pricePerClass + extraFee;
 
+  const usePointsCheckbox = document.getElementById('usePointsCheckbox');
+  if (usePointsCheckbox && usePointsCheckbox.checked) {
+    priceSpan.innerText = "0";
+  } else {
+    priceSpan.innerText = course.pricePerClass + extraFee;
+  }
+
   // 💡 [修改] 直接在前端使用 globalSingleBookedMap 計算名額，免去後端 API 呼叫，瞬間載入！
   container.innerHTML = "";
 
@@ -5458,6 +5465,13 @@ function submitPointsCardForm() {
     return;
   }
 
+  const agreement = document.getElementById('pointsAgreementCheckbox');
+  if (!agreement || !agreement.checked) {
+    output.style.color = "red";
+    output.innerText = "⚠️ 請先點擊閱讀並同意「點數卡使用規則」";
+    return; // 阻斷送出
+  }
+
   const isPhoneValid = (data.phone.length === 10 && data.phone.startsWith('09'));
   if (!isPhoneValid) {
     output.style.color = "red";
@@ -5507,6 +5521,7 @@ function submitPointsCardForm() {
       document.getElementById('pPhone').value = "";
       document.getElementById('pBank').value = "";
       document.getElementById('pLine').value = "";
+      if (agreement) agreement.checked = false;
     })
     .catch(function (err) {
       btn.disabled = false;
@@ -5520,6 +5535,7 @@ function submitPointsCardForm() {
 function togglePointsUse() {
   const checkbox = document.getElementById('usePointsCheckbox');
   const bankInput = document.getElementById('sBank');
+  const priceSpan = document.getElementById('sTotalPrice'); // 新增：抓取總金額元素
   
   if (checkbox.checked) {
     // 勾選時：帶入文字、變灰、鎖定、移除數字驗證
@@ -5528,10 +5544,14 @@ function togglePointsUse() {
     bankInput.style.backgroundColor = "#eee";
     bankInput.style.color = "#888";
     bankInput.style.cursor = "not-allowed";
-    
-    // 移除會把非數字砍掉的機制
     bankInput.removeAttribute('maxlength');
     bankInput.removeAttribute('oninput');
+    
+    // 變更畫面上顯示的金額為 0
+    if (priceSpan) {
+      priceSpan.dataset.originalPrice = priceSpan.innerText; // 記憶原本金額
+      priceSpan.innerText = "0";
+    }
   } else {
     // 取消勾選時：清空文字、恢復白色、解鎖、加回數字驗證
     bankInput.value = "";
@@ -5539,9 +5559,28 @@ function togglePointsUse() {
     bankInput.style.backgroundColor = "#fff";
     bankInput.style.color = "#333";
     bankInput.style.cursor = "text";
-    
-    // 恢復輸入限制
     bankInput.setAttribute('maxlength', '5');
     bankInput.setAttribute('oninput', 'validateNumber(this)');
+    
+    // 恢復原本的金額
+    if (priceSpan && priceSpan.dataset.originalPrice) {
+      priceSpan.innerText = priceSpan.dataset.originalPrice;
+    }
   }
+}
+
+// 打開點數卡規則抽屜
+function openPointsRules(event) {
+  // 阻止原生的勾選行為，強制使用者只能從抽屜內按下同意
+  event.preventDefault(); 
+  // 呼叫現成的抽屜系統
+  toggleDrawer('points-rules-content', '點數卡使用規則');
+}
+
+// 點擊同意規則
+function agreePointsRules() {
+  // 將核取方塊強制打勾
+  document.getElementById('pointsAgreementCheckbox').checked = true;
+  // 關閉抽屜
+  closeDrawer();
 }

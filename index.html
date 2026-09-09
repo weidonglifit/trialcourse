@@ -414,6 +414,13 @@
                 <input type="text" id="pBank" name="bankId" maxlength="5" placeholder="請輸入帳號末 5 碼" inputmode="numeric" oninput="validateNumber(this)" required>
               </div>
             </div>
+
+            <div class="field" style="margin-top: 15px;">
+              <label class="agreement-item" onclick="openPointsRules(event)">
+                <input type="checkbox" id="pointsAgreementCheckbox" style="pointer-events: none;">
+                <span>我已閱讀點數卡使用規則</span>
+              </label>
+            </div>
             
             <button type="button" class="btn-universal" onclick="submitPointsCardForm()" id="submitPointsBtn"
                     style="background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); width: 100%; margin-top: 10px;">
@@ -612,12 +619,14 @@
                 <input type="text" id="sLine" placeholder="方便後續聯繫">
               </div>
               <div class="field">
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
-                  <span class="pink-highlight" style="margin-bottom: 0;">匯款末5碼</span>
-                  <label style="display: flex; align-items: center; cursor: pointer; color: #D05A6E; font-weight: bold; font-size: 0.95em; margin-bottom: 2px;">
-                    <input type="checkbox" id="usePointsCheckbox" onchange="togglePointsUse()" style="margin-right: 5px; width: 16px; height: 16px; cursor: pointer;"> 使用點數
-                  </label>
-                </div>
+                <span class="pink-highlight">匯款末5碼</span>
+                
+                <!-- 這裡套用您指定的 agreement-item 風格 -->
+                <label class="agreement-item" style="margin-top: 5px; margin-bottom: 10px; padding: 8px 10px; border: 1px solid #eee; background-color: #fafafa;">
+                  <input type="checkbox" id="usePointsCheckbox" onchange="togglePointsUse()">
+                  <span style="color: #D05A6E; font-weight: bold; font-size: 0.95em;">使用點數付款</span>
+                </label>
+                
                 <input type="text" id="sBank" maxlength="5" placeholder="請輸入帳號末 5 碼" inputmode="numeric"
                   oninput="validateNumber(this)">
               </div>
@@ -1326,6 +1335,24 @@
     </p>
   </div>
 
+
+  <!-- 隱藏的資料庫：點數卡規則 -->
+  <div id="points-rules-content" style="display:none;">
+    <div style="line-height: 1.8; color: #555; font-size: 0.95em;">
+      <h4 style="color: #d14d72; border-bottom: 2px solid #F4A7B9; padding-bottom: 8px; margin-top: 0;">📌 點數卡使用規範</h4>
+      <p>
+        1. 點數卡限本人使用，不得轉讓與共用。<br>
+        2. 使用期限為購買日起算 <strong>6 個月</strong>內有效。<br>
+        3. 點數卡一經使用，或超過 7 日鑑賞期，恕不接受退費。<br>
+        4. 每次預約單堂課程將扣除對應點數。<br>
+        5. 微動身活保有最終解釋與修改之權利。
+      </p>
+    </div>
+    <!-- 點擊同意後觸發 agreePointsRules() -->
+    <button type="button" class="btn-universal" onclick="agreePointsRules()" style="background: linear-gradient(135deg, #E87A90 0%, #D05A6E 100%); width: 100%; margin-top: 25px;">
+      同意並接受
+    </button>
+  </div>
 
   <div id="paymentInfo"
     style="display: none; margin-top: 15px; padding: 15px; border: 2px dashed #E87A90; border-radius: 10px; background-color: #fff5f7; color: #333; text-align: center;">
