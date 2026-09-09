@@ -65,6 +65,7 @@ window.addEventListener('load', function () {
       const mTime = performance.now();
       const durationSeconds = ((mTime - startTime) / 1000).toFixed(3);
       console.log(`🎉 載入成功！總共花費了 ${durationSeconds} 秒。`);
+      renderPointsPlans();
       // 1. 將後端抓回的資料直接塞入全域變數中，供各功能隨時撈取
       globalSettings = initData.settings;
       allCourseData = initData.currentCourses;
@@ -5449,8 +5450,8 @@ function fillHistoricalData(name, phone, line, email) {
 // === 1. 點數卡方案設定陣列 ===
 // 以後要新增方案，只要在這裡加一行就好！
 const pointsPlanOptions = [
-  { label: "5點($1150)", price: 1150 },
-  // { label: "10點($2200)", price: 2200 }, // 未來可以隨時解除註解或新增
+  { label: "5點課程卡($1150)", price: 1150 },
+  { label: "10點課程卡($2200)", price: 2200 }, // 未來可以隨時解除註解或新增
 ];
 
 // === 2. 動態渲染方案到畫面上 ===
@@ -5539,9 +5540,9 @@ function submitPointsCardForm() {
       output.style.color = "green";
       output.innerText = "✅ " + res;
 
-      // 提取金額 (從 "5點($1150)" 中抓出 1150)
-      const priceMatch = data.plan.match(/\$(\d+)/);
-      const amount = priceMatch ? priceMatch[1] : "1150";
+      // 提取金額：直接從剛剛被選取的 radio 按鈕身上，抓取預先藏好的 data-price
+      const selectedPlanEl = document.querySelector('input[name="pointsPlan"]:checked');
+      const amount = selectedPlanEl ? selectedPlanEl.getAttribute('data-price') : "0";
 
       // 顯示匯款資訊並卷動
       document.getElementById('displayFinalAmount').innerText = amount;
