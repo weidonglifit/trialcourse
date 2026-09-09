@@ -5451,7 +5451,7 @@ function fillHistoricalData(name, phone, line, email) {
 // 以後要新增方案，只要在這裡加一行就好！
 const pointsPlanOptions = [
   { label: "5點課程卡($1150)", price: 1150 },
-  { label: "10點課程卡($2200)", price: 2200 }, // 未來可以隨時解除註解或新增
+  // { label: "10點課程卡($2200)", price: 2200 }, // 未來可以隨時解除註解或新增
 ];
 
 // === 2. 動態渲染方案到畫面上 ===
