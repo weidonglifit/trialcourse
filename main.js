@@ -5417,7 +5417,95 @@ function fillHistoricalData(name, phone, line, email) {
     }
   }
   
+  const pName = document.getElementById('pName');
+  const pPhone = document.getElementById('pPhone');
+  const pLine = document.getElementById('pLine');
+  if (pName) pName.value = name;
+  if (pPhone) {
+    pPhone.value = phone;
+    // 觸發防呆驗證產生綠框
+    if (typeof validateSinglePhone === 'function') {
+      validateSinglePhone(pPhone);
+    }
+  }
+  if (pLine) pLine.value = line;
   // 帶入後自動關閉小卡視窗
   closeHistoryModal();
 }
 
+function submitPointsCardForm() {
+  const output = document.getElementById('pointsOutput');
+  const btn = document.getElementById('submitPointsBtn');
+  const plan = document.querySelector('input[name="pointsPlan"]:checked');
+
+  const data = {
+    plan: plan ? plan.value : "",
+    name: document.getElementById('pName').value.trim(),
+    phone: document.getElementById('pPhone').value.trim(),
+    lineId: document.getElementById('pLine').value.trim(),
+    bankId: document.getElementById('pBank').value.trim()
+  };
+
+  if (!data.plan || !data.name || !data.phone || !data.bankId) {
+    output.style.color = "red";
+    output.innerText = "⚠️ 請填寫完整購買資訊";
+    return;
+  }
+
+  const isPhoneValid = (data.phone.length === 10 && data.phone.startsWith('09'));
+  if (!isPhoneValid) {
+    output.style.color = "red";
+    output.innerText = "⚠️ 電話格式不正確，必須為 09 開頭的 10 位數字";
+    document.getElementById('pPhone').focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `
+      <svg class="fly-out-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="1.4em" height="1.4em" style="vertical-align: middle; margin-right: 8px;">
+        <path fill="white" d="M125.4 128C91.5 128 64 155.5 64 189.4C64 190.3 64 191.1 64.1 192L64 192L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 192L575.9 192C575.9 191.1 576 190.3 576 189.4C576 155.5 548.5 128 514.6 128L125.4 128zM528 256.3L528 448C528 456.8 520.8 464 512 464L128 464C119.2 464 112 456.8 112 448L112 256.3L266.8 373.7C298.2 397.6 341.7 397.6 373.2 373.7L528 256.3zM112 189.4C112 182 118 176 125.4 176L514.6 176C522 176 528 182 528 189.4C528 193.6 526 197.6 522.7 200.1L344.2 335.5C329.9 346.3 310.1 346.3 295.8 335.5L117.3 200.1C114 197.6 112 193.6 112 189.4z"/>
+      </svg>
+    `;
+  output.style.color = "#34495e";
+  output.innerText = "正在處理購買資料...";
+
+  callGasApi("buyPointsCard", [data])
+    .then(function (res) {
+      btn.disabled = false;
+      btn.innerText = "購買";
+      output.style.color = "green";
+      output.innerText = "✅ " + res;
+
+      // 提取金額 (從 "5點($1150)" 中抓出 1150)
+      const priceMatch = data.plan.match(/\$(\d+)/);
+      const amount = priceMatch ? priceMatch[1] : "1150";
+
+      // 顯示匯款資訊並卷動
+      document.getElementById('displayFinalAmount').innerText = amount;
+
+      // 抓取 paymentInfo 的內容並注入到 Modal 
+      const paymentInfoHtml = document.getElementById('paymentInfo').innerHTML;
+      const injectionPoint = document.getElementById('modalInjectionPoint');
+
+      injectionPoint.innerHTML = `
+        <div style="display:block !important; border:none; background:none; margin:0;">
+          ${paymentInfoHtml}
+        </div>
+      `;
+
+      // 顯示中央彈出視窗
+      document.getElementById('paymentModalOverlay').classList.add('active');
+
+      // 成功後清空欄位
+      document.getElementById('pName').value = "";
+      document.getElementById('pPhone').value = "";
+      document.getElementById('pBank').value = "";
+      document.getElementById('pLine').value = "";
+    })
+    .catch(function (err) {
+      btn.disabled = false;
+      btn.innerText = "購買";
+      output.style.color = "red";
+      output.innerText = "❌ 購買失敗：" + (err.message || err);
+    });
+}
