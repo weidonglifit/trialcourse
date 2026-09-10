@@ -161,10 +161,11 @@
           <span class="expand-title">請假與補課系統</span>
           <span class="expand-close" onclick="closeLeaveModal(event)">×</span>
         </div>
-        <!-- 設定 iframe 容器，讓它能滿版滑動 -->
+        <!-- 修正：移除 inline 的 display: flex，讓它乖乖繼承原本的隱藏狀態 -->
         <div class="expand-content" id="leaveContentArea"
-          style="padding: 0; min-height: 400px; height: calc(100vh - 120px); background: #fcfcfc; overflow: hidden; display: flex; flex-direction: column;">
-          <iframe id="leaveIframe" src="" style="width: 100%; flex-grow: 1; border: none; overflow-y: auto; -webkit-overflow-scrolling: touch;"></iframe>
+          style="padding: 0; min-height: 400px; height: calc(100vh - 120px); background: #fcfcfc; overflow: hidden;">
+          <!-- 修正：直接給 iframe height: 100%，讓它自動填滿外層空間 -->
+          <iframe id="leaveIframe" src="" style="width: 100%; height: 100%; border: none; overflow-y: auto; -webkit-overflow-scrolling: touch; display: block;"></iframe>
         </div>
       </div>
 
