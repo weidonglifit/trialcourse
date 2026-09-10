@@ -4645,6 +4645,12 @@ function getOrCreateExpandOverlay() {
       if (document.getElementById('queryInputContainer')?.classList.contains('expanded')) {
         closeQueryCourse();
       }
+      if (document.getElementById('announcementInputContainer')?.classList.contains('expanded')) {
+        closeAnnouncementModal();
+      }
+      if (document.getElementById('leaveInputContainer')?.classList.contains('expanded')) {
+        closeLeaveModal();
+      }
     };
     document.body.appendChild(overlay);
   }
@@ -5202,6 +5208,67 @@ function closeAnnouncementModal(event) {
   if (overlay) overlay.classList.remove('show');
 
   const container = document.getElementById('announcementInputContainer');
+  if (container) {
+    // 2. 觸發翻轉滑出退場動畫
+    container.style.transform = "";
+    container.style.animation = "expandFlipOut 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards";
+
+    // 3. 等動畫結束後打掃戰場並歸位
+    setTimeout(function () {
+      container.classList.remove('expanded');
+      container.style.animation = "";
+      document.body.style.overflow = '';
+
+      // 將它裝回原本的 Wrapper 中
+      const wrapper = document.getElementById('announcementWrapper');
+      if (wrapper) wrapper.appendChild(container);
+    }, 350);
+  }
+}
+
+// ==========================================
+// ✨ 我要請假：翻頁跳窗動畫與 iframe 載入
+// ==========================================
+function openLeaveModal() {
+  const container = document.getElementById('leaveInputContainer');
+  const iframe = document.getElementById('leaveIframe');
+
+  if (!container || !iframe) return;
+
+  // 動態載入外部網址 (這樣一開始進網頁時才不會偷吃資源)
+  if (!iframe.src) {
+    iframe.src = "https://script.google.com/macros/s/AKfycby2fIjoIsGpZBdZOe2AqisNAZ0tXxdFnJC1tQImiQ_HDyCtyHJRwGNdRGwjuYblJgGsyg/exec?view=student";
+  }
+
+  // 將容器掛載到 body 下方，避免 z-index 被父元素切斷
+  document.body.appendChild(container);
+
+  // 呼叫共用的黑底遮罩
+  const overlay = getOrCreateExpandOverlay();
+  overlay.classList.add('show');
+
+  // 顯示跳窗並鎖住底層網頁滑動
+  container.classList.add('expanded');
+  document.body.style.overflow = 'hidden';
+
+  // 觸發翻轉滑入動畫
+  setTimeout(function () {
+    container.style.animation = "expandFlipIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards";
+    setTimeout(function () {
+      container.style.animation = "none";
+      container.style.transform = "translate(-50%, -50%) perspective(1000px) rotateX(0deg) scale(1)";
+    }, 400);
+  }, 20);
+}
+
+function closeLeaveModal(event) {
+  if (event) event.stopPropagation();
+
+  // 1. 關閉遮罩
+  const overlay = document.getElementById('expandSharedOverlay');
+  if (overlay) overlay.classList.remove('show');
+
+  const container = document.getElementById('leaveInputContainer');
   if (container) {
     // 2. 觸發翻轉滑出退場動畫
     container.style.transform = "";

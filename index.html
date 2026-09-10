@@ -134,6 +134,16 @@
           查看停課與代課公告</span>
       </div>
 
+      <div class="wd-dropdown-trigger" onclick="openLeaveModal()"
+        style="margin-top: 15px; border-radius: 12px; height: auto; padding: 12px 15px; display: flex; justify-content: center; align-items: center; cursor: pointer; background: #ffffff; border: 1px solid #F4A7B9; box-shadow: 0 4px 12px rgba(232, 122, 144, 0.15);">
+        <span style="color: #E87A90; font-weight: bold; font-size: 1.25em; display: inline-flex; align-items: center; gap: 6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 20px; height: 20px; fill: #E87A90;">
+            <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/>
+          </svg>
+          我要請假
+        </span>
+      </div>
+
       <div class="expand-input-container" id="announcementInputContainer">
         <div class="expand-header">
           <span class="expand-title">停課與代課公告</span>
@@ -144,6 +154,18 @@
         </div>
       </div>
     </div>
+
+    <div class="expand-input-container" id="leaveInputContainer">
+        <div class="expand-header">
+          <span class="expand-title">請假與補課系統</span>
+          <span class="expand-close" onclick="closeLeaveModal(event)">×</span>
+        </div>
+        <!-- 設定 iframe 容器，讓它能滿版滑動 -->
+        <div class="expand-content" id="leaveContentArea"
+          style="padding: 0; min-height: 400px; height: calc(100vh - 120px); background: #fcfcfc; overflow: hidden; display: flex; flex-direction: column;">
+          <iframe id="leaveIframe" src="" style="width: 100%; flex-grow: 1; border: none; overflow-y: auto; -webkit-overflow-scrolling: touch;"></iframe>
+        </div>
+      </div>
 
     <div id="hiddenAnnouncementData" style="display:none;"></div>
 
@@ -623,7 +645,7 @@
                   <span class="pink-highlight" style="margin-bottom: 0;">匯款末5碼</span>
                   
                   <!-- 加上 width: auto; 讓它不要佔滿整行，並且縮小一點內距讓它更精緻 -->
-                  <label class="agreement-item" style="width: auto; margin-bottom: 0; padding: 4px 10px; border: 1px solid #eee; background-color: #fafafa;">
+                  <label class="agreement-item" style="width: auto; margin-bottom: 0; padding: 1px 10px;">
                     <input type="checkbox" id="usePointsCheckbox" onchange="togglePointsUse()">
                     <span style="color: #D05A6E; font-weight: bold; font-size: 0.9em;">使用點數付款</span>
                   </label>
